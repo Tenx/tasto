@@ -1,0 +1,4677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TASTO — 视觉风格系统</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,400;0,9..40,500;1,9..40,200&display=swap');
+
+    :root {
+      --bg: #080a0e;
+      --bg2: #0c0f14;
+      --surface: #10141a;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.16);
+      --text: #e8e6e2;
+      --text-dim: rgba(232,230,226,0.45);
+      --text-muted: rgba(232,230,226,0.22);
+      --accent: #e8ff47;
+      --accent-dim: rgba(232,255,71,0.1);
+      --accent2: #ff6b8a;
+      --accent3: #5bc8e8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 200;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 32px; height: 32px;
+      border: 1px solid rgba(232,255,71,0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring.expand {
+      width: 56px; height: 56px;
+      border-color: rgba(232,255,71,0.9);
+    }
+
+    /* Canvas background */
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* Noise overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    /* Layout */
+    .layout {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,8,8,0.88);
+      backdrop-filter: blur(20px);
+      gap: 24px;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.15em;
+      color: var(--text);
+    }
+    .logo span {
+      color: var(--accent);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    nav a {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+
+    .nav-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 3px 8px;
+      text-transform: uppercase;
+    }
+
+    /* Hero — full-screen centered */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 40px 40px;
+      gap: 0;
+      position: relative;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step-code {
+      margin-top: 8px;
+      background: #000;
+      border: 1px solid var(--border);
+      padding: 7px 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .step-code .dim { color: var(--text-muted); }
+
+    .hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 12vw, 160px);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.4s forwards;
+    }
+    .hero-title .line2 {
+      color: var(--text-muted);
+      padding-left: 0;
+    }
+    .hero-title .accent-word {
+      color: var(--accent);
+      -webkit-text-stroke: 0px;
+    }
+    .hero-title .outline-word {
+      -webkit-text-stroke: 1px rgba(240,237,232,0.3);
+      color: transparent;
+    }
+
+    .hero-sub {
+      max-width: 500px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.6s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.8s forwards;
+    }
+
+    .btn-primary {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      cursor: none;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover {
+      background: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 14px 28px;
+      cursor: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+
+    .hero-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .hero-stat .num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      color: var(--text-muted);
+    }
+    .hero-stat .label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* Marquee */
+    .marquee-section {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      padding: 12px 0;
+      background: var(--bg2);
+    }
+    .marquee-track {
+      display: flex;
+      gap: 0;
+      animation: marquee 30s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-item {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 32px;
+      flex-shrink: 0;
+    }
+    .marquee-item .dot {
+      color: var(--accent);
+      margin-right: 32px;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* Section */
+    section {
+      padding: 80px 40px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 48px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px;
+      line-height: 1;
+      letter-spacing: 0.03em;
+    }
+
+    .section-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent-dim);
+      border-color: rgba(232,255,71,0.4);
+      color: var(--accent);
+    }
+
+    /* Style Grid */
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      background: transparent;
+    }
+
+    .style-card {
+      position: relative;
+      background: var(--surface);
+      overflow: hidden;
+      cursor: none;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s, box-shadow 0.3s;
+    }
+    .style-card:hover {
+      z-index: 10;
+      transform: translateY(-4px);
+      border-color: rgba(168,216,160,0.25);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(168,216,160,0.1);
+    }
+
+    .card-preview {
+      aspect-ratio: 16/10;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* When image is present, hide CSS fallback */
+    .card-preview .preview-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      z-index: 2;
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .style-card:hover .preview-img {
+      transform: scale(1.03);
+    }
+    .card-preview .preview-img.hidden { display: none; }
+
+    /* Image badge */
+    .preview-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      z-index: 3;
+      font-family: 'Space Mono', monospace;
+      font-size: 7px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.6);
+      color: var(--accent);
+      border: 1px solid rgba(232,255,71,0.3);
+      padding: 3px 8px;
+      backdrop-filter: blur(4px);
+    }
+    .preview-y2k {
+      background: linear-gradient(135deg, #ff006e 0%, #8338ec 50%, #3a86ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-y2k::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 8px,
+        rgba(255,255,255,0.05) 8px,
+        rgba(255,255,255,0.05) 16px
+      );
+    }
+    .preview-y2k .inner {
+      text-align: center;
+      z-index: 1;
+    }
+    .preview-y2k .inner h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 0.1em;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255,0,110,0.8), 0 0 40px rgba(131,56,236,0.6);
+    }
+    .preview-y2k .inner p {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.7);
+      margin-top: 4px;
+    }
+    .preview-y2k .chip {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 2px 8px;
+      font-size: 8px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.1em;
+      color: #fff;
+      margin-top: 8px;
+      backdrop-filter: blur(8px);
+    }
+
+    .preview-brutalist {
+      background: #f5f0e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .preview-brutalist .inner {
+      text-align: left;
+      padding: 24px;
+      width: 100%;
+    }
+    .preview-brutalist .inner h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px;
+      line-height: 0.85;
+      color: #000;
+      letter-spacing: -0.01em;
+    }
+    .preview-brutalist .inner p {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      color: #000;
+      margin-top: 8px;
+      letter-spacing: 0.05em;
+      border-top: 2px solid #000;
+      padding-top: 6px;
+    }
+    .preview-brutalist::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; right: -4px;
+      width: 80px; height: 80px;
+      background: #ff4d6d;
+    }
+
+    .preview-glassmorphism {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-glassmorphism::before {
+      content: '';
+      position: absolute;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(0,212,255,0.3), transparent 70%);
+      top: 20%; left: 20%;
+      border-radius: 50%;
+      filter: blur(20px);
+    }
+    .preview-glassmorphism::after {
+      content: '';
+      position: absolute;
+      width: 100px; height: 100px;
+      background: radial-gradient(circle, rgba(232,255,71,0.2), transparent 70%);
+      bottom: 20%; right: 20%;
+      border-radius: 50%;
+      filter: blur(15px);
+    }
+    .preview-glassmorphism .inner {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      padding: 20px 28px;
+      text-align: center;
+    }
+    .preview-glassmorphism .inner h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 200;
+      font-size: 22px;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0.08em;
+    }
+    .preview-glassmorphism .inner p {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      color: rgba(0,212,255,0.8);
+      letter-spacing: 0.15em;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .preview-neubrutalism {
+      background: #ffd60a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .preview-neubrutalism .card-inner {
+      background: #fff;
+      border: 2px solid #000;
+      box-shadow: 6px 6px 0 #000;
+      padding: 16px 24px;
+      text-align: center;
+    }
+    .preview-neubrutalism .card-inner h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.05em;
+      color: #000;
+    }
+    .preview-neubrutalism .card-inner p {
+      font-family: 'Space Mono', monospace;
+      font-size: 7px;
+      color: #333;
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+    }
+    .preview-neubrutalism .tag {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: #000;
+      color: #ffd60a;
+      font-family: 'Space Mono', monospace;
+      font-size: 7px;
+      padding: 3px 8px;
+      letter-spacing: 0.1em;
+    }
+
+    .preview-cyberpunk {
+      background: #0d0d1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-cyberpunk::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(0,255,200,0.08) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(0,255,200,0.04) 50%, transparent 51%);
+      background-size: 30px 30px;
+    }
+    .preview-cyberpunk .scan-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,255,200,0.8), transparent);
+      animation: scan 3s linear infinite;
+    }
+    .preview-cyberpunk .inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .preview-cyberpunk .inner h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #00ffc8;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(0,255,200,0.8);
+    }
+    .preview-cyberpunk .inner p {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      color: rgba(0,255,200,0.5);
+      letter-spacing: 0.15em;
+      margin-top: 6px;
+    }
+    .preview-cyberpunk .glitch {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 100%;
+      background: rgba(0,255,200,0.03);
+      animation: glitchAnim 5s steps(1) infinite;
+    }
+
+    .preview-editorial {
+      background: #fafaf8;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-editorial .block {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 55%;
+      background: #1a1a1a;
+    }
+    .preview-editorial .content {
+      position: relative;
+      z-index: 1;
+      padding: 20px 24px;
+      width: 100%;
+    }
+    .preview-editorial .content h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 38px;
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      color: #1a1a1a;
+    }
+    .preview-editorial .content h3 .white {
+      color: #fff;
+      display: block;
+    }
+    .preview-editorial .content p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px;
+      font-weight: 400;
+      color: #777;
+      margin-top: 8px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .preview-minimal {
+      background: #fefefe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-minimal .inner {
+      text-align: center;
+      padding: 24px;
+    }
+    .preview-minimal .line {
+      width: 24px;
+      height: 1px;
+      background: #000;
+      margin: 0 auto 16px;
+    }
+    .preview-minimal .inner h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 200;
+      color: #1a1a1a;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+    .preview-minimal .inner p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: #999;
+      margin-top: 10px;
+      letter-spacing: 0.1em;
+    }
+
+    .preview-neon {
+      background: #100010;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .preview-neon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(255,0,255,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 50%, rgba(0,200,255,0.15) 0%, transparent 60%);
+    }
+    .preview-neon .inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .preview-neon .inner h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 0.1em;
+      color: transparent;
+      -webkit-text-stroke: 1px #ff00ff;
+      text-shadow: 0 0 20px rgba(255,0,255,0.6);
+      animation: neonPulse 2s ease-in-out infinite;
+    }
+    .preview-neon .inner p {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      color: rgba(0,200,255,0.8);
+      letter-spacing: 0.2em;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    @keyframes neonPulse {
+      0%, 100% { text-shadow: 0 0 20px rgba(255,0,255,0.6), 0 0 40px rgba(255,0,255,0.3); }
+      50% { text-shadow: 0 0 30px rgba(255,0,255,0.9), 0 0 60px rgba(255,0,255,0.5); }
+    }
+
+    /* ── 9. Retro 90s ── */
+    .preview-retro90 {
+      background: #c0c0c0;
+      display: flex; align-items: flex-start; justify-content: flex-start;
+      padding: 0; position: relative; overflow: hidden;
+    }
+    .preview-retro90 .win95-bar {
+      position: absolute; top: 0; left: 0; right: 0;
+      background: linear-gradient(90deg, #000080, #1084d0);
+      padding: 3px 6px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .preview-retro90 .win95-bar span {
+      font-family: 'Space Mono', monospace; font-size: 8px; color: #fff; letter-spacing: 0.05em;
+    }
+    .preview-retro90 .win95-btns { display: flex; gap: 2px; }
+    .preview-retro90 .win95-btns span {
+      width: 14px; height: 12px; background: #c0c0c0;
+      border-top: 2px solid #fff; border-left: 2px solid #fff;
+      border-bottom: 2px solid #000; border-right: 2px solid #000;
+      font-size: 8px; display: flex; align-items: center; justify-content: center; color: #000;
+    }
+    .preview-retro90 .win95-body {
+      position: absolute; top: 22px; left: 0; right: 0; bottom: 0;
+      padding: 12px; display: flex; align-items: center; justify-content: center;
+    }
+    .preview-retro90 .win95-dialog {
+      background: #c0c0c0;
+      border-top: 2px solid #fff; border-left: 2px solid #fff;
+      border-bottom: 2px solid #000; border-right: 2px solid #000;
+      padding: 12px 20px; text-align: center;
+    }
+    .preview-retro90 .win95-dialog h3 {
+      font-family: 'Space Mono', monospace; font-size: 11px; color: #000;
+      margin-bottom: 8px; letter-spacing: 0.05em;
+    }
+    .preview-retro90 .win95-dialog .ok-btn {
+      display: inline-block; background: #c0c0c0;
+      border-top: 2px solid #fff; border-left: 2px solid #fff;
+      border-bottom: 2px solid #000; border-right: 2px solid #000;
+      padding: 2px 12px; font-family: 'Space Mono', monospace; font-size: 8px; color: #000;
+    }
+
+    /* ── 10. Soft Pastel ── */
+    .preview-pastel {
+      background: linear-gradient(135deg, #fde8f5 0%, #e8f5fd 50%, #fdf5e8 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-pastel .pinner { text-align: center; }
+    .preview-pastel .pinner h3 {
+      font-family: 'DM Sans', sans-serif; font-weight: 200; font-size: 22px;
+      color: #b08a9e; letter-spacing: 0.12em;
+    }
+    .preview-pastel .pinner p {
+      font-family: 'DM Sans', sans-serif; font-size: 9px; color: #c4a8b8;
+      margin-top: 6px; letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .preview-pastel .dots {
+      display: flex; gap: 6px; justify-content: center; margin-top: 10px;
+    }
+    .preview-pastel .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .preview-pastel .dot:nth-child(1) { background: #f7c5de; }
+    .preview-pastel .dot:nth-child(2) { background: #c5def7; }
+    .preview-pastel .dot:nth-child(3) { background: #f7dfc5; }
+    .preview-pastel .dot:nth-child(4) { background: #c5f7de; }
+
+    /* ── 11. Dark Academia ── */
+    .preview-darkacademia {
+      background: #1a1510;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .preview-darkacademia::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(180,150,90,0.15), transparent 60%);
+    }
+    .preview-darkacademia .pinner { text-align: center; position: relative; z-index: 1; padding: 0 20px; }
+    .preview-darkacademia .pinner h3 {
+      font-family: 'DM Sans', sans-serif; font-weight: 200; font-size: 20px;
+      color: #d4b896; letter-spacing: 0.15em; font-style: italic;
+    }
+    .preview-darkacademia .rule {
+      width: 40px; height: 1px; background: rgba(212,184,150,0.4); margin: 8px auto;
+    }
+    .preview-darkacademia .pinner p {
+      font-family: 'Space Mono', monospace; font-size: 7px;
+      color: rgba(212,184,150,0.5); letter-spacing: 0.2em; text-transform: uppercase;
+    }
+
+    /* ── 12. Memphis Design ── */
+    .preview-memphis {
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .preview-memphis::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(45deg, #ff6b6b 0, #ff6b6b 2px, transparent 0, transparent 50%),
+        repeating-linear-gradient(-45deg, #4ecdc4 0, #4ecdc4 2px, transparent 0, transparent 50%);
+      background-size: 20px 20px; opacity: 0.3;
+    }
+    .preview-memphis .shape1 { position: absolute; top: 15%; left: 10%; width: 28px; height: 28px; background: #ffe66d; border-radius: 50%; }
+    .preview-memphis .shape2 { position: absolute; bottom: 15%; right: 12%; width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 24px solid #ff6b6b; }
+    .preview-memphis .shape3 { position: absolute; top: 20%; right: 15%; width: 18px; height: 18px; background: #4ecdc4; transform: rotate(45deg); }
+    .preview-memphis .pinner { position: relative; z-index: 1; text-align: center; background: #fff; padding: 8px 16px; border: 2px solid #000; }
+    .preview-memphis .pinner h3 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.08em; color: #000; }
+    .preview-memphis .pinner p { font-family: 'Space Mono', monospace; font-size: 7px; color: #333; letter-spacing: 0.1em; margin-top: 2px; }
+
+    /* ── 13. Swiss / Bauhaus ── */
+    .preview-swiss {
+      background: #f5f5f0;
+      display: flex; align-items: stretch; justify-content: stretch;
+      position: relative; overflow: hidden;
+    }
+    .preview-swiss .red-bar { position: absolute; top: 0; left: 0; bottom: 0; width: 8px; background: #e63329; }
+    .preview-swiss .content { padding: 20px 20px 20px 28px; display: flex; flex-direction: column; justify-content: center; }
+    .preview-swiss .content h3 {
+      font-family: 'DM Sans', sans-serif; font-weight: 200; font-size: 28px;
+      color: #1a1a1a; letter-spacing: -0.01em; line-height: 1; text-transform: uppercase;
+    }
+    .preview-swiss .content h3 strong { font-weight: 500; display: block; }
+    .preview-swiss .content p {
+      font-family: 'Space Mono', monospace; font-size: 8px; color: #999;
+      letter-spacing: 0.15em; text-transform: uppercase; margin-top: 10px;
+      border-top: 1px solid #ddd; padding-top: 8px;
+    }
+    .preview-swiss .grid-mark { position: absolute; bottom: 12px; right: 12px; width: 20px; height: 20px; }
+    .preview-swiss .grid-mark::before, .preview-swiss .grid-mark::after { content: ''; position: absolute; background: #ddd; }
+    .preview-swiss .grid-mark::before { width: 100%; height: 1px; top: 50%; }
+    .preview-swiss .grid-mark::after { width: 1px; height: 100%; left: 50%; }
+
+    /* ── 14. Vaporwave ── */
+    .preview-vaporwave {
+      background: linear-gradient(180deg, #0d0221 0%, #1a0533 40%, #ff71ce 100%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .preview-vaporwave .grid-floor {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+      background-image: linear-gradient(to bottom, transparent, rgba(255,113,206,0.5)),
+        repeating-linear-gradient(90deg, rgba(255,113,206,0.3) 0, rgba(255,113,206,0.3) 1px, transparent 0, transparent 40px),
+        repeating-linear-gradient(0deg, rgba(255,113,206,0.3) 0, rgba(255,113,206,0.3) 1px, transparent 0, transparent 30px);
+      transform: perspective(200px) rotateX(45deg); transform-origin: bottom;
+    }
+    .preview-vaporwave .sun {
+      position: absolute; bottom: 35%; left: 50%; transform: translateX(-50%);
+      width: 60px; height: 30px; overflow: hidden;
+    }
+    .preview-vaporwave .sun::before {
+      content: ''; display: block; width: 60px; height: 60px;
+      border-radius: 50%; background: linear-gradient(to bottom, #ff9a00 0%, #ff71ce 50%, transparent 50%);
+    }
+    .preview-vaporwave .sun-lines {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .preview-vaporwave .sun-line { height: 1px; background: #2b0033; }
+    .preview-vaporwave .pinner { position: relative; z-index: 1; text-align: center; margin-top: -20px; }
+    .preview-vaporwave .pinner h3 {
+      font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.15em;
+      color: transparent; -webkit-text-stroke: 1px #b2fcff;
+      text-shadow: 0 0 20px rgba(178,252,255,0.6);
+    }
+    .preview-vaporwave .pinner p {
+      font-family: 'Space Mono', monospace; font-size: 7px; color: rgba(178,252,255,0.6);
+      letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px;
+    }
+
+    /* ── 15. Organic / Biomorphic ── */
+    .preview-organic {
+      background: #f4f1ec;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .preview-organic .blob1 {
+      position: absolute; width: 140px; height: 120px;
+      background: rgba(180,210,180,0.5);
+      border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%;
+      top: -20px; right: -20px;
+    }
+    .preview-organic .blob2 {
+      position: absolute; width: 100px; height: 90px;
+      background: rgba(220,190,160,0.4);
+      border-radius: 40% 60% 30% 70% / 60% 40% 60% 40%;
+      bottom: -10px; left: -15px;
+    }
+    .preview-organic .pinner { position: relative; z-index: 1; text-align: center; }
+    .preview-organic .pinner h3 {
+      font-family: 'DM Sans', sans-serif; font-weight: 200; font-size: 18px;
+      color: #4a4035; letter-spacing: 0.12em; font-style: italic;
+    }
+    .preview-organic .pinner p {
+      font-family: 'DM Sans', sans-serif; font-size: 8px; color: #9a8878;
+      letter-spacing: 0.15em; text-transform: uppercase; margin-top: 6px;
+    }
+
+    /* ── 16. Terminal / Monochrome ── */
+    .preview-terminal {
+      background: #0a0a0a;
+      display: flex; align-items: flex-start; justify-content: flex-start;
+      padding: 16px; position: relative; overflow: hidden;
+    }
+    .preview-terminal::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(0,255,0,0.02) 18px, rgba(0,255,0,0.02) 19px);
+    }
+    .preview-terminal .term-content { position: relative; z-index: 1; width: 100%; }
+    .preview-terminal .term-line {
+      font-family: 'Space Mono', monospace; font-size: 9px; line-height: 1.8;
+      color: #00ff41; letter-spacing: 0.05em;
+    }
+    .preview-terminal .term-line .prompt { color: rgba(0,255,65,0.5); }
+    .preview-terminal .term-line .cmd { color: #00ff41; }
+    .preview-terminal .term-line .out { color: rgba(0,255,65,0.6); }
+    .preview-terminal .cursor-blink {
+      display: inline-block; width: 7px; height: 12px;
+      background: #00ff41; animation: blink 1s step-end infinite; vertical-align: bottom;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Card footer */
+    .card-footer {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+    }
+
+    .card-meta {
+      flex: 1;
+    }
+
+    .card-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+      letter-spacing: 0.01em;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+    }
+
+    .copy-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      cursor: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover, .copy-btn.copied {
+      background: var(--accent-dim);
+      border-color: rgba(232,255,71,0.4);
+      color: var(--accent);
+    }
+    .copy-btn.copied::before {
+      content: '✓ ';
+    }
+
+    /* Card hover effect */
+    .style-card {
+      transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .style-card:hover {
+      z-index: 10;
+      transform: scale(1.02);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .style-card:hover .card-preview::after {
+      opacity: 1;
+    }
+    .card-preview::after {
+      content: '查看风格 →';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    /* Prompt overlay */
+    .prompt-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .prompt-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .prompt-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      width: 90%;
+      max-width: 680px;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .prompt-overlay.active .prompt-modal {
+      transform: translateY(0);
+    }
+
+    /* Modal preview image */
+    .modal-preview {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/8;
+      overflow: hidden;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+    }
+    .modal-preview-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-preview-fallback .fallback-css {
+      width: 100%;
+      height: 100%;
+      transform: scale(1.5);
+      transform-origin: top center;
+      pointer-events: none;
+    }
+    .modal-preview-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(8,10,14,0.8) 100%);
+      pointer-events: none;
+    }
+    .modal-preview .preview-badge {
+      top: 14px; right: 14px;
+    }
+    /* hide fallback when real img loads */
+    .modal-preview.has-img .modal-preview-fallback { display: none; }
+    .modal-preview-img.hidden { display: none; }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.05em;
+    }
+    .modal-close {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: none;
+      text-transform: uppercase;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .prompt-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--text-dim);
+      background: #000;
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-bottom: 24px;
+      white-space: pre-wrap;
+    }
+    .prompt-text .highlight {
+      color: var(--accent);
+    }
+    .prompt-text .highlight2 {
+      color: var(--accent3);
+    }
+    .prompt-coming-soon {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; line-height: 2;
+      color: var(--text-muted);
+      background: #000; border: 1px dashed rgba(232,255,71,0.2);
+      padding: 28px 20px; text-align: center; margin-bottom: 24px;
+    }
+    .prompt-coming-soon .cs-icon { font-size: 24px; display: block; margin-bottom: 12px; opacity: 0.5; }
+    .prompt-coming-soon .cs-title { color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: 0.2em; text-transform: uppercase; font-size: 11px; }
+    .prompt-coming-soon .cs-sub { color: var(--text-muted); font-size: 9px; letter-spacing: 0.15em; }
+
+    .params-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .param-item {
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+    .param-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .param-value {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Bottom scanline animation */
+    @keyframes scan {
+      from { top: 0; }
+      to { top: 100%; }
+    }
+    @keyframes glitchAnim {
+      0%, 90%, 100% { clip-path: none; opacity: 0; }
+      92% { clip-path: inset(30% 0 50% 0); opacity: 1; transform: translateX(-3px); }
+      94% { clip-path: inset(70% 0 10% 0); opacity: 1; transform: translateX(3px); }
+      96% { clip-path: inset(50% 0 30% 0); opacity: 1; transform: translateX(-2px); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    footer .logo {
+      font-size: 20px;
+    }
+    footer p {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+    /* Modal brand input */
+    .modal-brand-input {
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 8px;
+    }
+    .brand-input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-input {
+      flex: 1;
+      background: #000;
+      border: 1px solid rgba(232,255,71,0.3);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      padding: 8px 14px;
+      outline: none;
+      letter-spacing: 0.05em;
+      cursor: text;
+    }
+    .brand-input:focus {
+      border-color: rgba(232,255,71,0.7);
+    }
+    .brand-input::placeholder {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    .brand-hint {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+    .modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-tab {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 12px 20px;
+      cursor: none;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .modal-tab .tab-icon { font-size: 11px; }
+    .modal-tab:hover { color: var(--text-dim); }
+    .modal-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .prompt-block {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--text-dim);
+      background: #000;
+      border: 1px solid var(--border);
+      padding: 20px;
+      white-space: pre-wrap;
+      margin-bottom: 0;
+    }
+    .prompt-block .hl { color: var(--accent); }
+    .prompt-block .hl2 { color: #00d4ff; }
+    .prompt-block .brand-inject {
+      color: #ff9a3c;
+      font-weight: 700;
+      background: rgba(255,154,60,0.1);
+      padding: 0 2px;
+    }
+
+    /* ─── ENTER BUTTON ─────────────────────────────────── */
+    .enter-btn {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: none;
+      overflow: visible;
+    }
+    .enter-btn-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .enter-btn-ring {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid rgba(232,255,71,0.3);
+      animation: btnPulse 2.4s ease-in-out infinite;
+    }
+    .enter-btn::before {
+      content: '';
+      position: absolute;
+      inset: -28px;
+      border-radius: 50%;
+      border: 1px solid rgba(232,255,71,0.12);
+      animation: btnPulse 2.4s 0.6s ease-in-out infinite;
+    }
+    .enter-btn-text {
+      position: relative;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.14em;
+      color: #000;
+      z-index: 1;
+      transition: letter-spacing 0.3s ease;
+    }
+    .enter-btn-sub {
+      position: relative;
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.15em;
+      color: rgba(0,0,0,0.55);
+      z-index: 1;
+      text-transform: uppercase;
+    }
+    .enter-btn:hover .enter-btn-bg {
+      transform: scale(1.08);
+    }
+    .enter-btn:hover .enter-btn-text {
+      letter-spacing: 0.2em;
+    }
+    .enter-btn.firing .enter-btn-bg {
+      transform: scale(3);
+      opacity: 0;
+      transition: transform 0.8s cubic-bezier(0.23,1,0.32,1), opacity 0.5s 0.3s ease;
+    }
+    @keyframes btnPulse {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.12); opacity: 0.1; }
+    }
+
+    /* ─── DREAM TRANSITION ─────────────────────────────── */
+    .dream-transition {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .dream-transition.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .dream-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .dream-words {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.18em;
+      pointer-events: none;
+    }
+    .dw {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 10vw, 120px);
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      opacity: 0;
+      animation: dreamWord 0.6s calc(var(--i) * 0.15s + 0.1s) forwards;
+    }
+    @keyframes dreamWord {
+      0%   { opacity: 0; transform: scale(0.6) translateY(20px); filter: blur(12px); }
+      60%  { opacity: 1; transform: scale(1.05) translateY(-4px); filter: blur(0); }
+      100% { opacity: 0; transform: scale(1.2) translateY(-12px); filter: blur(6px); }
+    }
+
+    /* ─── GALLERY PORTAL ───────────────────────────────── */
+    .gallery-portal {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      display: flex;
+      background: var(--bg);
+      transform: translateY(100vh);
+      transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .gallery-portal.active {
+      transform: translateY(0);
+    }
+
+    /* Sidebar */
+    .gp-sidebar {
+      width: 200px;
+      min-width: 200px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: var(--bg2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .gp-sidebar-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.15em;
+      color: var(--text);
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .gp-sidebar-logo span { color: var(--accent); }
+    .gp-sidebar-label { display: none; }
+    .gp-nav {
+      flex: 1;
+      display: block;
+      width: 200px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0 16px;
+    }
+    .gp-nav::-webkit-scrollbar { width: 0; }
+
+    /* 一级分组标题 */
+    .gp-nav-group {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+      padding: 18px 16px 4px;
+      cursor: default;
+    }
+    .gp-nav-group:first-child { padding-top: 12px; }
+
+    /* 二级子项 */
+    .gp-nav-btn {
+      display: block;
+      min-width: 180px;
+      width: 100%;
+      padding: 4px 16px;
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      cursor: none;
+      transition: color 0.15s;
+      text-align: left;
+      line-height: 1.7;
+      box-sizing: border-box;
+    }
+    .gp-nav-btn:hover { color: var(--text); }
+    .gp-nav-btn.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    /* 全部风格 — 置顶单独一行 */
+    .gp-nav-btn[data-cat="all"] {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-dim);
+      padding: 10px 16px 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .gp-nav-btn[data-cat="all"].active { color: var(--accent); }
+    .gp-nav-icon { display: none; }
+    .gp-nav-count { display: none; }
+    .gp-sidebar-foot {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .gp-back-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: none;
+      padding: 0;
+      transition: color 0.15s;
+    }
+    .gp-back-btn:hover { color: var(--text-dim); }
+
+    /* Main area */
+    .gp-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .gp-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,10,14,0.9);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+    }
+    .gp-topbar-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.05em;
+      color: var(--text);
+    }
+    .gp-topbar-title span {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-left: 8px;
+      font-family: 'Space Mono', monospace;
+    }
+    .gp-search {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      outline: none;
+      width: 220px;
+      transition: border-color 0.2s;
+    }
+    .gp-search::placeholder { color: var(--text-muted); }
+    .gp-search:focus { border-color: var(--border-hover); }
+
+    /* Waterfall / masonry */
+    .gp-waterfall {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 20px 20px 40px;
+      position: relative;
+    }
+    .gp-waterfall-inner {
+      position: relative;
+      width: 100%;
+    }
+    .gp-waterfall::-webkit-scrollbar { width: 4px; }
+    .gp-waterfall::-webkit-scrollbar-track { background: transparent; }
+    .gp-waterfall::-webkit-scrollbar-thumb { background: var(--border); }
+
+    /* Vibe cards */
+    .vibe-card {
+      position: absolute;
+      cursor: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.25s cubic-bezier(0.23,1,0.32,1), box-shadow 0.2s;
+    }
+    .vibe-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .vc-img-wrap {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+      min-height: 180px;
+    }
+    .vc-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .vibe-card:hover .vc-img {
+      transform: scale(1.04);
+    }
+    .vc-fallback {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+    }
+    .vc-hover {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      pointer-events: none;
+    }
+    .vibe-card:hover .vc-hover {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .vc-copy-btn {
+      display: block;
+      width: 100%;
+      padding: 11px 0;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      cursor: none;
+      transition: background 0.15s, letter-spacing 0.15s;
+    }
+    .vc-copy-btn:hover {
+      background: #fff;
+      letter-spacing: 0.18em;
+    }
+    .vc-copy-btn.copied {
+      background: #00ff88;
+      letter-spacing: 0.08em;
+    }
+    .vc-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+    }
+    .vc-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .vc-cat {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* ─── VIBE MODAL ────────────────────────────────────── */
+    .vibe-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      background: rgba(4,5,8,0.88);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .vibe-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .vibe-modal {
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0,0,0,0.7);
+    }
+    .vm-preview {
+      width: 340px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .vm-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .vm-img.hidden { display: none; }
+    .vm-fallback {
+      width: 100%;
+      height: 100%;
+      min-height: 260px;
+    }
+    .vm-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, transparent 60%, var(--surface));
+    }
+    .vm-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      background: rgba(8,10,14,0.7);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      cursor: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .vm-close:hover { background: rgba(8,10,14,0.95); color: var(--text); }
+    .vm-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 28px 24px;
+      overflow: hidden;
+    }
+    .vm-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .vm-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 18px;
+      line-height: 1;
+    }
+    .vm-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .vm-brand-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .vm-brand-input {
+      flex: 1;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-bottom-color: var(--accent);
+      color: var(--text);
+      padding: 7px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .vm-brand-input:focus { border-color: rgba(232,255,71,0.5); }
+    .vm-prompt-wrap {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    .vm-prompt-wrap::-webkit-scrollbar { width: 3px; }
+    .vm-prompt-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+    .vm-prompt {
+      font-family: 'Space Mono', monospace;
+      font-size: 10.5px;
+      line-height: 1.8;
+      color: var(--text-dim);
+      white-space: pre-wrap;
+      background: #000;
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+    .vm-prompt .brand-inject {
+      color: #ff9a3c;
+      font-weight: 700;
+      background: rgba(255,154,60,0.1);
+      padding: 0 2px;
+    }
+    .vm-foot {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Body state when in gallery */
+    body.in-gallery { overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="layout">
+  <header>
+    <div class="logo">TAST<span>O</span></div>
+    <a href="zh.html" style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text-dim);text-decoration:none;white-space:nowrap;flex-shrink:0" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">中文 →</a>
+  </header>
+
+  <div class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">// 视觉识别系统 — AI 驱动</p>
+      <h1 class="hero-title">
+        PICK<br>
+        <span class="line2">YOUR <span class="accent-word">VIBE</span></span><br>
+        <span class="outline-word">SHIP IT.</span>
+      </h1>
+      <p class="hero-sub">按美学风格浏览精选图片。选择你的风格 — 复制 Prompt — 发布你的品牌。</p>
+      <div class="hero-actions">
+        <button class="enter-btn" id="enter-btn" onclick="enterGallery()">
+          <span class="enter-btn-bg"></span>
+          <span class="enter-btn-ring"></span>
+          <span class="enter-btn-text">进入风格库</span>
+          <span class="enter-btn-sub">60+ 美学系统</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .layout -->
+
+<!-- ═══ DREAM TRANSITION ══════════════════════════════════ -->
+<div class="dream-transition" id="dream-transition">
+  <canvas class="dream-canvas" id="dream-canvas"></canvas>
+  <div class="dream-words">
+    <span class="dw" style="--i:0">PICK</span>
+    <span class="dw" style="--i:1">YOUR</span>
+    <span class="dw" style="--i:2">VIBE</span>
+  </div>
+</div>
+
+<!-- ═══ GALLERY PORTAL ════════════════════════════════════ -->
+<div class="gallery-portal" id="gallery-portal">
+  <div class="gp-sidebar" id="gp-sidebar">
+    <div class="gp-sidebar-logo">TAST<span>O</span></div>
+    <div class="gp-sidebar-label">// 美学风格分类</div>
+    <nav class="gp-nav">
+      <button class="gp-nav-btn active" data-cat="all">全部风格<span class="gp-nav-count">35+</span></button>
+
+      <div class="gp-nav-group">极简与现代</div>
+      <button class="gp-nav-btn" data-cat="minimal_modern">瑞士国际主义</button>
+      <button class="gp-nav-btn" data-cat="editorial_min">编辑式极简</button>
+      <button class="gp-nav-btn" data-cat="tech_min">科技极简</button>
+      <button class="gp-nav-btn" data-cat="warm_min">温暖极简</button>
+      <button class="gp-nav-btn" data-cat="luxury_min">奢华极简</button>
+      <button class="gp-nav-btn" data-cat="monochrome">单色主义</button>
+
+      <div class="gp-nav-group">材质与空间</div>
+      <button class="gp-nav-btn" data-cat="glassmorphism">玻璃拟态</button>
+      <button class="gp-nav-btn" data-cat="paper_cutout">纸张拼贴</button>
+
+      <div class="gp-nav-group">未来科技</div>
+      <button class="gp-nav-btn" data-cat="cyberpunk">赛博朋克</button>
+      <button class="gp-nav-btn" data-cat="scifi_hud">科幻 HUD</button>
+      <button class="gp-nav-btn" data-cat="dark_tech">暗黑科技</button>
+
+      <div class="gp-nav-group">影视叙事</div>
+      <button class="gp-nav-btn" data-cat="cinematic">电影感暗色</button>
+      <button class="gp-nav-btn" data-cat="film_noir">黑色电影</button>
+
+      <div class="gp-nav-group">图形与实验</div>
+      <button class="gp-nav-btn" data-cat="neo_brutalism">新粗野主义</button>
+      <button class="gp-nav-btn" data-cat="anti_design">反设计</button>
+      <button class="gp-nav-btn" data-cat="maximalism">极繁主义</button>
+      <button class="gp-nav-btn" data-cat="memphis">孟菲斯</button>
+      <button class="gp-nav-btn" data-cat="glitch">故障艺术</button>
+      <button class="gp-nav-btn" data-cat="kinetic_typo">动态字体</button>
+      <button class="gp-nav-btn" data-cat="surreal_3d">超现实 3D</button>
+
+      <div class="gp-nav-group">复古与时代</div>
+      <button class="gp-nav-btn" data-cat="bauhaus">包豪斯</button>
+      <button class="gp-nav-btn" data-cat="synthwave">合成波</button>
+      <button class="gp-nav-btn" data-cat="y2k">千禧 Y2K</button>
+      <button class="gp-nav-btn" data-cat="cassette_fut">磁带未来主义</button>
+
+      <div class="gp-nav-group">自然与人文</div>
+      <button class="gp-nav-btn" data-cat="organic_modern">有机现代</button>
+      <button class="gp-nav-btn" data-cat="biophilic">亲生命设计</button>
+      <button class="gp-nav-btn" data-cat="wabi_sabi">侘寂</button>
+      <button class="gp-nav-btn" data-cat="ethereal">梦幻空灵</button>
+    </nav>
+    <div class="gp-sidebar-foot">
+      <button class="gp-back-btn" onclick="exitGallery()">← 返回首页</button>
+    </div>
+  </div>
+
+  <div class="gp-main" id="gp-main">
+    <div class="gp-topbar">
+      <div class="gp-topbar-title" id="gp-topbar-title">全部风格 <span>60+</span></div>
+      <input class="gp-search" id="gp-search" type="text" placeholder="搜索风格..." autocomplete="off">
+    </div>
+    <div class="gp-waterfall" id="gp-waterfall">
+      <div class="gp-waterfall-inner" id="gp-waterfall-inner">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VIBE MODAL ════════════════════════════════════════ -->
+<div class="vibe-overlay" id="vibe-overlay" onclick="closeVibeModal(event)">
+  <div class="vibe-modal" onclick="event.stopPropagation()">
+    <div class="vm-preview" id="vm-preview">
+      <img class="vm-img hidden" id="vm-img" alt="">
+      <div class="vm-fallback" id="vm-fallback"></div>
+      <div class="vm-overlay"></div>
+      <button class="vm-close" onclick="closeVibeModal()">✕</button>
+    </div>
+    <div class="vm-body">
+      <div class="vm-eyebrow">// VI 系统 PROMPT</div>
+      <h2 class="vm-title" id="vm-title">Y2K REVIVAL</h2>
+      <div class="vm-brand-row">
+        <label class="vm-brand-label">你的品牌名称</label>
+        <input type="text" id="vm-brand-input" class="vm-brand-input" placeholder="如：LUNA、NovaSkin、玄鸟..." maxlength="40">
+      </div>
+      <div class="vm-prompt-wrap">
+        <pre class="vm-prompt" id="vm-prompt"></pre>
+      </div>
+      <div class="vm-foot">
+        <button class="btn-primary" id="vm-copy-btn" onclick="copyVibePrompt()">复制 VI Prompt</button>
+        <button class="btn-ghost" onclick="closeVibeModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <section id="gallery" style="display:none">
+    <div class="style-grid">
+
+      <!-- Y2K -->
+      <div class="style-card" onclick="openModal('y2k')">
+        <div class="card-preview preview-y2k">
+          <img class="preview-img" src="images/y2k.jpg" alt="y2k style preview" onerror="this.classList.add('hidden')">
+          <div class="inner">
+            <h3>HELLO WORLD</h3>
+            <p>YOUR SITE — EST. 2001</p>
+            <span class="chip">LOADING 100%</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Y2K Revival</div>
+            <div class="card-tags">
+              <span class="tag">Retro</span>
+              <span class="tag">Maximalist</span>
+              <span class="tag">Colorful</span>
+            </div>
+          </div>
+        <button class="copy-btn" onclick="copyPrompt(event,'y2k')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Brutalist -->
+      <div class="style-card" onclick="openModal('brutalist')">
+        <div class="card-preview preview-brutalist">
+          <img class="preview-img" src="images/brutalist.jpg" alt="brutalist style preview" onerror="this.classList.add('hidden')">
+          <div class="inner">
+            <h3>BOLD<br>UGLY<br>TRUE</h3>
+            <p>BRUTALISM — NO COMPROMISES</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Raw Brutalism</div>
+            <div class="card-tags">
+              <span class="tag">Experimental</span>
+              <span class="tag">Typography</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'brutalist')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Glassmorphism -->
+      <div class="style-card" onclick="openModal('glassmorphism')">
+        <div class="card-preview preview-glassmorphism">
+          <img class="preview-img" src="images/glassmorphism.jpg" alt="glassmorphism style preview" onerror="this.classList.add('hidden')">
+          <div class="inner">
+            <h3>Crystal Clear</h3>
+            <p>Glass · Blur · Depth</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Glassmorphism</div>
+            <div class="card-tags">
+              <span class="tag">Dark</span>
+              <span class="tag">Soft</span>
+              <span class="tag">Modern</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'glassmorphism')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Neubrutalism -->
+      <div class="style-card" onclick="openModal('neubrutalism')">
+        <div class="card-preview preview-neubrutalism">
+          <img class="preview-img" src="images/neubrutalism.jpg" alt="neubrutalism style preview" onerror="this.classList.add('hidden')">
+          <span class="tag">NEW</span>
+          <div class="card-inner">
+            <h3>NEU BRUTAL</h3>
+            <p>SHADOWS · BORDERS · YELLOW</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Neubrutalism</div>
+            <div class="card-tags">
+              <span class="tag">Bold</span>
+              <span class="tag">Fun</span>
+              <span class="tag">High-contrast</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'neubrutalism')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Cyberpunk -->
+      <div class="style-card" onclick="openModal('cyberpunk')">
+        <div class="card-preview preview-cyberpunk">
+          <img class="preview-img" src="images/cyberpunk.jpg" alt="cyberpunk style preview" onerror="this.classList.add('hidden')">
+          <div class="scan-line"></div>
+          <div class="glitch"></div>
+          <div class="inner">
+            <h3>SYS_ACCESS</h3>
+            <p>GRID · SCAN · TERMINAL</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Cyberpunk Grid</div>
+            <div class="card-tags">
+              <span class="tag">Dark</span>
+              <span class="tag">Tech</span>
+              <span class="tag">Animated</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'cyberpunk')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Editorial -->
+      <div class="style-card" onclick="openModal('editorial')">
+        <div class="card-preview preview-editorial">
+          <img class="preview-img" src="images/editorial.jpg" alt="editorial style preview" onerror="this.classList.add('hidden')">
+          <div class="block"></div>
+          <div class="content">
+            <h3><span class="white">DESIGN</span>FOCUS</h3>
+            <p>Magazine · Clean · Contrast</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Editorial</div>
+            <div class="card-tags">
+              <span class="tag">Minimal</span>
+              <span class="tag">Type-heavy</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'editorial')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Minimal -->
+      <div class="style-card" onclick="openModal('minimal')">
+        <div class="card-preview preview-minimal">
+          <img class="preview-img" src="images/minimal.jpg" alt="minimal style preview" onerror="this.classList.add('hidden')">
+          <div class="inner">
+            <div class="line"></div>
+            <h3>Less is More</h3>
+            <p>White space · Clarity · Calm</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Zen Minimal</div>
+            <div class="card-tags">
+              <span class="tag">Light</span>
+              <span class="tag">Clean</span>
+              <span class="tag">Luxury</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'minimal')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Neon Noir -->
+      <div class="style-card" onclick="openModal('neon')">
+        <div class="card-preview preview-neon">
+          <img class="preview-img" src="images/neon.jpg" alt="neon style preview" onerror="this.classList.add('hidden')">
+          <div class="inner">
+            <h3>NEON NOIR</h3>
+            <p>Darkness · Glow · Contrast</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Neon Noir</div>
+            <div class="card-tags">
+              <span class="tag">Dark</span>
+              <span class="tag">Glow</span>
+              <span class="tag">Dramatic</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'neon')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Retro 90s -->
+      <div class="style-card" onclick="openModal('retro90')">
+        <div class="card-preview preview-retro90">
+          <img class="preview-img" src="images/retro90.jpg" alt="retro90 style preview" onerror="this.classList.add('hidden')">
+          <div class="win95-bar">
+            <span>My Website.exe</span>
+            <div class="win95-btns"><span>_</span><span>□</span><span>✕</span></div>
+          </div>
+          <div class="win95-body">
+            <div class="win95-dialog">
+              <h3>Welcome to My Homepage!</h3>
+              <span class="ok-btn">OK</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Retro 90s</div>
+            <div class="card-tags">
+              <span class="tag">Retro</span>
+              <span class="tag">Windows 95</span>
+              <span class="tag">Skeuomorphic</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'retro90')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Soft Pastel -->
+      <div class="style-card" onclick="openModal('pastel')">
+        <div class="card-preview preview-pastel">
+          <img class="preview-img" src="images/pastel.jpg" alt="pastel style preview" onerror="this.classList.add('hidden')">
+          <div class="pinner">
+            <h3>Sweet &amp; Soft</h3>
+            <p>Calm · Warm · Gentle</p>
+            <div class="dots">
+              <span class="dot"></span><span class="dot"></span>
+              <span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Soft Pastel</div>
+            <div class="card-tags">
+              <span class="tag">Light</span>
+              <span class="tag">Feminine</span>
+              <span class="tag">Calm</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'pastel')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Dark Academia -->
+      <div class="style-card" onclick="openModal('darkacademia')">
+        <div class="card-preview preview-darkacademia">
+          <img class="preview-img" src="images/darkacademia.jpg" alt="darkacademia style preview" onerror="this.classList.add('hidden')">
+          <div class="pinner">
+            <h3>ars longa, vita brevis</h3>
+            <div class="rule"></div>
+            <p>Knowledge · Mystery · Ink</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Dark Academia</div>
+            <div class="card-tags">
+              <span class="tag">Dark</span>
+              <span class="tag">Literary</span>
+              <span class="tag">Vintage</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'darkacademia')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Memphis Design -->
+      <div class="style-card" onclick="openModal('memphis')">
+        <div class="card-preview preview-memphis">
+          <img class="preview-img" src="images/memphis.jpg" alt="memphis style preview" onerror="this.classList.add('hidden')">
+          <div class="shape1"></div>
+          <div class="shape2"></div>
+          <div class="shape3"></div>
+          <div class="pinner">
+            <h3>MEMPHIS</h3>
+            <p>Geo · Bold · Pop</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Memphis Design</div>
+            <div class="card-tags">
+              <span class="tag">Retro</span>
+              <span class="tag">Geometric</span>
+              <span class="tag">Playful</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'memphis')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Swiss / Bauhaus -->
+      <div class="style-card" onclick="openModal('swiss')">
+        <div class="card-preview preview-swiss">
+          <img class="preview-img" src="images/swiss.jpg" alt="swiss style preview" onerror="this.classList.add('hidden')">
+          <div class="red-bar"></div>
+          <div class="content">
+            <h3>Form<strong>Function</strong></h3>
+            <p>Grid · Order · Precision</p>
+          </div>
+          <div class="grid-mark"></div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Swiss / Bauhaus</div>
+            <div class="card-tags">
+              <span class="tag">Minimal</span>
+              <span class="tag">Grid</span>
+              <span class="tag">Typographic</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'swiss')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Vaporwave -->
+      <div class="style-card" onclick="openModal('vaporwave')">
+        <div class="card-preview preview-vaporwave">
+          <img class="preview-img" src="images/vaporwave.jpg" alt="vaporwave style preview" onerror="this.classList.add('hidden')">
+          <div class="grid-floor"></div>
+          <div class="sun">
+            <div class="sun-lines">
+              <div class="sun-line"></div><div class="sun-line"></div>
+              <div class="sun-line"></div><div class="sun-line"></div>
+            </div>
+          </div>
+          <div class="pinner">
+            <h3>ÆSTHETICS</h3>
+            <p>Retro · Future · Dream</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Vaporwave</div>
+            <div class="card-tags">
+              <span class="tag">Retro</span>
+              <span class="tag">Dreamy</span>
+              <span class="tag">80s Cyber</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'vaporwave')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Organic / Biomorphic -->
+      <div class="style-card" onclick="openModal('organic')">
+        <div class="card-preview preview-organic">
+          <img class="preview-img" src="images/organic.jpg" alt="organic style preview" onerror="this.classList.add('hidden')">
+          <div class="blob1"></div>
+          <div class="blob2"></div>
+          <div class="pinner">
+            <h3>Nature Flow</h3>
+            <p>Soft · Curved · Alive</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Organic / Biomorphic</div>
+            <div class="card-tags">
+              <span class="tag">Light</span>
+              <span class="tag">Natural</span>
+              <span class="tag">Flowing</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'organic')">复制 Prompt</button>
+        </div>
+      </div>
+
+      <!-- Terminal -->
+      <div class="style-card" onclick="openModal('terminal')">
+        <div class="card-preview preview-terminal">
+          <img class="preview-img" src="images/terminal.jpg" alt="terminal style preview" onerror="this.classList.add('hidden')">
+          <div class="term-content">
+            <div class="term-line"><span class="prompt">~/site $ </span><span class="cmd">init project</span></div>
+            <div class="term-line"><span class="out">▶ Loading vibes...</span></div>
+            <div class="term-line"><span class="out">✓ Done in 0.3s</span></div>
+            <div class="term-line"><span class="prompt">~/site $ </span><span class="cursor-blink"></span></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">
+            <div class="card-name">Terminal / Monochrome</div>
+            <div class="card-tags">
+              <span class="tag">Dark</span>
+              <span class="tag">Minimal</span>
+              <span class="tag">Hacker</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(event,'terminal')">复制 Prompt</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+<script>
+// ─── Cursor ───────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 4 + 'px';
+  cursor.style.top = my - 4 + 'px';
+});
+
+function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+document.querySelectorAll('button, a, .vibe-card').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('expand'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('expand'));
+});
+
+// ─── Parallax Background ──────────────────────────────────
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, docH = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  docH = document.documentElement.scrollHeight || H;
+}
+resize();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+// Three parallax star layers: [count, speed, size, alpha]
+const LAYERS = [
+  { count: 280, speed: 0.08, sizeMin: 0.3, sizeMax: 0.9, alpha: 0.25 },
+  { count: 120, speed: 0.22, sizeMin: 0.6, sizeMax: 1.4, alpha: 0.45 },
+  { count: 50,  speed: 0.55, sizeMin: 1.0, sizeMax: 2.2, alpha: 0.7  },
+];
+
+let stars = [];
+function initStars() {
+  stars = [];
+  LAYERS.forEach((layer, li) => {
+    for (let i = 0; i < layer.count; i++) {
+      stars.push({
+        layer: li,
+        ox: Math.random() * W,
+        oy: Math.random() * (docH || H),
+        r: layer.sizeMin + Math.random() * (layer.sizeMax - layer.sizeMin),
+        alpha: layer.alpha * (0.7 + Math.random() * 0.6),
+        twinkle: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.005 + Math.random() * 0.015,
+        color: Math.random() < 0.08 ? '232,255,71' : Math.random() < 0.12 ? '91,200,232' : '255,255,255',
+      });
+    }
+  });
+}
+initStars();
+
+// Nebula blobs (slow-drifting radial gradient patches)
+const nebulae = Array.from({length: 4}, () => ({
+  x: Math.random() * W,
+  y: Math.random() * H,
+  r: 180 + Math.random() * 240,
+  vx: (Math.random() - 0.5) * 0.06,
+  vy: (Math.random() - 0.5) * 0.04,
+  hue: [168, 91, 255, 140][Math.floor(Math.random() * 4)],
+  sat: [216, 200, 180, 120][Math.floor(Math.random() * 4)],
+  light: [160, 232, 200, 180][Math.floor(Math.random() * 4)],
+}));
+
+// Grid lines (subtle, diagonal-ish)
+const GRID_SPACING = 120;
+let mouseOffX = 0, mouseOffY = 0;
+document.addEventListener('mousemove', e => {
+  mouseOffX += (e.clientX / W - 0.5 - mouseOffX) * 0.04;
+  mouseOffY += (e.clientY / H - 0.5 - mouseOffY) * 0.04;
+});
+
+let scrollY = 0;
+window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
+
+let raf = 0;
+function drawCanvas() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Nebulae
+  nebulae.forEach(n => {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x < -n.r) n.x = W + n.r;
+    if (n.x > W + n.r) n.x = -n.r;
+    if (n.y < -n.r) n.y = H + n.r;
+    if (n.y > H + n.r) n.y = -n.r;
+    const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+    g.addColorStop(0, `rgba(${n.hue},${n.sat},${n.light},0.018)`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Grid — fixed in canvas space, mouse parallax only
+  const gOffX = mouseOffX * 40;
+  const gOffY = mouseOffY * 40;
+  ctx.strokeStyle = 'rgba(255,255,255,0.028)';
+  ctx.lineWidth = 0.5;
+  // Horizontal
+  for (let y = (gOffY % GRID_SPACING) - GRID_SPACING; y < H + GRID_SPACING; y += GRID_SPACING) {
+    ctx.beginPath();
+    ctx.moveTo(0, y); ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+  // Vertical
+  for (let x = (gOffX % GRID_SPACING) - GRID_SPACING; x < W + GRID_SPACING; x += GRID_SPACING) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0); ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+
+  // Stars — each layer scrolls at different speed
+  const t = Date.now() * 0.001;
+  stars.forEach(s => {
+    const layer = LAYERS[s.layer];
+    // parallax: doc-space y position minus scroll offset scaled by layer speed
+    // maps into viewport: stars at oy=0 appear at top when scrollY=0
+    const docY = s.oy - scrollY * layer.speed;
+    // wrap within a viewport-height window so stars always fill screen
+    const py = ((docY % H) + H) % H;
+    const px = s.ox;
+
+    s.twinkle += s.twinkleSpeed;
+    const tw = 0.5 + 0.5 * Math.sin(s.twinkle);
+    const a = s.alpha * (0.6 + 0.4 * tw);
+
+    // Glow for bright stars
+    if (s.r > 1.2) {
+      const glow = ctx.createRadialGradient(px, py, 0, px, py, s.r * 4);
+      glow.addColorStop(0, `rgba(${s.color},${a * 0.4})`);
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(px, py, s.r * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(px, py, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${s.color},${a})`;
+    ctx.fill();
+  });
+
+  // Shooting star (occasional)
+  if (Math.sin(t * 0.3) > 0.995) {
+    const sx = Math.random() * W;
+    const sy = Math.random() * H * 0.4;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + 80, sy + 20);
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  raf = requestAnimationFrame(drawCanvas);
+}
+drawCanvas();
+
+// ─── Prompt data ─────────────────────────────────────────
+const styles = {
+
+  // ══════════════════════════════════════
+  // 极简与现代 | Minimal & Modern
+  // ══════════════════════════════════════
+
+  swiss_style: {
+    title: 'SWISS STYLE',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Swiss International Style aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #ffffff;
+  --color-text:    #000000;
+  --color-red:     #e8192c;   /* International Klein Red */
+  --color-gray:    #888888;
+  Rule: Maximum 3 colors. No gradients. Color used as signal, not decoration.
+
+## 2. Typography System
+  Display: "Helvetica Neue" or "Inter" — 700 weight, tight tracking (-0.03em)
+  Body: "Helvetica Neue" — 400 weight, 16px, line-height 1.5
+  Grid: 12-column with 20px gutters. Mathematical spacing.
+  Rule: Asymmetric layouts. Text always left-aligned or justified. Never centered.
+
+## 3. Logo Concept for [BRAND]
+  Pure wordmark in Helvetica Neue Bold. Red rule above or below.
+  Optional: simple geometric mark (circle, square, triangle) in red.
+  Grid-locked positioning. Never decorative.
+
+## 4. Layout Principles
+  Strict grid adherence. Heavy use of white space as active element.
+  Diagonal or angled type strictly prohibited.
+  Photography: black & white or single-color duotone.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.btn {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 12px 24px;
+}
+.btn-accent { background: #e8192c; }
+.card {
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 0;
+  padding: 24px;
+}
+.rule-red {
+  border: none;
+  border-top: 2px solid #e8192c;
+  margin: 32px 0;
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Minimal. Reveal text left-to-right in 0.3s. No bounce, no spring.
+  Hover: border-color shift black→red in 0.15s ease.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: rational order, objective clarity, the grid as worldview. Swiss modernism at its most precise.`,
+  },
+
+  editorial_min: {
+    title: 'EDITORIAL MINIMALISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Editorial Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #faf9f7;   /* warm off-white */
+  --color-text:    #1a1814;   /* warm near-black */
+  --color-mid:     #c8b89a;   /* warm stone */
+  --color-accent:  #2a2520;   /* deep brown-black */
+  Rule: Warm whites and near-blacks. No cool grays. Ink-on-paper feeling.
+
+## 2. Typography System
+  Display: Large serif (Playfair Display / Cormorant) — editorial scale 64–120px
+  Body: "DM Sans" — 300 weight, generous line-height 1.8
+  Caption: "Space Mono" — 11px, tracked +0.15em, uppercase
+  Mixing serif + sans-serif is intentional and essential.
+
+## 3. Logo Concept for [BRAND]
+  Thin serif wordmark with editorial proportions (wide tracking).
+  Optional: single letter monogram in large display serif.
+  Always on warm white or warm dark backgrounds.
+
+## 4. Layout Principles
+  Magazine-style: large images dominate, text blocks as counterbalance.
+  Asymmetric column grids (1+2, 2+1). Running white space.
+  Full-bleed photography with thin caption bars.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.btn-editorial {
+  background: transparent;
+  border: 1px solid #1a1814;
+  color: #1a1814;
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 14px 32px;
+}
+.card-editorial {
+  background: #faf9f7;
+}
+.card-editorial img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+.card-editorial .caption {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #c8b89a;
+  padding: 12px 0 0;
+}
+.pull-quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: clamp(24px, 4vw, 48px);
+  line-height: 1.3;
+  color: #1a1814;
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Slow, deliberate. Fade in 0.6s ease. Image parallax 0.2× scroll speed.
+  Page transitions: crossfade 0.4s. No bounce, no spring.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: fashion magazine intelligence — large, slow, considered.`,
+  },
+
+  tech_min: {
+    title: 'TECH MINIMALISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Tech Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #f8f8f8;
+  --color-surface: #ffffff;
+  --color-text:    #111111;
+  --color-dim:     #888888;
+  --color-accent:  #0066ff;   /* single precise blue */
+  --color-border:  rgba(0,0,0,0.08);
+  Rule: Near-white backgrounds. One accent blue. Maximum restraint.
+
+## 2. Typography System
+  Display: "Inter" — 600 weight, -0.02em tracking
+  Body: "Inter" — 400 weight, 15px, line-height 1.6
+  Mono: "JetBrains Mono" — for code, data, precision labels
+  Scale: 11 · 13 · 15 · 18 · 24 · 32 · 48 · 64px
+
+## 3. Logo Concept for [BRAND]
+  Geometric wordmark or letterform. Clean edges, no serifs.
+  Monochrome. Optional: subtle geometric symbol.
+  Works in light and dark contexts.
+
+## 4. UI Component Library (CSS)
+\`\`\`css
+.btn {
+  background: #0066ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  transition: opacity 0.2s ease;
+}
+.btn:hover { opacity: 0.85; }
+.card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 20px;
+  transition: box-shadow 0.2s ease;
+}
+.card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.input {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  padding: 10px 14px;
+  transition: border-color 0.15s ease;
+}
+.input:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.12); }
+\`\`\`
+
+## 5. Layout Principles
+  Grid: 12-column, 8px baseline. Nothing breaks the grid.
+  Density: comfortable — not cramped like data dashboards.
+  States: loading skeletons, empty states, error states all designed.
+
+## 6. Motion & Animation
+  Micro-interactions only. 0.2s ease. No drama.
+  Loading: thin progress bar (#0066ff), no spinners.
+  Hover: card lifts (box-shadow deepens), button dims (opacity 0.85).
+  Page transition: 150ms fade. Nothing slides — that's too playful.
+  Focus: blue ring appears instantly (no animation on accessibility states).
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Apple-meets-Linear precision — every pixel justified, nothing decorative.`,
+  },
+
+  warm_min: {
+    title: 'WARM MINIMALISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Warm Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #faf6f0;   /* warm cream */
+  --color-surface: #f5efe6;
+  --color-text:    #2d2419;   /* warm dark brown */
+  --color-mid:     #a08870;
+  --color-accent:  #c87941;   /* terracotta */
+  Rule: Earthy, warm, never cool. Inspired by natural materials.
+
+## 2. Typography System
+  Display: Rounded sans or soft serif — approachable weight
+  Body: "DM Sans" — 300–400 weight, generous spacing
+  Caption: italic, slightly smaller, warm tone
+  Feeling: handwritten warmth without actual handwriting
+
+## 3. Logo Concept for [BRAND]
+  Soft wordmark, possibly with subtle rounded letterforms.
+  Natural texture optional (grain overlay at 8% opacity).
+  Earthy palette only.
+
+## 4. Layout Principles
+  Generous white (warm white) space. Rounded cards.
+  Natural photography: plants, ceramics, linen, skin.
+  Nothing sharp, nothing cold.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.btn-warm {
+  background: #c87941;
+  color: #faf6f0;
+  border: none;
+  border-radius: 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  padding: 12px 28px;
+  transition: background 0.2s ease;
+}
+.btn-warm:hover { background: #a06030; }
+.card-warm {
+  background: #f5efe6;
+  border: 2px solid #d4b896;
+  border-radius: 16px;
+  padding: 24px;
+}
+.divider-warm {
+  border: none;
+  border-top: 1px solid #d4b896;
+  margin: 32px 0;
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Gentle and slow. Transitions: 0.35s ease. No snapping.
+  Hover: warm glow (box-shadow 0 4px 20px rgba(200,121,65,0.15)).
+  Entrance: fade-up 0.5s ease, 24px translateY offset.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Sunday morning in a Scandinavian kitchen — warm, unhurried, material.`,
+  },
+
+  luxury_min: {
+    title: 'LUXURY MINIMALISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Luxury Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #fafaf8;
+  --color-text:    #1a1a18;
+  --color-gold:    #c0a060;   /* restrained gold */
+  --color-mid:     #888880;
+  Rule: Extreme restraint. Gold used sparingly — one detail, not a theme.
+
+## 2. Typography System
+  Display: High-contrast serif (Didot / Bodoni style) — extreme thin/thick contrast
+  Body: Light sans, 14–16px, generous line-height 1.9
+  Tracking: Wide on all uppercase labels (+0.2em minimum)
+  Scale: Fewer sizes, larger jumps. Nothing ordinary.
+
+## 3. Logo Concept for [BRAND]
+  Thin serif wordmark with optically corrected spacing.
+  Optional monogram in contrasting weight.
+  Embossed/letterpress effect via CSS (text-shadow simulation).
+
+## 4. Layout Principles
+  Massive white space — content as precious object.
+  Single-column or 2-column editorial. Never crowded.
+  Photography: high fashion, architectural, product still.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.btn-luxury {
+  background: transparent;
+  border: 0.5px solid #1a1a18;
+  color: #1a1a18;
+  font-family: 'Didot', 'Bodoni MT', serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  padding: 16px 40px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.btn-luxury:hover { background: #1a1a18; color: #fafaf8; }
+.card-luxury {
+  background: #fafaf8;
+  border: none;
+  overflow: hidden;
+}
+.card-luxury img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
+.card-luxury-caption {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #888880;
+  padding: 12px 0 0;
+}
+.divider-gold { border: none; border-top: 0.5px solid #c0a060; margin: 48px 0; }
+\`\`\`
+
+## 6. Motion & Animation
+  Philosophy: Stillness is luxury. Every transition is deliberate and slow.
+  Transitions: 0.5s cubic-bezier(0.25, 0, 0, 1). No bounce, no spring.
+  Hover lift: translateY(-2px), box-shadow 0 12px 40px rgba(0,0,0,0.08).
+  Image reveal: clip-path expand from bottom over 0.8s on scroll entrance.
+  Gold accent: fade-in only, never animate gold color itself.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Céline, The Row, Bottega — presence through restraint, luxury through absence.`,
+  },
+
+  monochrome: {
+    title: 'MONOCHROME',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Monochrome aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #ffffff;
+  --color-text:    #000000;
+  --color-100:     #f5f5f5;
+  --color-300:     #cccccc;
+  --color-600:     #666666;
+  --color-900:     #111111;
+  Rule: Zero hue. Hierarchy built entirely from value (light/dark), weight, and scale.
+
+## 2. Typography System
+  Display: One typeface family, all weights — from Ultra Light to Black
+  Body: Same family, Regular, generous spacing
+  Technique: Use weight contrast aggressively to build visual hierarchy.
+
+## 3. Logo Concept for [BRAND]
+  Pure wordmark. No color. No icon.
+  Multiple versions: black on white, white on black, reversed.
+
+## 4. Layout Principles
+  Photography: black & white, high contrast, graphic.
+  Texture: subtle grain or halftone at low opacity for depth.
+  Ink: every element feels like it was typeset.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.btn-mono {
+  background: #000;
+  color: #fff;
+  border: none;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 14px 32px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-mono:hover { background: #fff; color: #000; outline: 1px solid #000; }
+.btn-mono-outline {
+  background: transparent;
+  color: #000;
+  border: 1px solid #000;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 14px 32px;
+}
+.card-mono {
+  background: #fff;
+  border: 1px solid #000;
+  padding: 24px;
+  overflow: hidden;
+}
+.img-mono { filter: grayscale(100%) contrast(1.1); width: 100%; }
+\`\`\`
+
+## 6. Motion & Animation
+  Transitions: 0.2s ease. Crisp and binary — on or off.
+  Hover invert: background and color swap, no gradient blending.
+  Entrance: fadeIn 0.4s linear. No translateY drift — Monochrome doesn't float.
+  Focus states: 2px solid #000 outline, no color glow.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the ultimate constraint — when you remove color, every other decision matters more.`,
+  },
+
+  // ══════════════════════════════════════
+  // 材质与空间 | Material & Spatial
+  // ══════════════════════════════════════
+
+  glassmorphism: {
+    title: 'GLASSMORPHISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Glassmorphism aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      linear-gradient(135deg, #1a1a4e, #0d0d2b);
+  --glass-bg:      rgba(255,255,255,0.08);
+  --glass-border:  rgba(255,255,255,0.18);
+  --glass-blur:    16px;
+  --color-accent:  #6699ff;
+  --color-glow:    rgba(100,150,255,0.4);
+
+## 2. Typography System
+  Display: "Inter" — 300–600 weight, white/near-white
+  Body: "Inter" — 300 weight, rgba(255,255,255,0.85)
+  Labels: all-caps, tracked +0.1em, rgba(255,255,255,0.5)
+
+## 3. Core Glass Effect (CSS)
+\`\`\`css
+.glass-panel {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+\`\`\`
+
+## 4. UI Component Library
+  Buttons: glass bg + accent glow border + inner highlight
+  Cards: layered glass panels, depth via blur variation
+  Navigation: frosted bar with gradient border
+  Modals: deep blur (24px), prominent glass frame
+
+## 5. Depth System
+  Layer 0 (background): animated gradient mesh
+  Layer 1 (base panels): blur 8px, opacity 0.06
+  Layer 2 (cards): blur 16px, opacity 0.10
+  Layer 3 (modals/popups): blur 24px, opacity 0.14
+
+## 6. Motion & Animation
+  Float: subtle translateY oscillation 4px over 4s ease-in-out
+  Hover: increase backdrop blur + border opacity
+  Entrance: scale(0.96)→scale(1) + opacity 0→1, 0.4s spring
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: floating interfaces, depth without weight, the UI as polished ice.`,
+  },
+
+  paper_cutout: {
+    title: 'PAPER / CUTOUT',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Paper & Cutout aesthetic — inspired by risograph printing, zine culture, and handmade layers. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #f5e6c8;   /* aged newsprint */
+  --color-ink:     #1a1a2e;
+  --color-red:     #d44444;   /* risograph red */
+  --color-blue:    #1a4a8a;   /* risograph blue */
+  --color-yellow:  #f0c040;
+  Key: Colors overlap with multiply blend-mode — simulate mis-registration.
+
+## 2. Typography System
+  Display: "Bebas Neue" — mix with slight rotations (±2°)
+  Body: "Space Mono" — typewriter feel, 400 weight
+  Cut-out letters: appear clipped from different sources, mismatched weights
+  Rule: intentional misalignment is correct.
+
+## 3. Logo Concept for [BRAND]
+  Cut-and-paste wordmark. Rubber stamp variant.
+  Box with uneven ink pressure (box-shadow offset).
+
+## 4. Collage Layout Principles
+  Layered elements with mix-blend-mode: multiply
+  Torn paper edges via CSS clip-path polygon
+  Tape effects: semi-transparent rectangles at slight angles
+  Image treatment: halftone dot, duotone, high-contrast B&W
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.paper-card {
+  background: var(--color-bg);
+  border: 1px solid rgba(26,26,46,0.15);
+  transform: rotate(calc(var(--r, 0) * 1deg));
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+}
+.stamp {
+  border: 3px solid var(--color-ink);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: inline-block;
+  transform: rotate(-2deg);
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Transitions: none by default — elements appear already placed, like collage.
+  Hover: slight rotation exaggeration (+1° extra), paper rustling feel.
+  Stamp reveal: scale(0.8) → scale(1) + slight overshoot, 0.25s ease-out.
+  Scroll: elements drift in from slight rotations, settle on scroll.
+  Sound metaphor: each interaction is like peeling tape or tearing paper.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: analog sincerity, DIY publishing, the imperfect beauty of handmade things.`,
+  },
+
+  // ══════════════════════════════════════
+  // 未来科技 | Futuristic & Sci-Fi
+  // ══════════════════════════════════════
+
+  cyberpunk: {
+    title: 'CYBERPUNK',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cyberpunk aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #050510;
+  --color-surface: #0d0d1a;
+  --color-cyan:    #00ffff;
+  --color-magenta: #ff00aa;
+  --color-yellow:  #ffee00;
+  --color-text:    rgba(200,220,255,0.9);
+  Rule: Dark base, neon accents. Colors appear as light sources.
+
+## 2. Typography System
+  Display: "Bebas Neue" — 400 weight, tight tracking, neon text-shadow
+  Body: "Space Mono" or "JetBrains Mono" — monospace for authenticity
+  Effect: RGB channel offset on hero text (2px cyan left, 2px magenta right)
+
+## 3. Logo Concept for [BRAND]
+  Glitched wordmark with neon glow: text-shadow 0 0 20px #00ffff
+  Kanji/ideographic elements optional as decorative layer
+  Usage: dark backgrounds only
+
+## 4. Glitch & Neon Effects (CSS)
+\`\`\`css
+.neon-text {
+  color: #00ffff;
+  text-shadow: 0 0 4px #00ffff, 0 0 16px #00ffff, 0 0 40px rgba(0,255,255,0.4);
+}
+.glitch {
+  position: relative;
+}
+.glitch::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  color: #ff00aa;
+  clip-path: inset(30% 0 50% 0);
+  animation: glitch-anim 3s infinite;
+}
+@keyframes glitch-anim {
+  0%,90%,100% { transform: translateX(0); }
+  92% { transform: translateX(-4px); clip-path: inset(20% 0 60% 0); }
+  96% { transform: translateX(4px); clip-path: inset(70% 0 10% 0); }
+}
+\`\`\`
+
+## 5. UI Component Library
+  Buttons: dark bg + neon border + glow on hover
+  Cards: dark surface, 1px neon border, scanline overlay
+  Progress bars: animated neon gradient
+  Data: monospace, green or cyan
+
+## 6. Motion & Animation
+  Glitch loop every 5–8s. CRT scanline scroll.
+  Hover: increase text-shadow glow intensity.
+  Entrance: translate from bottom + neon flicker.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Blade Runner neon, Ghost in the Shell HUD, the beautiful decay of hypercapitalist futurity.`,
+  },
+
+  dark_tech: {
+    title: 'DARK TECHNOLOGY',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Dark Technology aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #000000;
+  --color-surface: #0a0a0a;
+  --color-border:  rgba(255,255,255,0.06);
+  --color-text:    rgba(255,255,255,0.9);
+  --color-dim:     rgba(255,255,255,0.4);
+  --color-accent:  #00ff88;   /* single cold green */
+  Rule: Maximum darkness. Accent is surgical, not decorative.
+
+## 2. Typography System
+  Display: "Space Mono" or "JetBrains Mono" — monospace, precision feel
+  Body: "Inter" — 300 weight, high contrast on dark
+  All UI labels: uppercase, tracked, small caps
+  Numbers: tabular figures, monospace
+
+## 3. Logo Concept for [BRAND]
+  Terminal-style wordmark. Optional: blinking cursor after name.
+  Strict black background. White or green text only.
+
+## 4. UI Component Library (CSS)
+\`\`\`css
+.panel {
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+}
+.label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.4);
+}
+.value {
+  color: #00ff88;
+  font-variant-numeric: tabular-nums;
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Minimal. Data updates: number tick. Progress: linear fill.
+  No decorative animation. Every motion carries information.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: black mirror surface, precision instruments, control room of the future.`,
+  },
+
+  scifi_hud: {
+    title: 'SCI-FI HUD',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Sci-Fi HUD (Heads-Up Display) aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #020814;
+  --color-primary: #00d4ff;   /* HUD cyan */
+  --color-secondary:#39ff14;  /* scan green */
+  --color-warning: #ff6600;
+  --color-text:    rgba(0,212,255,0.85);
+  Rule: All elements feel like projected light on transparent surfaces.
+
+## 2. Typography System
+  Display: "Orbitron" or "Space Mono" — mechanical, all-caps
+  Data readouts: monospace, tabular, small (11–13px)
+  Scanning labels: uppercase, wide tracking (+0.2em)
+
+## 3. HUD Frame Elements (CSS)
+\`\`\`css
+.hud-frame {
+  border: 1px solid rgba(0,212,255,0.3);
+  position: relative;
+}
+.hud-frame::before, .hud-frame::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  border-color: #00d4ff;
+  border-style: solid;
+}
+.hud-frame::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.hud-frame::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+.scanline {
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,212,255,0.03) 2px, rgba(0,212,255,0.03) 4px
+  );
+}
+\`\`\`
+
+## 4. UI Patterns
+  Corner brackets on all panels. Status indicators (●/○).
+  Progress arcs (SVG stroke-dasharray animation).
+  Radar/sweep animation on maps.
+
+## 6. Motion & Animation
+  Scan line scroll: 8s linear infinite.
+  Data update: instant replace with brief flash.
+  Loading: circular arc progress indicator.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Iron Man HUD, Westworld interface, mission control in 2077.`,
+  },
+
+  // ══════════════════════════════════════
+  // 影视叙事 | Cinematic & Narrative
+  // ══════════════════════════════════════
+
+  cinematic: {
+    title: 'CINEMATIC DARK',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cinematic Dark aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #080808;
+  --color-surface: #111111;
+  --color-text:    rgba(240,235,225,0.9);   /* warm white like film grain */
+  --color-dim:     rgba(240,235,225,0.4);
+  --color-accent:  #c8a060;   /* warm amber */
+  --color-border:  rgba(255,255,255,0.06);
+
+## 2. Typography System
+  Display: Dramatic serif or condensed sans — cinematic weight
+  Body: "DM Sans" — 300 weight, wide line-height 1.8
+  Captions: "Space Mono" — 11px, tracked, film-strip feel
+
+## 3. Logo Concept for [BRAND]
+  High-contrast wordmark on black. Letterpress or cold foil effect.
+  Optional: film sprocket motif or wide-ratio letterboxing.
+
+## 4. Layout Principles
+  Cinematic 21:9 or 16:9 hero sections.
+  Vignette overlays on photography.
+  Text overlaid on dark imagery — always legible.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.scene {
+  background: #080808;
+  position: relative;
+}
+.scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+}
+.film-title {
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #f0ebe1;
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Slow dissolves: 0.8s ease. Parallax at 0.3× scroll speed.
+  Text: cinematic reveal — mask wipe left to right.
+  Ambient: subtle grain overlay animation (3% opacity).
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: opening titles of an A24 film — dark, deliberate, cinematic gravity.`,
+  },
+
+  film_noir: {
+    title: 'FILM NOIR',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Film Noir aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #0a0a0a;
+  --color-text:    #e8e0d0;
+  --color-shadow:  #000000;
+  --color-highlight: #ffffff;
+  --color-amber:   #d4a030;   /* single warm accent */
+  Rule: Pure black & white with one amber warmth. High contrast is the language.
+
+## 2. Typography System
+  Display: Classic condensed serif or slab — 1940s newspaper energy
+  Body: "Space Mono" — typewriter rhythm
+  Captions: italic, faded, worn
+  Shadows: text-shadow to simulate deep contrast lighting
+
+## 3. Logo Concept for [BRAND]
+  Typeset wordmark in vintage condensed style.
+  Usage: white on black or black on warm paper.
+  Optional: detective badge or film reel motif.
+
+## 4. Photography Treatment
+  Black & white only. High contrast — crush the shadows.
+  Venetian blind lighting effect via CSS.
+  Rain texture overlay (low opacity).
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.noir-panel {
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.spotlight {
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,0.06) 0%, transparent 70%);
+}
+.venetian-blind {
+  background: repeating-linear-gradient(
+    0deg, rgba(0,0,0,0.4), rgba(0,0,0,0.4) 6px,
+    transparent 6px, transparent 20px
+  );
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Transitions: 0.3s ease. Slow fade, like smoke. Nothing snappy.
+  Venetian-blind entrance: clip-path horizontal slats open over 0.6s.
+  Hover: subtle brightness increase (+10%), no scale — shadows don't bounce.
+  Cursor: crosshair. The cursor is part of the atmosphere.
+  Scroll parallax: background image slower than content, deepens the noir depth.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: shadows with secrets, every frame a confession, the beauty of moral ambiguity in monochrome.`,
+  },
+
+  // ══════════════════════════════════════
+  // 图形与实验 | Graphic & Experimental
+  // ══════════════════════════════════════
+
+  neo_brutalism: {
+    title: 'NEO-BRUTALISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Neo-Brutalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #ffffff;
+  --color-text:    #000000;
+  --color-primary: #FFD60A;   /* brutal yellow */
+  --color-accent2: #FF6B6B;   /* coral red */
+  --color-accent3: #4ECDC4;   /* teal */
+  Rule: White base, hard offset shadows, bold saturated accent.
+
+## 2. Typography System
+  Display: "Arial Black" / "Space Grotesk" — 900 weight, all caps
+  Body: "Space Mono" — monospace, confrontational
+  Rule: No optical refinements. Set it ugly, set it loud.
+
+## 3. Neo-Brutalist Shadow System (CSS)
+\`\`\`css
+.neo-card {
+  background: #FFD60A;
+  border: 2px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  border-radius: 0;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.neo-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000;
+}
+.neo-btn {
+  background: #000;
+  color: #FFD60A;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 #FFD60A;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  cursor: pointer;
+}
+.neo-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+\`\`\`
+
+## 4. Layout Principles
+  Hard grids. No gradients. No border-radius (or extremely rare).
+  Elements stack with visible layering and hard offset.
+
+## 6. Motion & Animation
+  Bounce on hover (transform spring). Click: compress shadow.
+  No slow fades. Everything is instant or snappy.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the internet eating itself, Figma but honest, brutality as UX philosophy.`,
+  },
+
+  anti_design: {
+    title: 'ANTI-DESIGN',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Anti-Design aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  No fixed palette. Colors are chosen to clash, contradict, overwhelm.
+  Use primary red, blue, yellow at full saturation simultaneously.
+  White and black as punctuation, not foundation.
+
+## 2. Typography System
+  Display: Multiple conflicting typefaces in the same layout
+  Mix: serif + sans + monospace + script
+  Rotation: text at ±15° to ±45° intentionally
+  Size: extreme contrast, 8px next to 120px
+
+## 3. Anti-Design Layout Principles
+  Grid: deliberately broken. Elements overflow their containers.
+  Overlap: intentional, not accidental.
+  Margin: negative margin as aesthetic choice.
+  Cursor: unexpected, custom, disorienting.
+
+## 4. UI Component Library (CSS)
+\`\`\`css
+.anti-container {
+  position: relative;
+  overflow: visible; /* elements escape */
+}
+.anti-text {
+  mix-blend-mode: multiply;
+  position: absolute;
+  transform: rotate(var(--r, -12deg));
+}
+.anti-btn {
+  border: 3px solid red;
+  background: yellow;
+  color: blue;
+  font-family: 'Times New Roman', serif;
+  font-size: 20px;
+  padding: 8px 12px;
+  transform: rotate(-3deg);
+  cursor: crosshair;
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Anti-design rejects smooth transitions — use jarring, instant state changes.
+  Hover: random rotation shift (CSS custom property reassignment).
+  Click: element jumps position by 8–20px — deliberately wrong feedback.
+  Scroll: parallax in wrong direction on some elements. Rules are for breaking.
+  Cursor: glitch/crosshair, custom SVG that feels inappropriate.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Emigre magazine, David Carson, the violence of pure graphic intent.`,
+  },
+
+  maximalism: {
+    title: 'MAXIMALISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Maximalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  Use everything. Every strong color is valid.
+  --color-purple:  #7b2fff;
+  --color-orange:  #ff6600;
+  --color-yellow:  #ffe000;
+  --color-pink:    #ff3399;
+  --color-green:   #00cc66;
+  Key rule: colors must fight each other and look intentional, not accidental.
+
+## 2. Typography System
+  Multiple display typefaces. Massive scale. Type as texture.
+  Body text can be small — contrast with enormous display elements.
+  Layer text on top of images, over other text, fill every void.
+
+## 3. Layout Principles
+  No white space. Every pixel earns its place or is replaced.
+  Layers: 3–5 overlapping elements per section minimum.
+  Patterns: geometric tiles, gradient meshes, texture fills.
+
+## 4. Texture & Pattern System
+\`\`\`css
+.pattern-dots {
+  background-image: radial-gradient(#7b2fff 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+.pattern-lines {
+  background-image: repeating-linear-gradient(
+    45deg, #ff6600, #ff6600 1px, transparent 1px, transparent 8px
+  );
+}
+.layer-mix {
+  mix-blend-mode: multiply;
+  position: absolute;
+  inset: 0;
+}
+\`\`\`
+
+## 5. Philosophy
+  More is more. Every element competes for attention and all elements win simultaneously.
+  Restraint is the only sin.
+
+## 6. Motion & Animation
+  Everything moves. Simultaneously. On loop.
+  Background patterns: slow scroll or rotate at different speeds (parallax chaos).
+  Hover: scale(1.05) + brightness boost + drop-shadow burst.
+  Entrance: each element animates in from a different direction, staggered 50ms.
+  Continuous: at least one element on screen is always subtly animating.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: More is more. A feast for the eyes where restraint is the only sin.`,
+  },
+
+  memphis: {
+    title: 'MEMPHIS',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Memphis Design aesthetic — inspired by the 1980s Milan design movement. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #ffffff;
+  --color-yellow:  #fff700;
+  --color-red:     #ff4444;
+  --color-blue:    #00aaff;
+  --color-black:   #000000;
+  --color-pink:    #ff88cc;
+  Rule: Pure primaries + secondaries on white. No gradients in the classic version.
+
+## 2. Typography System
+  Display: Bold geometric sans (Futura-style) — high contrast, 700+ weight
+  Body: Same family, regular weight
+  Labels: all-caps, tracked
+
+## 3. Memphis Pattern System (CSS)
+\`\`\`css
+.memphis-dots {
+  background: radial-gradient(circle, #000 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+.memphis-squiggle {
+  background: repeating-linear-gradient(
+    90deg, transparent, transparent 6px,
+    #ff4444 6px, #ff4444 7px
+  );
+}
+.memphis-zigzag {
+  background: linear-gradient(135deg, #fff700 25%, transparent 25%),
+              linear-gradient(225deg, #fff700 25%, transparent 25%);
+  background-size: 20px 20px;
+}
+\`\`\`
+
+## 4. Shape Language
+  Squiggly lines, polka dots, lightning bolts, palm trees.
+  Geometric shapes: triangles, circles, squares — always outlined or filled solid.
+  Nothing rounded unless it is a perfect circle.
+
+## 6. Motion & Animation
+  Bounce with spring physics. Geometric shapes rotate.
+  Pattern tiles slide on enter. Jump cuts, no fades.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Ettore Sottsass at full volume — geometry as party, pattern as rebellion against good taste.`,
+  },
+
+  glitch: {
+    title: 'GLITCH ART',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Glitch Art / Digital Distortion aesthetic — inspired by data corruption, CRT monitors, and digital error culture. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #050510;
+  --color-cyan:    #00ffff;
+  --color-magenta: #ff00ff;
+  --color-yellow:  #ffff00;
+  --color-white:   #ffffff;
+  Rule: Colors appear as RGB channel separation (offset R, G, B layers)
+
+## 2. Typography System
+  Display: "Space Mono" or "IBM Plex Mono" — monospace, 700 weight
+  Glitch style: text with CSS text-shadow creating RGB offset (2–4px R/G/B split)
+  Effect: occasional character corruption — replace letters with █ or ▓ symbols
+
+## 3. Glitch Effect System (CSS)
+\`\`\`css
+@keyframes glitch-1 {
+  0%,95%,100% { clip-path: inset(0); transform: translateX(0); }
+  96% { clip-path: inset(20% 0 60% 0); transform: translateX(-8px); }
+  97% { clip-path: inset(50% 0 20% 0); transform: translateX(8px); }
+  98% { clip-path: inset(80% 0 5% 0); transform: translateX(-4px); }
+}
+.glitch-text {
+  position: relative;
+  color: #fff;
+}
+.glitch-text::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  color: #ff00ff;
+  animation: glitch-1 4s infinite;
+}
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  left: -2px;
+  color: #00ffff;
+  animation: glitch-1 4s infinite 0.1s;
+}
+\`\`\`
+
+## 5. UI Component Library
+  Scanlines: repeating horizontal lines via background
+  VHS tracking: slight vertical offset on large image blocks
+  Error state: red/white striped border on form errors
+  Loading: terminal-style blinking cursor + "LOADING..." text
+
+## 6. Motion & Animation
+  Glitch trigger: on hover or load, run @keyframes glitch-shift 0.2s 3 times.
+  Continuous: scanline overlay scrolls top-to-bottom at 0.5px/frame.
+  Text: RGB channel split on hover (translateX ±3px for ::before/::after).
+  Transition: none between states — glitch appearance is instantaneous.
+  Audio metaphor: every interaction sounds like static or a dropped signal.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: digital corruption as art, the beauty of broken signals, cyberpunk meets net.art.`,
+  },
+
+  kinetic_typo: {
+    title: 'KINETIC TYPOGRAPHY',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Kinetic Typography aesthetic — where type IS the design and motion IS the message. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #0a0a0a;
+  --color-text:    #ffffff;
+  --color-accent:  #ff3300;   /* single kinetic accent */
+  Rule: Reduce to black, white, one accent. Let the motion provide richness.
+
+## 2. Typography System
+  Only 1–2 typefaces, but used at extreme scale range.
+  Display: Condensed grotesque or variable font (for animation)
+  Minimum: 8px (caption) to 360px (full-screen letter)
+  Variable fonts preferred for weight/width animation.
+
+## 3. Kinetic Text Animation System (CSS)
+\`\`\`css
+@keyframes word-reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+@keyframes char-up {
+  from { transform: translateY(110%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes weight-pulse {
+  0%,100% { font-variation-settings: 'wght' 200; }
+  50%     { font-variation-settings: 'wght' 900; }
+}
+.reveal-word { animation: word-reveal 0.6s cubic-bezier(0.77,0,0.175,1) both; }
+.reveal-char { animation: char-up 0.5s cubic-bezier(0.23,1,0.32,1) both; }
+\`\`\`
+
+## 4. Layout Principles
+  Text is layout. No decoration needed — type fills the canvas.
+  Single word can occupy a full viewport. This is intentional.
+  Counters, time displays, number sequences as hero elements.
+
+## 6. Motion Vocabulary
+  Reveal: mask wipe (clip-path), line-by-line, char-by-char
+  Exit: compress to 0 height, reverse reveal
+  Continuous: scroll-linked, physics-based following
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the word as image, language as spectacle, motion as meaning.`,
+  },
+
+  surreal_3d: {
+    title: 'SURREAL 3D',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Surreal 3D aesthetic — dream spaces, impossible physics, objects at wrong scale. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #1a0a40;   /* deep violet dream */
+  --color-surface: #2d1a6e;
+  --color-glow:    #8800ff;
+  --color-pink:    #ff88cc;
+  --color-white:   #f8f0ff;
+  Gradients: purple→pink, violet→electric blue. Always atmospheric.
+
+## 2. Typography System
+  Display: Elegant serif or rounded display — dreamlike softness
+  Body: "DM Sans" — 300 weight, floaty line-height 2.0
+  Text feels like it's floating, not anchored.
+
+## 3. 3D CSS Illusion System
+\`\`\`css
+.floating-object {
+  animation: float 6s ease-in-out infinite;
+  filter: drop-shadow(0 40px 60px rgba(136,0,255,0.4));
+}
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  33%     { transform: translateY(-20px) rotate(2deg); }
+  66%     { transform: translateY(-10px) rotate(-1deg); }
+}
+.surreal-bg {
+  background: radial-gradient(ellipse at 30% 20%, #8800ff 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, #ff88cc 0%, transparent 50%),
+              #1a0a40;
+}
+\`\`\`
+
+## 4. Visual Vocabulary
+  Objects at impossible scale: giant everyday objects.
+  Portals, mirrors, infinite reflections.
+  Soft atmospheric fog/haze on all depth layers.
+
+## 6. Motion & Animation
+  Everything floats with slight rotation.
+  Parallax: foreground moves 3× faster than background.
+  Entrance: scale from 0.5 + blur 20px → normal, 1s spring.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: between sleep and waking, where proportion is feeling and space is emotion.`,
+  },
+
+  // ══════════════════════════════════════
+  // 复古与时代 | Retro & Era
+  // ══════════════════════════════════════
+
+  bauhaus: {
+    title: 'BAUHAUS',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Bauhaus aesthetic — form follows function, elementary geometry, primary colors. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-red:     #e8192c;
+  --color-yellow:  #f5d800;
+  --color-blue:    #0057a8;
+  --color-black:   #000000;
+  --color-white:   #ffffff;
+  Rule: ONLY these 5 colors. Any tint is a betrayal.
+
+## 2. Typography System
+  Display: Universal typeface (geometric sans — Futura, Bauhaus 93)
+  No decorative fonts. No serifs.
+  Body: geometric sans, regular weight, 16px
+  All type aligns to invisible grid axes.
+
+## 3. Logo Concept for [BRAND]
+  Geometric construction using only circles, squares, triangles.
+  Primary color fill. Black outline optional.
+  Can be assembled from pure CSS shapes — no SVG files needed.
+
+## 4. Geometric Design System (CSS)
+\`\`\`css
+.bauhaus-circle { border-radius: 50%; }
+.bauhaus-square { border-radius: 0; }
+.bauhaus-triangle {
+  width: 0; height: 0;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-bottom: 70px solid #e8192c;
+}
+.bauhaus-composition {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: #000;
+}
+\`\`\`
+
+## 5. Layout Principles
+  Grid first. Everything derives from the grid.
+  Asymmetric balance: heavy left, light right (or vice versa).
+  Photography: geometric crop, primary color duotone.
+
+## 6. Motion & Animation
+  Motion is structural, not decorative. Only purposeful transitions.
+  Transitions: 0.25s linear — no ease curves, no spring. Bauhaus is mechanical.
+  Hover: single-axis translate (left 4px or up 4px) — axis-aligned only.
+  State change: color block swaps with 0.15s linear crossfade.
+  No rotation, no blur, no shadow animations — geometry is static by nature.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Gropius's school made digital — elementary forms, revolutionary function, timeless geometry.`,
+  },
+
+  synthwave: {
+    title: 'SYNTHWAVE',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Synthwave aesthetic — 80s electronics, neon grids, analog synthesizers. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #0d0020;
+  --color-purple:  #7b2fff;
+  --color-pink:    #ff71ce;
+  --color-blue:    #01cdfe;
+  --color-yellow:  #fffb96;
+  --color-grid:    rgba(123,47,255,0.3);
+  Gradients: always diagonal or radial, purple→pink or dark→neon.
+
+## 2. Typography System
+  Display: "Orbitron", "Syncopate", or retro-future geometric sans
+  Body: "Rajdhani" or clean geometric — 300 weight, slightly wide tracking
+  All-caps for hero elements. Neon glow on headlines.
+
+## 3. Synthwave Visual System (CSS)
+\`\`\`css
+.synthwave-bg {
+  background:
+    linear-gradient(0deg, rgba(123,47,255,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(123,47,255,0.3) 1px, transparent 1px),
+    linear-gradient(180deg, #0d0020 0%, #1a0050 50%, #0d0020 100%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+  perspective: 400px;
+}
+.neon-glow {
+  color: #ff71ce;
+  text-shadow:
+    0 0 4px #ff71ce,
+    0 0 20px rgba(255,113,206,0.5),
+    0 0 60px rgba(255,113,206,0.2);
+}
+.chrome-text {
+  background: linear-gradient(180deg, #fffb96, #ff71ce, #7b2fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+\`\`\`
+
+## 4. Elements
+  Perspective grid (horizon line, vanishing point).
+  Sun: large semicircle with horizontal stripe cutouts.
+  Mountains: dark silhouette on horizon.
+  Palm trees: dark outline, neon highlight edge.
+
+## 6. Motion & Animation
+  Grid scroll: perspective grid moves toward viewer (translateZ).
+  Sun stripes: slow descend animation.
+  Text: neon flicker (opacity 0.8→1 rapid oscillation).
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Kavinsky, Perturbator, Outrun — nostalgia for a future that never existed.`,
+  },
+
+  y2k: {
+    title: 'Y2K REVIVAL',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Y2K Revival aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-primary:   #FF006E;   /* hot pink */
+  --color-secondary: #8338EC;   /* electric purple */
+  --color-chrome:    #C0C0C0;   /* metallic silver */
+  --color-neon-blue: #00BFFF;
+  --color-bg:        #0a0010;
+  All gradients diagonal (135deg). Iridescent/holographic shimmer effects.
+
+## 2. Typography System
+  Display: "Impact" or "Bebas Neue" — 900 weight, ALL CAPS, metallic shine
+  Body: "Tahoma" — 400 weight, 14–16px
+  Special: rainbow gradient text-fill-color on hero titles.
+
+## 3. Logo Concept for [BRAND]
+  Chrome gradient wordmark: linear-gradient(135deg, #C0C0C0, #fff, #C0C0C0)
+  Drop shadow in hot pink: 2px 2px 0 #FF006E
+  Star/diamond motifs (★ ✦ ◆) as logo mark.
+
+## 4. Y2K Visual Effects (CSS)
+\`\`\`css
+.holographic {
+  background: conic-gradient(
+    #FF006E, #8338EC, #00BFFF, #FF006E
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: holo-rotate 3s linear infinite;
+}
+@keyframes holo-rotate {
+  to { filter: hue-rotate(360deg); }
+}
+.chrome-border {
+  border: 2px solid;
+  border-image: linear-gradient(135deg, #C0C0C0, #fff, #C0C0C0, #888) 1;
+}
+\`\`\`
+
+## 5. UI Component Library
+  Buttons: hot pink + chrome border + diagonal gradient hover
+  Cards: iridescent border, dark surface, chrome inner shadow
+  Badges: holographic foil gradient background
+  Progress: animated gradient fill with star endpoint
+
+## 6. Motion & Animation
+  Holo-rotate: filter hue-rotate 360deg in 3s on hover (chrome/holographic elements).
+  Entrance: scale(0) → scale(1) with 0.3s spring — brash and immediate.
+  Cursor trail: sparkle/star particles follow the cursor.
+  Text shimmer: background-position shift across chrome gradient.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: THE FUTURE IS NOW energy — chrome, holographic, neon, maximalist, futuristic optimism of 1999–2004.`,
+  },
+
+  cassette_fut: {
+    title: 'CASSETTE FUTURISM',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cassette Futurism aesthetic — the analog sci-fi of the late 20th century: physical buttons, CRT screens, magnetic tape, modular hardware. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #1a1a1a;
+  --color-surface: #2a2a2a;
+  --color-text:    #e8e0cc;   /* warm off-white */
+  --color-amber:   #ff9900;   /* LED amber */
+  --color-green:   #00cc44;   /* phosphor green */
+  --color-chrome:  #999999;
+  Textures: brushed aluminum, matte plastic, rubber grip.
+
+## 2. Typography System
+  Display: "VT323", "Share Tech Mono", or "Courier New" — terminal/label feel
+  Body: "Space Mono" — technical documentation style
+  Physical labels: embossed all-caps, tight tracking
+
+## 3. Hardware Interface System (CSS)
+\`\`\`css
+.cassette-panel {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  border: 1px solid #444;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 8px rgba(0,0,0,0.5);
+  border-radius: 4px;
+}
+.led-indicator {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ff9900;
+  box-shadow: 0 0 6px #ff9900, 0 0 12px rgba(255,153,0,0.5);
+  animation: led-pulse 2s ease-in-out infinite;
+}
+.crt-screen {
+  background: #000;
+  color: #00cc44;
+  font-family: 'Space Mono', monospace;
+  text-shadow: 0 0 4px #00cc44;
+  border-radius: 8px;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+}
+\`\`\`
+
+## 5. Physical Control Language
+  Recessed buttons with embossed labels.
+  LED status indicators (pulse animation).
+  VU meters and analog dials (SVG arcs).
+  Tape reel animation (spinning circles).
+
+## 6. Motion & Animation
+  Mechanical, not digital. Transitions mimic physical movement.
+  Tape reel: rotate 360deg linear infinite, speed tied to "playback state".
+  VU meter: height lerp based on data value, 60fps update.
+  Button press: translateY(2px) + inner shadow deepens — feels physical.
+  Loading: analog dial sweep 0→270deg over 1.5s ease-in-out.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the future as imagined by 1978 — warm, tactile, mechanical, beautifully analog.`,
+  },
+
+  // ══════════════════════════════════════
+  // 自然与人文 | Organic & Humanistic
+  // ══════════════════════════════════════
+
+  organic_modern: {
+    title: 'ORGANIC MODERN',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Organic Modern aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #f5f0e8;   /* warm linen */
+  --color-surface: #ede8de;
+  --color-text:    #2d2419;
+  --color-mid:     #a08870;
+  --color-accent:  #7a6050;   /* warm brown */
+  --color-green:   #8a9a7a;   /* muted sage */
+  Rule: No sharp colors. Everything muted, warm, natural.
+
+## 2. Typography System
+  Display: Soft serif or humanist sans — approachable, never cold
+  Body: "DM Sans" — 300 weight, generous line-height 1.9
+  Organic letterforms: slight irregularity is preferred.
+
+## 3. Organic Shape Language (CSS)
+\`\`\`css
+.organic-card {
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  background: var(--color-surface);
+}
+.blob {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation: morph 8s ease-in-out infinite;
+}
+@keyframes morph {
+  0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  50%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+}
+\`\`\`
+
+## 4. Layout Principles
+  Asymmetric organic curves in section backgrounds.
+  No hard edges. Every corner is softened.
+  Photography: natural materials, skin, plants, ceramics, stone.
+
+## 6. Motion & Animation
+  Slow morphing shapes as ambient background.
+  Scroll: gentle parallax 0.15× speed.
+  Hover: soft scale 1.02 with shadow bloom.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: grown not made — the comfort of natural rhythm, the intelligence of living forms.`,
+  },
+
+  biophilic: {
+    title: 'BIOPHILIC',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Biophilic Design aesthetic — connecting humans to nature through digital interfaces. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #f0f5ed;   /* morning leaf */
+  --color-deep:    #1a3a1a;   /* forest shadow */
+  --color-green1:  #5a8a5a;   /* mid-canopy */
+  --color-green2:  #88cc88;   /* new growth */
+  --color-earth:   #a08060;
+  --color-light:   #e8f0e0;   /* dappled sunlight */
+
+## 2. Typography System
+  Display: Humanist serif — organic intelligence, not corporate
+  Body: "DM Sans" — 300 weight, breathing line-height 1.9
+  Rhythm: spacing mimics breath cycles (exhale = open space)
+
+## 3. Natural Texture System (CSS)
+\`\`\`css
+.leaf-texture {
+  background-image: url("data:image/svg+xml,...");  /* leaf vein SVG pattern */
+  background-size: 200px 200px;
+  opacity: 0.04;
+}
+.dappled-light {
+  background: radial-gradient(ellipse 60% 40% at 30% 20%,
+    rgba(232,240,224,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 70% 60%,
+    rgba(200,225,180,0.4) 0%, transparent 50%),
+    #f0f5ed;
+}
+.organic-divider {
+  height: 80px;
+  background: url("wave-path.svg") no-repeat center;
+  background-size: cover;
+}
+\`\`\`
+
+## 5. Principles
+  Photography: golden hour, close-up textures, water, plants, stone.
+  Icons: botanical line drawings, never geometric icons.
+  Motion: breathing, flowing, growing — never mechanical.
+
+## 6. Motion & Animation
+  Breathing rhythm: elements scale 1→1.02→1 over 4s ease-in-out, infinite.
+  Water ripple: radial gradient pulse on interaction (opacity 0.15→0 over 0.8s).
+  Scroll reveal: fade-up 32px, 0.6s ease. No snap or bounce.
+  Transitions: 0.4s ease. Never instant. Growth takes time.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the forest floor translated to pixels — alive, breathing, quietly intelligent.`,
+  },
+
+  wabi_sabi: {
+    title: 'WABI-SABI',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Wabi-Sabi aesthetic — the Japanese philosophy of imperfect, incomplete, impermanent beauty. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #f0ebe0;   /* aged paper */
+  --color-surface: #e8e0d0;
+  --color-text:    #3a3028;   /* warm ink */
+  --color-mid:     #8a7a6a;
+  --color-moss:    #7a8a6a;
+  --color-rust:    #8a5a40;
+  Rule: Muted, aged, impure tones. No brightness. Colors look weathered.
+
+## 2. Typography System
+  Display: Thin serif or brush-influenced letterforms
+  Body: Light weight, generously spaced — reading as meditation
+  Imperfection: slight optical irregularity is correct, not a mistake.
+
+## 3. Texture Language (CSS)
+\`\`\`css
+.washi-texture {
+  background-image:
+    url("data:image/svg+xml,..."); /* fiber noise pattern */
+  background-blend-mode: multiply;
+}
+.cracked-border {
+  border: 1px solid rgba(58,48,40,0.15);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.aged-photo {
+  filter: sepia(0.3) contrast(0.9) brightness(0.95);
+}
+\`\`\`
+
+## 4. Design Principles
+  Empty space is the most important element — not negative space but ma (間).
+  Asymmetry preferred. Nothing perfectly centered.
+  Objects appear used, touched, alive — not pristine.
+  Photography: worn surfaces, water stains, natural weathering.
+
+## 6. Motion & Animation
+  Extremely slow. Fade 1.2s ease. Nothing jarring.
+  Rain, falling leaves, gentle water ripple as ambient elements.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: a tea bowl with a crack that makes it more beautiful — find perfection in imperfection.`,
+  },
+
+  ethereal: {
+    title: 'ETHEREAL',
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Ethereal aesthetic — mist, soft light, weightless space, spiritual calm. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #f5f0ff;   /* lavender white */
+  --color-surface: #ede8f8;
+  --color-text:    #2a2040;
+  --color-mid:     #9080b0;
+  --color-glow:    #c0a8e0;
+  --color-mist:    rgba(255,255,255,0.6);
+  Gradients: soft, large, diffuse — like light through frosted glass.
+
+## 2. Typography System
+  Display: Ultra-light serif or thin humanist sans — almost weightless
+  Body: "DM Sans" — 200 weight, wide line-height 2.0
+  Letter spacing: +0.05em — each letter breathes.
+
+## 3. Ethereal Effects System (CSS)
+\`\`\`css
+.mist-layer {
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 30%,
+    rgba(255,255,255,0.7) 0%,
+    rgba(192,168,224,0.2) 50%,
+    transparent 100%
+  );
+}
+.floating-element {
+  animation: float-soft 8s ease-in-out infinite;
+  filter: blur(0.5px);
+}
+@keyframes float-soft {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%     { transform: translateY(-12px) scale(1.01); }
+}
+.glass-veil {
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(20px) brightness(1.1);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+\`\`\`
+
+## 4. Visual Language
+  Soft gradients replacing hard edges. Everything diffuse.
+  Photography: backlighting, silhouettes, fog, reflections.
+  Particles: soft bokeh, floating dust motes.
+
+## 6. Motion & Animation
+  All at 0.6–1.2s duration. Ease-in-out only. Never bounce.
+  Ambient: gentle particle float, slow mist movement.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the moment before dawn, between solid and vapor, between silence and sound.`,
+  },
+};
+
+// ─── Gallery + Modal ─────────────────────────────────────
+// ─── Vibe data: category assignment ─────────────────────
+const vibeCategories = {
+  // 极简与现代
+  swiss_style:    'minimal_modern',
+  editorial_min:  'editorial_min',
+  tech_min:       'tech_min',
+  warm_min:       'warm_min',
+  luxury_min:     'luxury_min',
+  monochrome:     'monochrome',
+  // 材质与空间
+  glassmorphism:  'glassmorphism',
+  paper_cutout:   'paper_cutout',
+  // 未来科技
+  cyberpunk:      'cyberpunk',
+  dark_tech:      'dark_tech',
+  scifi_hud:      'scifi_hud',
+  // 影视叙事
+  cinematic:      'cinematic',
+  film_noir:      'film_noir',
+  // 图形与实验
+  neo_brutalism:  'neo_brutalism',
+  anti_design:    'anti_design',
+  maximalism:     'maximalism',
+  memphis:        'memphis',
+  glitch:         'glitch',
+  kinetic_typo:   'kinetic_typo',
+  surreal_3d:     'surreal_3d',
+  // 复古与时代
+  bauhaus:        'bauhaus',
+  synthwave:      'synthwave',
+  y2k:            'y2k',
+  cassette_fut:   'cassette_fut',
+  // 自然与人文
+  organic_modern: 'organic_modern',
+  biophilic:      'biophilic',
+  wabi_sabi:      'wabi_sabi',
+  ethereal:       'ethereal',
+};
+
+const styleImageMap = {
+  // 极简与现代
+  swiss_style:    'images/lark_swiss.jpg',
+  editorial_min:  'images/lark_editorial_min.jpg',
+  tech_min:       'images/lark_tech_min.webp',
+  warm_min:       'images/lark_warm_min.jpg',
+  luxury_min:     'images/lark_luxury_min.png',
+  monochrome:     'images/lark_monochrome.png',
+  // 材质与空间
+  glassmorphism:  'images/lark_glassmorphism.png',
+  paper_cutout:   'images/lark_paper_cutout.jpg',
+  // 未来科技
+  cyberpunk:      'images/lark_cyberpunk.jpg',
+  dark_tech:      'images/lark_dark_tech.png',
+  scifi_hud:      'images/lark_scifi_hud.jpg',
+  // 影视叙事
+  cinematic:      'images/darkacademia.jpg',
+  film_noir:      'images/rave3.jpg',
+  // 图形与实验
+  neo_brutalism:  'images/lark_neo_brutalism.jpg',
+  anti_design:    'images/lark_anti_design.jpg',
+  maximalism:     'images/lark_maximalism.jpg',
+  memphis:        'images/lark_memphis.jpg',
+  glitch:         'images/lark_glitch.jpg',
+  kinetic_typo:   'images/lark_kinetic_typo.jpg',
+  surreal_3d:     'images/lark_surreal_3d.jpg',
+  // 复古与时代
+  bauhaus:        'images/lark_bauhaus.jpg',
+  synthwave:      'images/vaporwave.jpg',
+  y2k:            'images/retro90.jpg',
+  cassette_fut:   'images/album2.jpg',
+  // 自然与人文
+  organic_modern: 'images/organic.jpg',
+  biophilic:      'images/festival3.jpg',
+  wabi_sabi:      'images/editorial4.jpg',
+  ethereal:       'images/psychedelic2.jpg',
+};
+
+// Gradient fallback colors per vibe
+const vibePalette = {
+  // 极简与现代
+  swiss_style:    ['#ffffff','#ff0000','#000000'],
+  editorial_min:  ['#f5f0eb','#c8b89a','#2a2520'],
+  tech_min:       ['#f8f8f8','#e0e0e0','#1a1a1a'],
+  warm_min:       ['#f5efe6','#d4b896','#8b6a4f'],
+  luxury_min:     ['#fafaf8','#c0a882','#1a1a1a'],
+  monochrome:     ['#000000','#555555','#f0f0f0'],
+  // 材质与空间
+  glassmorphism:  ['#1a1a3e','#4488ff','#ffffff'],
+  paper_cutout:   ['#f5e6c8','#d44444','#1a4a8a'],
+  // 未来科技
+  cyberpunk:      ['#0d0d1a','#00FFFF','#FF00AA'],
+  dark_tech:      ['#000000','#00ff00','#003300'],
+  scifi_hud:      ['#060612','#39ff14','#ff00ff'],
+  // 影视叙事
+  cinematic:      ['#1a1410','#8b6914','#d4b896'],
+  film_noir:      ['#0a0a0a','#888888','#ffffff'],
+  // 图形与实验
+  neo_brutalism:  ['#FFD60A','#FF6B6B','#000000'],
+  anti_design:    ['#ff0000','#0000ff','#ffff00'],
+  maximalism:     ['#1a0050','#ff6600','#ffe000'],
+  memphis:        ['#fff700','#ff4444','#00aaff'],
+  glitch:         ['#060612','#ff00ff','#00ffff'],
+  kinetic_typo:   ['#000000','#ff3300','#ffffff'],
+  surreal_3d:     ['#1a0040','#8800ff','#ff88cc'],
+  // 复古与时代
+  bauhaus:        ['#f5f0e8','#1a1a1a','#e84444'],
+  synthwave:      ['#1a0030','#ff71ce','#01cdfe'],
+  y2k:            ['#FF006E','#8338EC','#00BFFF'],
+  cassette_fut:   ['#1a0030','#ff71ce','#01cdfe'],
+  // 自然与人文
+  organic_modern: ['#e8e0d0','#8a7a6a','#4a3a2a'],
+  biophilic:      ['#2a4a2a','#88cc88','#f5efe6'],
+  wabi_sabi:      ['#d4c8b0','#8a7a6a','#3a3028'],
+  ethereal:       ['#e8e0f0','#c0a8d8','#ffffff'],
+};
+
+function getVIPrompt(styleId, styleData, brandName) {
+  const brand = brandName || '[你的品牌]';
+  return styleData.vi.replace(/\[BRAND\]/g, brand);
+}
+
+// ─── Gallery portal ───────────────────────────────────────
+let currentVibe = null;
+
+function buildWaterfall(cat, query) {
+  const outer = document.getElementById('gp-waterfall');
+  const container = document.getElementById('gp-waterfall-inner');
+  container.innerHTML = '';
+  const q = (query || '').toLowerCase();
+
+  const filtered = Object.entries(styles).filter(([id, s]) => {
+    if (cat && cat !== 'all' && vibeCategories[id] !== cat) return false;
+    if (q && !s.title.toLowerCase().includes(q) && !id.includes(q)) return false;
+    return true;
+  });
+
+  // Build cards (hidden initially for masonry layout calc)
+  const cards = filtered.map(([id, s], i) => {
+    const pal = vibePalette[id] || ['#111','#333','#555'];
+    const imgPath = styleImageMap[id];
+    const card = document.createElement('div');
+    card.className = 'vibe-card';
+    card.onclick = () => openVibeModal(id);
+    card.innerHTML = `
+      <div class="vc-img-wrap">
+        <img class="vc-img" src="${imgPath}" alt="${s.title}"
+             onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';fb.style.height='240px';fb.style.position='relative';">
+        <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]})"></div>
+        <div class="vc-hover">
+          <button class="vc-copy-btn" onclick="quickCopy(event,'${id}')">Copy Prompt</button>
+        </div>
+      </div>
+      <div class="vc-foot">
+        <span class="vc-title">${s.title}</span>
+        <span class="vc-cat">${vibeCategories[id] || ''}</span>
+      </div>`;
+    card.style.opacity = '0';
+    container.appendChild(card);
+    return { card, i };
+  });
+
+  // Masonry layout after images load
+  function layoutMasonry() {
+    const GAP = 12;
+    const outerW = outer.clientWidth - 40; // minus padding
+    const cols = outerW < 600 ? 2 : outerW < 900 ? 3 : outerW < 1400 ? 4 : 5;
+    const colW = Math.floor((outerW - GAP * (cols - 1)) / cols);
+    const colHeights = new Array(cols).fill(0);
+
+    cards.forEach(({ card }, i) => {
+      // Find shortest column
+      const col = colHeights.indexOf(Math.min(...colHeights));
+      const x = col * (colW + GAP);
+      const y = colHeights[col];
+
+      card.style.width = colW + 'px';
+      card.style.left = x + 'px';
+      card.style.top = y + 'px';
+
+      colHeights[col] += card.offsetHeight + GAP;
+    });
+
+    container.style.height = Math.max(...colHeights) + 'px';
+
+    // Staggered entrance
+    cards.forEach(({ card }, i) => {
+      card.style.transform = 'translateY(16px)';
+      setTimeout(() => {
+        card.style.transition = `opacity 0.45s ease ${i * 35}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${i * 35}ms`;
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 20);
+    });
+  }
+
+  // Wait for images to load before layout (use a short timeout as fallback)
+  let loaded = 0;
+  const total = cards.length;
+  if (total === 0) return;
+
+  function onLoad() {
+    loaded++;
+    layoutMasonry();
+  }
+
+  function onError() {
+    loaded++;
+    setTimeout(layoutMasonry, 20);
+  }
+
+  cards.forEach(({ card }) => {
+    const img = card.querySelector('.vc-img');
+    if (!img) { onLoad(); return; }
+    if (img.complete && img.naturalHeight > 0) { onLoad(); return; }
+    if (img.complete && img.naturalHeight === 0) { onError(); return; }
+    img.addEventListener('load', onLoad, { once: true });
+    img.addEventListener('error', onError, { once: true });
+  });
+
+  // Fallback: layout at 200ms and 1500ms regardless
+  setTimeout(layoutMasonry, 200);
+  setTimeout(layoutMasonry, 1500);
+
+  // Re-layout on resize
+  outer._masonryResize = () => layoutMasonry();
+  window.removeEventListener('resize', outer._masonryResize);
+  window.addEventListener('resize', outer._masonryResize);
+}
+
+let activeCat = 'all';
+
+function initGallery() {
+  buildWaterfall('all', '');
+  document.querySelectorAll('.gp-nav-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.gp-nav-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeCat = this.dataset.cat;
+      // Get label: text content minus the icon span
+      const iconEl = this.querySelector('.gp-nav-icon');
+      const label = this.textContent.replace(iconEl ? iconEl.textContent : '', '').trim();
+      const count = activeCat === 'all'
+        ? Object.keys(styles).length + '+'
+        : Object.keys(styles).filter(id => vibeCategories[id] === activeCat).length || '—';
+      document.getElementById('gp-topbar-title').innerHTML = `${label} <span>${count}</span>`;
+      buildWaterfall(activeCat, document.getElementById('gp-search').value);
+    });
+  });
+
+  document.getElementById('gp-search').addEventListener('input', function() {
+    buildWaterfall(activeCat, this.value);
+  });
+}
+
+// ─── Dream transition ────────────────────────────────────
+function enterGallery() {
+  const btn = document.getElementById('enter-btn');
+  btn.classList.add('firing');
+
+  const dt = document.getElementById('dream-transition');
+  dt.classList.add('active');
+  runDreamAnim(() => {
+    dt.classList.add('done');
+    document.getElementById('gallery-portal').classList.add('active');
+    if (!galleryBuilt) {
+      initGallery();
+      galleryBuilt = true;
+    }
+    document.body.classList.add('in-gallery');
+    setTimeout(() => dt.classList.remove('active', 'done'), 400);
+  });
+}
+
+let galleryBuilt = false;
+
+function exitGallery() {
+  document.getElementById('gallery-portal').classList.remove('active');
+  document.body.classList.remove('in-gallery');
+  document.getElementById('enter-btn').classList.remove('firing');
+}
+
+// ─── Dream canvas animation ──────────────────────────────
+function runDreamAnim(onDone) {
+  const dc = document.getElementById('dream-canvas');
+  dc.width = window.innerWidth;
+  dc.height = window.innerHeight;
+  const ctx2 = dc.getContext('2d');
+  let t = 0;
+  const cx = dc.width / 2, cy = dc.height / 2;
+  const maxR = Math.hypot(cx, cy) * 1.1;
+
+  function frame() {
+    t += 0.025;
+    ctx2.clearRect(0, 0, dc.width, dc.height);
+
+    // Expanding radial dream wipe
+    const r = maxR * Math.pow(t, 1.4);
+    const grad = ctx2.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, `rgba(8,10,14,${Math.min(t * 1.5, 1)})`);
+    grad.addColorStop(0.6, `rgba(20,40,80,${Math.min(t, 0.9)})`);
+    grad.addColorStop(0.85, `rgba(232,255,71,${0.12 * Math.sin(t * 4)})`);
+    grad.addColorStop(1, 'rgba(8,10,14,0)');
+    ctx2.fillStyle = grad;
+    ctx2.fillRect(0, 0, dc.width, dc.height);
+
+    // Particle rings
+    for (let ring = 0; ring < 5; ring++) {
+      const rr = r * (0.4 + ring * 0.15);
+      const alpha = Math.max(0, 0.4 - t * 0.3 - ring * 0.06);
+      ctx2.beginPath();
+      ctx2.arc(cx, cy, rr, 0, Math.PI * 2);
+      ctx2.strokeStyle = `rgba(232,255,71,${alpha})`;
+      ctx2.lineWidth = 1;
+      ctx2.stroke();
+    }
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      ctx2.clearRect(0, 0, dc.width, dc.height);
+      onDone();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+// ─── Vibe modal ──────────────────────────────────────────
+function openVibeModal(id) {
+  const s = styles[id];
+  if (!s) return;
+  currentVibe = id;
+
+  document.getElementById('vm-title').textContent = s.title;
+
+  const imgEl = document.getElementById('vm-img');
+  const fallEl = document.getElementById('vm-fallback');
+  const pal = vibePalette[id] || ['#111','#333','#555'];
+  fallEl.style.background = `linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]})`;
+  imgEl.classList.add('hidden');
+
+  const probe = new Image();
+  probe.onload = () => { imgEl.src = styleImageMap[id]; imgEl.classList.remove('hidden'); };
+  probe.src = styleImageMap[id];
+
+  const input = document.getElementById('vm-brand-input');
+  input.value = '';
+  renderVibePre();
+  input.oninput = renderVibePre;
+
+  document.getElementById('vibe-overlay').classList.add('active');
+}
+
+function renderVibePre() {
+  const s = styles[currentVibe];
+  if (!s) return;
+  const brand = document.getElementById('vm-brand-input').value.trim();
+  const prompt = getVIPrompt(currentVibe, s, brand);
+  const safe = brand ? brand.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') : null;
+  const html = prompt
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(safe ? new RegExp(safe,'g') : /(?!)/,
+      brand ? `<span class="brand-inject">${brand}</span>` : '');
+  document.getElementById('vm-prompt').innerHTML = html;
+}
+
+function copyVibePrompt() {
+  const s = styles[currentVibe];
+  if (!s) return;
+  const brand = document.getElementById('vm-brand-input').value.trim();
+  const text = getVIPrompt(currentVibe, s, brand);
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('vm-copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ 已复制！';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+function closeVibeModal(e) {
+  if (!e || e.target === document.getElementById('vibe-overlay')) {
+    document.getElementById('vibe-overlay').classList.remove('active');
+    currentVibe = null;
+  }
+}
+
+function quickCopy(e, id) {
+  e.stopPropagation();
+  const s = styles[id];
+  if (!s) return;
+  const text = getVIPrompt(id, s, '');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = e.currentTarget;
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy Prompt';
+      btn.classList.remove('copied');
+    }, 1600);
+  });
+}
+
+// ─── Escape key ──────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeVibeModal({ target: document.getElementById('vibe-overlay') });
+  }
+});
+
+</script>
+</body>
+</html>
