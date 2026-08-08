@@ -574,7 +574,7 @@
     }
     .hero-tagline {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(80px, 10vw, 140px);
+      font-size: clamp(64px, 8vw, 112px);
       line-height: 0.88;
       letter-spacing: 0.02em;
       margin: 0;
@@ -646,20 +646,20 @@
       flex-direction: column;
     }
     .hero-right-header {
-      padding: 20px 28px 0;
+      padding: 16px 20px 0;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
     }
     .hero-right-dot {
-      width: 10px; height: 10px;
+      width: 8px; height: 8px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.1);
     }
     .hero-right-title {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 18px;
+      font-size: 14px;
       letter-spacing: 0.18em;
       color: var(--text-muted);
       margin-left: 8px;
@@ -677,8 +677,8 @@
       inset: 0;
       display: flex;
       align-items: center;
-      padding: 24px 28px;
-      gap: 32px;
+      padding: 16px 20px;
+      gap: 16px;
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.5s ease, transform 0.5s ease;
@@ -797,11 +797,11 @@
     .hero-panel-kit {
       display: flex;
       gap: 6px;
-      margin-top: 4px;
     }
     .hero-panel-kit img {
-      width: 56px; height: 40px;
-      border-radius: 4px;
+      flex: 1;
+      height: 56px;
+      border-radius: 5px;
       object-fit: cover;
       border: 1px solid rgba(255,255,255,0.1);
     }
@@ -2762,15 +2762,15 @@
           <div class="hero-step-slide active" data-step="0">
             <div class="hero-card-stack">
               <div class="hero-style-card highlighted">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_32_49 PM.png" alt="Bauhaus">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Bauhaus">
                 <div class="hero-style-card-label">Bauhaus</div>
               </div>
               <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_35_50 PM.png" alt="Anti-Design">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_36_20 PM.png" alt="Anti-Design">
                 <div class="hero-style-card-label">Anti-Design</div>
               </div>
               <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_45_17 PM.png" alt="Organic">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Organic">
                 <div class="hero-style-card-label">Organic Modern</div>
               </div>
               <div class="hero-style-card">
@@ -2778,18 +2778,27 @@
                 <div class="hero-style-card-label">Dark Tech</div>
               </div>
             </div>
+            <!-- connector dot -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+              <div style="width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(232,255,71,0.4));"></div>
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(232,255,71,0.8);"></div>
+              <div style="width:1px;height:40px;background:linear-gradient(to bottom,rgba(232,255,71,0.4),transparent);"></div>
+            </div>
             <div class="hero-panel">
               <div class="hero-panel-label">// SELECT STYLE</div>
               <div class="hero-panel-title">BAUHAUS</div>
-              <div class="hero-panel-lines">
-                <div class="hero-panel-line accent"></div>
-                <div class="hero-panel-line w80"></div>
-                <div class="hero-panel-line w60"></div>
-                <div class="hero-panel-line w90"></div>
-                <div class="hero-panel-line w50"></div>
-                <div class="hero-panel-line w80"></div>
+              <div style="display:flex;gap:6px;margin-top:8px;">
+                <div style="flex:1;height:4px;border-radius:2px;background:var(--accent);"></div>
+                <div style="flex:0.4;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);"></div>
               </div>
-              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:8px;">Red-yellow-blue system. Geometric forms. Single typeface family — weight defines hierarchy.</p>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <div style="width:32px;height:32px;border-radius:4px;background:#E63329;"></div>
+                <div style="width:32px;height:32px;border-radius:4px;background:#F5C400;"></div>
+                <div style="width:32px;height:32px;border-radius:4px;background:#1B4FD8;"></div>
+                <div style="width:32px;height:32px;border-radius:4px;background:#0a0a0a;border:1px solid rgba(255,255,255,0.15);"></div>
+              </div>
+              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px;">Primary color system. Geometric construction language. One typeface family — weight defines hierarchy.</p>
+              <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:9px;color:rgba(232,255,71,0.5);letter-spacing:0.12em;">29 STYLES AVAILABLE ↗</div>
             </div>
           </div>
 
@@ -2797,7 +2806,7 @@
           <div class="hero-step-slide" data-step="1">
             <div class="hero-card-stack">
               <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_32_49 PM.png" alt="Bauhaus">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Bauhaus">
                 <div class="hero-style-card-label">Bauhaus</div>
               </div>
               <div class="hero-style-card highlighted">
@@ -2805,7 +2814,7 @@
                 <div class="hero-style-card-label">Editorial Min</div>
               </div>
               <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_45_17 PM.png" alt="Organic">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Organic">
                 <div class="hero-style-card-label">Organic Modern</div>
               </div>
               <div class="hero-style-card">
@@ -2813,18 +2822,23 @@
                 <div class="hero-style-card-label">Dark Tech</div>
               </div>
             </div>
+            <!-- connector dot -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+              <div style="width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(232,255,71,0.4));"></div>
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(232,255,71,0.8);"></div>
+              <div style="width:1px;height:40px;background:linear-gradient(to bottom,rgba(232,255,71,0.4),transparent);"></div>
+            </div>
             <div class="hero-panel">
               <div class="hero-panel-label">// COPY PROMPT</div>
               <div class="hero-panel-title">EDITORIAL MINIMALISM</div>
-              <div class="hero-panel-lines">
-                <div class="hero-panel-line accent"></div>
-                <div class="hero-panel-line w80"></div>
-                <div class="hero-panel-line w60"></div>
-                <div class="hero-panel-line w90"></div>
-                <div class="hero-panel-line w50"></div>
+              <div style="display:flex;gap:6px;margin-top:8px;">
+                <div style="flex:1;height:4px;border-radius:2px;background:var(--accent);"></div>
+                <div style="flex:0.6;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);"></div>
               </div>
-              <p style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(232,255,71,0.7);line-height:1.6;margin-top:8px;letter-spacing:0.04em;">"Editorial minimalism brand identity, oversized typography anchoring composition, monochrome palette with single accent color..."</p>
-              <button class="hero-panel-copy-btn">COPY PROMPT</button>
+              <div style="margin-top:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(232,255,71,0.2);border-radius:6px;padding:10px 12px;">
+                <p style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(232,255,71,0.75);line-height:1.7;letter-spacing:0.03em;">"Editorial minimalism brand identity, oversized typography anchoring the composition, strict monochrome palette with single warm accent, high contrast black and white photography..."</p>
+              </div>
+              <button class="hero-panel-copy-btn" style="margin-top:12px;">COPY PROMPT</button>
             </div>
           </div>
 
@@ -2832,7 +2846,7 @@
           <div class="hero-step-slide" data-step="2">
             <div class="hero-card-stack">
               <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_32_49 PM.png" alt="Bauhaus">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Bauhaus">
                 <div class="hero-style-card-label">Bauhaus</div>
               </div>
               <div class="hero-style-card">
@@ -2848,20 +2862,26 @@
                 <div class="hero-style-card-label">Dark Tech</div>
               </div>
             </div>
+            <!-- connector dot -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+              <div style="width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(232,255,71,0.4));"></div>
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(232,255,71,0.8);"></div>
+              <div style="width:1px;height:40px;background:linear-gradient(to bottom,rgba(232,255,71,0.4),transparent);"></div>
+            </div>
             <div class="hero-panel">
               <div class="hero-panel-label">// OUTPUT KIT</div>
               <div class="hero-panel-title">BRAND KIT</div>
-              <div class="hero-panel-lines">
-                <div class="hero-panel-line accent"></div>
-                <div class="hero-panel-line w80"></div>
+              <div style="display:flex;gap:6px;margin-top:8px;">
+                <div style="flex:1;height:4px;border-radius:2px;background:var(--accent);"></div>
+                <div style="flex:0.2;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);"></div>
               </div>
-              <div class="hero-panel-kit">
+              <div class="hero-panel-kit" style="margin-top:12px;">
                 <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Bag">
                 <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_45_17 PM.png" alt="Market">
                 <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_39_18 PM.png" alt="Product">
                 <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Tshirt">
               </div>
-              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:8px;">Logo · Poster · Packaging · UI · Merch — one style, deployed across every touchpoint.</p>
+              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px;">Logo · Poster · Packaging · UI · Merch — one style, deployed across every touchpoint.</p>
             </div>
           </div>
 
