@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TASTO — 视觉风格系统</title>
+  <title>TASTO — Visual Style System</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,400;0,9..40,500;1,9..40,200&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,400;0,9..40,500;1,9..40,200&family=Almarai:wght@300;400;700;800&family=Instrument+Serif:ital@1&display=swap');
 
     :root {
       --bg: #080a0e;
@@ -20,46 +20,26 @@
       --accent-dim: rgba(232,255,71,0.1);
       --accent2: #ff6b8a;
       --accent3: #5bc8e8;
+      /* editorial highlights */
+      --ink: #0a0a0a;
+      --parchment: #c8b89a;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
       font-weight: 200;
-      overflow-x: hidden;
-      cursor: none;
+      min-height: 200vh; /* allows hero to scroll off screen to trigger gallery */
+      cursor: auto;
     }
 
-    /* Custom cursor */
-    .cursor {
-      position: fixed;
-      width: 8px; height: 8px;
-      background: var(--accent);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transition: transform 0.1s ease;
-      mix-blend-mode: difference;
-    }
-    .cursor-ring {
-      position: fixed;
-      width: 32px; height: 32px;
-      border: 1px solid rgba(232,255,71,0.5);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9998;
-      transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
-      transform: translate(-50%, -50%);
-    }
-    .cursor-ring.expand {
-      width: 56px; height: 56px;
-      border-color: rgba(232,255,71,0.9);
-    }
+    /* Custom cursor — disabled */
+    .cursor, .cursor-ring { display: none; }
 
     /* Canvas background */
     #bg-canvas {
@@ -99,7 +79,7 @@
       padding: 16px 32px;
       border-bottom: 1px solid var(--border);
       background: rgba(8,8,8,0.88);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(16px);
       gap: 24px;
     }
 
@@ -139,33 +119,752 @@
       text-transform: uppercase;
     }
 
-    /* Hero — full-screen centered */
-    .hero {
-      height: 100vh;
+    .nav-unlock-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      cursor: auto;
+      font-weight: 700;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-unlock-btn:hover { background: #fff; color: #000; }
+    .nav-unlock-btn.unlocked {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    /* Paywall overlay on prompt */
+    .vm-prompt-locked {
+      position: relative;
+    }
+    .vm-prompt-locked .vm-prompt {
+      max-height: 120px;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+      pointer-events: none;
+      user-select: none;
+    }
+    .vm-prompt-gate {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: flex-end;
+      padding: 20px 16px 16px;
+      gap: 8px;
+    }
+    .vm-prompt-gate-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .vm-prompt-gate-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 10px 22px;
+      cursor: auto;
+      font-weight: 700;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .vm-prompt-gate-btn:hover { background: #fff; color: #000; }
+
+    /* Unlock modal */
+    .unlock-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      text-align: center;
-      padding: 80px 40px 40px;
-      gap: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      backdrop-filter: blur(8px);
+    }
+    .unlock-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .unlock-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 40px 36px;
+      max-width: 440px;
+      width: 90%;
+      position: relative;
+    }
+    .unlock-modal-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: none; border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: auto;
+      transition: color 0.2s;
+    }
+    .unlock-modal-close:hover { color: var(--text); }
+    .unlock-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .unlock-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .unlock-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .unlock-features {
+      list-style: none;
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .unlock-features li {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+    .unlock-features li::before {
+      content: '✓ ';
+      color: var(--accent);
+    }
+    .unlock-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .unlock-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+    .unlock-price-note {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .unlock-buy-btn {
+      width: 100%;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 16px;
+      cursor: auto;
+      font-weight: 700;
+      transition: background 0.2s, color 0.2s;
+      margin-bottom: 12px;
+    }
+    .unlock-buy-btn:hover { background: #fff; color: #000; }
+    .unlock-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .unlock-divider::before, .unlock-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .unlock-divider span {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+    .unlock-key-row {
+      display: flex;
+      gap: 8px;
+    }
+    .unlock-key-input {
+      flex: 1;
+      background: #000;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 10px 12px;
+      letter-spacing: 0.05em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .unlock-key-input:focus { border-color: var(--accent); }
+    .unlock-key-input.error { border-color: var(--accent2); }
+    .unlock-key-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      cursor: auto;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .unlock-key-btn:hover { border-color: var(--border-hover); color: var(--text); }
+    .unlock-key-error {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--accent2);
+      letter-spacing: 0.1em;
+      margin-top: 6px;
+      display: none;
+    }
+    .unlock-key-error.visible { display: block; }
+
+    /* ═══ HERO — PRISMA STYLE ══════════════════════════════ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      padding: 100px 80px 80px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      gap: 80px;
+      align-items: center;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+    }
+      align-items: center;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      border-radius: 0;
       position: relative;
     }
 
+    /* full-bleed video */
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      z-index: 0;
+    }
+
+    /* noise texture overlay */
+    .hero-noise {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.7;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    }
+
+    /* gradient scrim */
+    .hero-scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(0,0,0,0.6) 100%);
+    }
+
+
+    /* bottom content grid */
+    .hero-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      align-items: flex-end;
+      padding: 0 24px 24px;
+    }
+
+    /* heading column wrapper */
+    .hero-heading-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    /* eyebrow above heading */
+    .hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.05s forwards;
+    }
+
+    /* giant heading — TASTO slogan */
+    .hero-heading {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 13vw, 180px);
+      font-weight: 400;
+      line-height: 0.92;
+      letter-spacing: 0.02em;
+      color: #e1e0cc;
+      margin: 0;
+      opacity: 0;
+      transform: translateY(24px);
+      animation: heroFadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.15s forwards;
+    }
+    .hero-heading .accent-word {
+      color: var(--accent);
+    }
+    .hero-heading .outline-word {
+      -webkit-text-stroke: 1px #e1e0cc;
+      color: transparent;
+    }
+
+    /* right column */
+    .hero-right-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      padding-bottom: 8px;
+      padding-left: 24px;
+    }
+    .hero-desc {
+      font-family: 'Almarai', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.5;
+      color: rgba(225,224,204,0.7);
+      max-width: 280px;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: heroFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s forwards;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #dedbc8;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 10px 10px 20px;
+      cursor: auto;
+      font-family: 'Almarai', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #000;
+      transition: gap 0.2s ease;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: heroFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.7s forwards;
+    }
+    .hero-cta:hover { gap: 14px; }
+    .hero-cta-icon {
+      width: 36px; height: 36px;
+      background: #000;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .hero-cta:hover .hero-cta-icon { transform: scale(1.1); }
+    .hero-cta-arrow {
+      display: block;
+      width: 14px; height: 14px;
+      border-right: 1.5px solid #dedbc8;
+      border-top: 1.5px solid #dedbc8;
+      transform: rotate(45deg);
+      margin-left: -2px;
+    }
+
+    @keyframes heroFadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* wave at bottom of inner container */
+    .hero-wave {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 80px;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .hero-wave svg { width: 100%; height: 100%; display: block; }
+    .wave-path-1 { animation: waveDrift1 4s ease-in-out infinite; }
+    .wave-path-2 { animation: waveDrift2 5s ease-in-out infinite; }
+    .wave-path-3 { animation: waveDrift3 3.5s ease-in-out infinite; }
+    @keyframes waveDrift1 {
+      0%,100% { d: path("M0,60 C320,20 640,100 960,60 C1280,20 1600,80 1920,60 L1920,120 L0,120 Z"); }
+      50% { d: path("M0,80 C320,40 640,80 960,40 C1280,0 1600,60 1920,40 L1920,120 L0,120 Z"); }
+    }
+    @keyframes waveDrift2 {
+      0%,100% { d: path("M0,70 C400,30 800,90 1200,50 C1500,20 1700,70 1920,50 L1920,120 L0,120 Z"); }
+      50% { d: path("M0,50 C400,80 800,40 1200,70 C1500,90 1700,40 1920,70 L1920,120 L0,120 Z"); }
+    }
+    @keyframes waveDrift3 {
+      0%,100% { d: path("M0,90 C300,60 700,100 1100,70 C1400,45 1700,85 1920,65 L1920,120 L0,120 Z"); }
+      50% { d: path("M0,65 C300,95 700,55 1100,85 C1400,105 1700,55 1920,80 L1920,120 L0,120 Z"); }
+    }
+    .hero-wave-label {
+      position: absolute;
+      bottom: 8px; left: 50%; transform: translateX(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(232,255,71,0.45);
+      white-space: nowrap; z-index: 16;
+      animation: waveLabel 2.5s ease-in-out infinite;
+    }
+    @keyframes waveLabel {
+      0%,100% { opacity: 0.45; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 0.9; transform: translateX(-50%) translateY(-3px); }
+    }
+    /* old hero pieces — hide */
+    .hero-curtain-cards,.hero-curtain-fog,.hero-curtain-line,.hero-curtain-label,.hero-curtain { display:none; }
+    .hero-video, .hero-noise, .hero-scrim { display: none; }
+    .hero-bottom { display: none; }
+    .hero-wave, .hero-wave-label { display: none; }
+
+    /* ── Hero left col ── */
     .hero-left {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      gap: 28px;
     }
+    .hero-tagline {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(80px, 10vw, 140px);
+      line-height: 0.88;
+      letter-spacing: 0.02em;
+      margin: 0;
+      color: var(--text);
+    }
+    .hero-tagline .line-vibe {
+      color: var(--accent);
+    }
+    .hero-tagline .line-ship {
+      color: rgba(232,230,226,0.18);
+    }
+    .hero-desc-new {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.6;
+      color: var(--text-dim);
+      max-width: 400px;
+    }
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .hero-btn-primary {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      font-weight: 700;
+      cursor: auto;
+      transition: opacity 0.2s;
+    }
+    .hero-btn-primary:hover { opacity: 0.85; }
+    .hero-btn-ghost {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border-hover);
+      padding: 14px 28px;
+      cursor: auto;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .hero-btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
+
+    /* ── Hero right col: step showcase ── */
+    .hero-right {
+      position: relative;
+      height: 480px;
+      background: #0d1017;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .hero-right-header {
+      padding: 20px 28px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .hero-right-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+    }
+    .hero-right-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+    .hero-right-title span { color: var(--accent); }
+
+    /* step slides container */
+    .hero-steps-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-step-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      padding: 24px 28px;
+      gap: 32px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+    }
+    .hero-step-slide.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* style card stack (left side of step panel) */
+    .hero-card-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-shrink: 0;
+      width: 120px;
+    }
+    .hero-style-card {
+      width: 120px;
+      height: 60px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: border-color 0.3s;
+      position: relative;
+    }
+    .hero-style-card.highlighted {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(232,255,71,0.2);
+    }
+    .hero-style-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hero-style-card-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.7);
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.7);
+      padding: 3px 6px;
+      text-transform: uppercase;
+    }
+
+    /* connector line (SVG) */
+    .hero-connector {
+      flex-shrink: 0;
+      width: 60px;
+      height: 100%;
+      position: relative;
+    }
+    .hero-connector svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .hero-connector-path {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 4;
+      opacity: 0.6;
+    }
+
+    /* step panel (right side) */
+    .hero-panel {
+      flex: 1;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(232,255,71,0.15);
+      border-radius: 8px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .hero-panel-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .hero-panel-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      line-height: 1;
+    }
+    .hero-panel-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .hero-panel-line {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.08);
+    }
+    .hero-panel-line.accent { background: rgba(232,255,71,0.35); width: 60%; }
+    .hero-panel-line.w80 { width: 80%; }
+    .hero-panel-line.w60 { width: 60%; }
+    .hero-panel-line.w90 { width: 90%; }
+    .hero-panel-line.w50 { width: 50%; }
+    .hero-panel-kit {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .hero-panel-kit img {
+      width: 56px; height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero-panel-copy-btn {
+      align-self: flex-start;
+      margin-top: auto;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      font-weight: 700;
+      cursor: auto;
+    }
+
+    /* step indicator bar */
+    .hero-step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 28px 20px;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .hero-step-ind {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: auto;
+      padding: 0 12px;
+      border-left: 2px solid transparent;
+      transition: border-color 0.3s;
+    }
+    .hero-step-ind:first-child { padding-left: 0; }
+    .hero-step-ind.active { border-left-color: var(--accent); }
+    .hero-step-ind-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+    }
+    .hero-step-ind.active .hero-step-ind-num { color: var(--accent); }
+    .hero-step-ind-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+    .hero-step-ind.active .hero-step-ind-label { color: var(--text); }
 
     .step-code {
       margin-top: 8px;
-      background: #000;
+      background: var(--bg2);
       border: 1px solid var(--border);
       padding: 7px 12px;
       font-family: 'Space Mono', monospace;
       font-size: 10px;
-      color: var(--accent);
+      color: var(--text-dim);
       letter-spacing: 0.06em;
       white-space: nowrap;
       overflow: hidden;
@@ -173,57 +872,6 @@
     }
 
     .step-code .dim { color: var(--text-muted); }
-
-    .hero-eyebrow {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 20px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.2s forwards;
-    }
-
-    .hero-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(72px, 12vw, 160px);
-      line-height: 0.9;
-      letter-spacing: 0.02em;
-      margin-bottom: 32px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.4s forwards;
-    }
-    .hero-title .line2 {
-      color: var(--text-muted);
-      padding-left: 0;
-    }
-    .hero-title .accent-word {
-      color: var(--accent);
-      -webkit-text-stroke: 0px;
-    }
-    .hero-title .outline-word {
-      -webkit-text-stroke: 1px rgba(240,237,232,0.3);
-      color: transparent;
-    }
-
-    .hero-sub {
-      max-width: 500px;
-      font-size: 15px;
-      line-height: 1.7;
-      color: var(--text-dim);
-      margin-bottom: 48px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.6s forwards;
-    }
-
-    .hero-actions {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.8s forwards;
-    }
 
     .btn-primary {
       font-family: 'Space Mono', monospace;
@@ -234,9 +882,9 @@
       color: #000;
       border: none;
       padding: 14px 28px;
-      cursor: none;
+      cursor: auto;
       font-weight: 700;
-      transition: background 0.2s, transform 0.15s;
+      transition: background 0.2s, color 0.2s;
     }
     .btn-primary:hover {
       background: #fff;
@@ -252,7 +900,7 @@
       color: var(--text-dim);
       border: 1px solid var(--border);
       padding: 14px 28px;
-      cursor: none;
+      cursor: auto;
       transition: border-color 0.2s, color 0.2s;
     }
     .btn-ghost:hover {
@@ -356,7 +1004,7 @@
       color: var(--text-dim);
       border: 1px solid var(--border);
       padding: 8px 16px;
-      cursor: none;
+      cursor: auto;
       transition: all 0.2s;
     }
     .filter-btn:hover, .filter-btn.active {
@@ -377,7 +1025,7 @@
       position: relative;
       background: var(--surface);
       overflow: hidden;
-      cursor: none;
+      cursor: auto;
       border-radius: 14px;
       border: 1px solid var(--border);
       transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s, box-shadow 0.3s;
@@ -1036,7 +1684,7 @@
       color: var(--text-dim);
       border: 1px solid var(--border);
       padding: 8px 14px;
-      cursor: none;
+      cursor: auto;
       transition: all 0.2s;
       white-space: nowrap;
       flex-shrink: 0;
@@ -1063,7 +1711,7 @@
       opacity: 1;
     }
     .card-preview::after {
-      content: '查看风格 →';
+      content: 'View Style →';
       position: absolute;
       inset: 0;
       background: rgba(0,0,0,0.5);
@@ -1173,7 +1821,7 @@
       color: var(--text-dim);
       background: none;
       border: none;
-      cursor: none;
+      cursor: auto;
       text-transform: uppercase;
     }
     .modal-close:hover { color: var(--text); }
@@ -1350,7 +1998,7 @@
       border: none;
       border-bottom: 2px solid transparent;
       padding: 12px 20px;
-      cursor: none;
+      cursor: auto;
       transition: all 0.2s;
       display: flex;
       align-items: center;
@@ -1395,7 +2043,7 @@
       border-radius: 50%;
       border: none;
       background: transparent;
-      cursor: none;
+      cursor: auto;
       overflow: visible;
     }
     .enter-btn-bg {
@@ -1497,29 +2145,31 @@
     }
 
     /* ─── GALLERY PORTAL ───────────────────────────────── */
+    .gallery-wrapper { position: relative; }
+
     .gallery-portal {
-      position: fixed;
-      inset: 0;
-      z-index: 150;
-      display: flex;
+      display: block;
       background: var(--bg);
-      transform: translateY(100vh);
-      transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
-    }
-    .gallery-portal.active {
-      transform: translateY(0);
     }
 
-    /* Sidebar */
+    /* Sidebar — always fixed to left */
     .gp-sidebar {
+      position: fixed;
+      left: 0; top: 0;
       width: 200px;
-      min-width: 200px;
-      flex-shrink: 0;
+      height: 100vh;
       border-right: 1px solid var(--border);
       background: var(--bg2);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .gp-sidebar.visible {
+      transform: translateX(0);
     }
     .gp-sidebar-logo {
       font-family: 'Bebas Neue', sans-serif;
@@ -1542,7 +2192,7 @@
     }
     .gp-nav::-webkit-scrollbar { width: 0; }
 
-    /* 一级分组标题 */
+    /* Top-level group heading */
     .gp-nav-group {
       font-family: 'DM Sans', sans-serif;
       font-size: 14px;
@@ -1553,7 +2203,7 @@
     }
     .gp-nav-group:first-child { padding-top: 12px; }
 
-    /* 二级子项 */
+    /* Second-level nav item */
     .gp-nav-btn {
       display: block;
       min-width: 180px;
@@ -1566,7 +2216,7 @@
       font-family: 'DM Sans', sans-serif;
       font-size: 13px;
       font-weight: 300;
-      cursor: none;
+      cursor: auto;
       transition: color 0.15s;
       text-align: left;
       line-height: 1.7;
@@ -1577,7 +2227,7 @@
       color: var(--accent);
       border-left-color: var(--accent);
     }
-    /* 全部风格 — 置顶单独一行 */
+    /* All Styles — pinned at top */
     .gp-nav-btn[data-cat="all"] {
       font-size: 14px;
       font-weight: 500;
@@ -1589,6 +2239,14 @@
     .gp-nav-btn[data-cat="all"].active { color: var(--accent); }
     .gp-nav-icon { display: none; }
     .gp-nav-count { display: none; }
+    .gp-sidebar-tagline {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      padding: 0 16px 16px;
+      line-height: 1.6;
+    }
     .gp-sidebar-foot {
       padding: 14px 16px;
       border-top: 1px solid var(--border);
@@ -1601,19 +2259,18 @@
       color: var(--text-muted);
       background: none;
       border: none;
-      cursor: none;
+      cursor: auto;
       padding: 0;
       transition: color 0.15s;
     }
     .gp-back-btn:hover { color: var(--text-dim); }
 
-    /* Main area */
+    /* Main area — normal document flow, shifts right of sidebar */
     .gp-main {
-      flex: 1;
+      margin-left: 200px;
       min-width: 0;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
     .gp-topbar {
       display: flex;
@@ -1621,8 +2278,11 @@
       justify-content: space-between;
       padding: 20px 32px;
       border-bottom: 1px solid var(--border);
-      background: rgba(8,10,14,0.9);
+      background: rgba(8,10,14,0.95);
       backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
       flex-shrink: 0;
     }
     .gp-topbar-title {
@@ -1654,24 +2314,17 @@
 
     /* Waterfall / masonry */
     .gp-waterfall {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 20px 20px 40px;
-      position: relative;
+      padding: 20px 20px 60px;
     }
     .gp-waterfall-inner {
-      position: relative;
       width: 100%;
     }
-    .gp-waterfall::-webkit-scrollbar { width: 4px; }
-    .gp-waterfall::-webkit-scrollbar-track { background: transparent; }
-    .gp-waterfall::-webkit-scrollbar-thumb { background: var(--border); }
 
     /* Vibe cards */
     .vibe-card {
-      position: absolute;
-      cursor: none;
+      display: inline-block;
+      width: 100%;
+      cursor: auto;
       background: var(--surface);
       border: 1px solid var(--border);
       overflow: hidden;
@@ -1679,13 +2332,13 @@
     }
     .vibe-card:hover {
       border-color: var(--border-hover);
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
     .vc-img-wrap {
       position: relative;
       overflow: hidden;
-      background: var(--surface);
+      background: var(--bg2);
       min-height: 180px;
     }
     .vc-img {
@@ -1729,15 +2382,17 @@
       background: var(--accent);
       color: #000;
       border: none;
-      cursor: none;
-      transition: background 0.15s, letter-spacing 0.15s;
+      cursor: auto;
+      transition: background 0.15s, color 0.15s, letter-spacing 0.15s;
     }
     .vc-copy-btn:hover {
       background: #fff;
+      color: #000;
       letter-spacing: 0.18em;
     }
     .vc-copy-btn.copied {
       background: #00ff88;
+      color: #000;
       letter-spacing: 0.08em;
     }
     .vc-foot {
@@ -1825,7 +2480,7 @@
       color: var(--text-dim);
       font-family: 'Space Mono', monospace;
       font-size: 10px;
-      cursor: none;
+      cursor: auto;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1853,8 +2508,45 @@
       font-size: 36px;
       letter-spacing: 0.06em;
       color: var(--text);
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       line-height: 1;
+    }
+    /* ── Style meta block ── */
+    .vm-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .vm-meta-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .vm-meta-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(232,255,71,0.7);
+      border: 1px solid rgba(232,255,71,0.2);
+      padding: 2px 8px;
+    }
+    .vm-meta-origin {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+    .vm-meta-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-dim);
+      font-weight: 300;
     }
     .vm-brand-row {
       display: flex;
@@ -1883,6 +2575,91 @@
       transition: border-color 0.2s;
     }
     .vm-brand-input:focus { border-color: rgba(232,255,71,0.5); }
+
+    /* ── Color palette row ── */
+    .vm-palette-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .vm-palette-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .vm-palette-swatches {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .vm-swatch {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.12);
+      cursor: auto;
+      transition: transform 0.15s, border-color 0.15s;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .vm-swatch:hover {
+      transform: scale(1.18);
+      border-color: rgba(232,255,71,0.5);
+    }
+    .vm-swatch input[type="color"] {
+      position: absolute;
+      inset: -4px;
+      width: calc(100% + 8px);
+      height: calc(100% + 8px);
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+    }
+    .vm-swatch-hex {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin-top: 3px;
+      text-align: center;
+      text-transform: uppercase;
+      width: 28px;
+    }
+    .vm-swatch-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .vm-palette-reset {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      cursor: auto;
+      transition: color 0.15s, border-color 0.15s;
+      margin-left: 4px;
+    }
+    .vm-palette-reset:hover {
+      color: var(--accent);
+      border-color: rgba(232,255,71,0.4);
+    }
+    .vm-prompt .color-inject {
+      color: #a8e6cf;
+      background: rgba(168,230,207,0.08);
+      padding: 0 2px;
+      font-weight: 700;
+    }
+
     .vm-prompt-wrap {
       flex: 1;
       overflow-y: auto;
@@ -1914,6 +2691,30 @@
 
     /* Body state when in gallery */
     body.in-gallery { overflow: hidden; }
+
+    .float-unlock-btn {
+      position: fixed;
+      top: 20px; right: 24px;
+      z-index: 500;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      cursor: auto;
+      font-weight: 700;
+      transition: background 0.2s;
+      border-radius: 2px;
+    }
+    .float-unlock-btn:hover { background: #fff; }
+    .float-unlock-btn.unlocked {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -1921,35 +2722,176 @@
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursor-ring"></div>
 
-<canvas id="bg-canvas"></canvas>
+<canvas id="bg-canvas" style="display:none"></canvas>
 
 <div class="layout">
   <header>
     <div class="logo">TAST<span>O</span></div>
-    <a href="zh.html" style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text-dim);text-decoration:none;white-space:nowrap;flex-shrink:0" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">中文 →</a>
+    <button class="nav-unlock-btn" id="nav-unlock-btn" onclick="openUnlockModal()">Go Unlimited</button>
   </header>
 
   <div class="hero">
-    <div class="hero-left">
-      <p class="hero-eyebrow">// 视觉识别系统 — AI 驱动</p>
-      <h1 class="hero-title">
-        PICK<br>
-        <span class="line2">YOUR <span class="accent-word">VIBE</span></span><br>
-        <span class="outline-word">SHIP IT.</span>
-      </h1>
-      <p class="hero-sub">按美学风格浏览精选图片。选择你的风格 — 复制 Prompt — 发布你的品牌。</p>
-      <div class="hero-actions">
-        <button class="enter-btn" id="enter-btn" onclick="enterGallery()">
-          <span class="enter-btn-bg"></span>
-          <span class="enter-btn-ring"></span>
-          <span class="enter-btn-text">进入风格库</span>
-          <span class="enter-btn-sub">60+ 美学系统</span>
-        </button>
+    <div class="hero-inner">
+
+      <!-- LEFT: tagline + CTA -->
+      <div class="hero-left">
+        <h1 class="hero-tagline">
+          PICK<br>
+          <span class="line-vibe">YOUR VIBE.</span><br>
+          <span class="line-ship">SHIP IT.</span>
+        </h1>
+        <p class="hero-desc-new">Browse curated aesthetics by style. Pick your vibe → Copy the prompt → Launch your brand.</p>
+        <div class="hero-btns">
+          <button class="hero-btn-primary" onclick="document.getElementById('gallery-portal').scrollIntoView({behavior:'smooth'})">Explore 29+ Styles ↗</button>
+          <button class="hero-btn-ghost" onclick="document.getElementById('gallery-portal').scrollIntoView({behavior:'smooth'})">See How It Works ↓</button>
+        </div>
       </div>
-    </div>
-  </div>
+
+      <!-- RIGHT: step showcase panel -->
+      <div class="hero-right">
+        <div class="hero-right-header">
+          <div class="hero-right-dot"></div>
+          <div class="hero-right-dot"></div>
+          <div class="hero-right-dot"></div>
+          <div class="hero-right-title">TAST<span>O</span></div>
+        </div>
+
+        <div class="hero-steps-wrap">
+
+          <!-- STEP 1: SELECT -->
+          <div class="hero-step-slide active" data-step="0">
+            <div class="hero-card-stack">
+              <div class="hero-style-card highlighted">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_32_49 PM.png" alt="Bauhaus">
+                <div class="hero-style-card-label">Bauhaus</div>
+              </div>
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_35_50 PM.png" alt="Anti-Design">
+                <div class="hero-style-card-label">Anti-Design</div>
+              </div>
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_45_17 PM.png" alt="Organic">
+                <div class="hero-style-card-label">Organic Modern</div>
+              </div>
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_37_49 PM.png" alt="Dark Tech">
+                <div class="hero-style-card-label">Dark Tech</div>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div class="hero-panel-label">// SELECT STYLE</div>
+              <div class="hero-panel-title">BAUHAUS</div>
+              <div class="hero-panel-lines">
+                <div class="hero-panel-line accent"></div>
+                <div class="hero-panel-line w80"></div>
+                <div class="hero-panel-line w60"></div>
+                <div class="hero-panel-line w90"></div>
+                <div class="hero-panel-line w50"></div>
+                <div class="hero-panel-line w80"></div>
+              </div>
+              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:8px;">Red-yellow-blue system. Geometric forms. Single typeface family — weight defines hierarchy.</p>
+            </div>
+          </div>
+
+          <!-- STEP 2: COPY PROMPT -->
+          <div class="hero-step-slide" data-step="1">
+            <div class="hero-card-stack">
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_32_49 PM.png" alt="Bauhaus">
+                <div class="hero-style-card-label">Bauhaus</div>
+              </div>
+              <div class="hero-style-card highlighted">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_38_47 PM.png" alt="Editorial">
+                <div class="hero-style-card-label">Editorial Min</div>
+              </div>
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_45_17 PM.png" alt="Organic">
+                <div class="hero-style-card-label">Organic Modern</div>
+              </div>
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_37_49 PM.png" alt="Dark Tech">
+                <div class="hero-style-card-label">Dark Tech</div>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div class="hero-panel-label">// COPY PROMPT</div>
+              <div class="hero-panel-title">EDITORIAL MINIMALISM</div>
+              <div class="hero-panel-lines">
+                <div class="hero-panel-line accent"></div>
+                <div class="hero-panel-line w80"></div>
+                <div class="hero-panel-line w60"></div>
+                <div class="hero-panel-line w90"></div>
+                <div class="hero-panel-line w50"></div>
+              </div>
+              <p style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(232,255,71,0.7);line-height:1.6;margin-top:8px;letter-spacing:0.04em;">"Editorial minimalism brand identity, oversized typography anchoring composition, monochrome palette with single accent color..."</p>
+              <button class="hero-panel-copy-btn">COPY PROMPT</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: BRAND KIT -->
+          <div class="hero-step-slide" data-step="2">
+            <div class="hero-card-stack">
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_32_49 PM.png" alt="Bauhaus">
+                <div class="hero-style-card-label">Bauhaus</div>
+              </div>
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_38_47 PM.png" alt="Editorial">
+                <div class="hero-style-card-label">Editorial Min</div>
+              </div>
+              <div class="hero-style-card highlighted">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Organic">
+                <div class="hero-style-card-label">Organic Modern</div>
+              </div>
+              <div class="hero-style-card">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_37_49 PM.png" alt="Dark Tech">
+                <div class="hero-style-card-label">Dark Tech</div>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div class="hero-panel-label">// OUTPUT KIT</div>
+              <div class="hero-panel-title">BRAND KIT</div>
+              <div class="hero-panel-lines">
+                <div class="hero-panel-line accent"></div>
+                <div class="hero-panel-line w80"></div>
+              </div>
+              <div class="hero-panel-kit">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Bag">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_45_17 PM.png" alt="Market">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_39_18 PM.png" alt="Product">
+                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Tshirt">
+              </div>
+              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:8px;">Logo · Poster · Packaging · UI · Merch — one style, deployed across every touchpoint.</p>
+            </div>
+          </div>
+
+        </div><!-- /hero-steps-wrap -->
+
+        <!-- step indicator -->
+        <div class="hero-step-indicator">
+          <div class="hero-step-ind active" data-ind="0">
+            <div class="hero-step-ind-num">01 / SELECT</div>
+            <div class="hero-step-ind-label">Select a style, define your visual language</div>
+          </div>
+          <div class="hero-step-ind" data-ind="1">
+            <div class="hero-step-ind-num">02 / COPY</div>
+            <div class="hero-step-ind-label">Copy the prompt, drop it into AI</div>
+          </div>
+          <div class="hero-step-ind" data-ind="2">
+            <div class="hero-step-ind-num">03 / LAUNCH</div>
+            <div class="hero-step-ind-label">Output a complete, cohesive brand kit</div>
+          </div>
+        </div>
+
+      </div><!-- /hero-right -->
+
+    </div><!-- /hero-inner -->
+  </div><!-- /hero -->
 
 </div><!-- end .layout -->
+
+<!-- Floating unlock button — hidden (using header button instead) -->
+<button class="float-unlock-btn" id="float-unlock-btn" onclick="openUnlockModal()" style="display:none">Go Unlimited</button>
 
 <!-- ═══ DREAM TRANSITION ══════════════════════════════════ -->
 <div class="dream-transition" id="dream-transition">
@@ -1962,64 +2904,67 @@
 </div>
 
 <!-- ═══ GALLERY PORTAL ════════════════════════════════════ -->
+<div class="gallery-wrapper" id="gallery-wrapper">
 <div class="gallery-portal" id="gallery-portal">
   <div class="gp-sidebar" id="gp-sidebar">
     <div class="gp-sidebar-logo">TAST<span>O</span></div>
-    <div class="gp-sidebar-label">// 美学风格分类</div>
+    <div class="gp-sidebar-tagline">Pick your aesthetic.<br>Copy the prompt.<br>Launch your brand.</div>
+    <div class="gp-sidebar-label">// Aesthetic Categories</div>
     <nav class="gp-nav">
-      <button class="gp-nav-btn active" data-cat="all">全部风格<span class="gp-nav-count">35+</span></button>
+      <button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">29</span></button>
 
-      <div class="gp-nav-group">极简与现代</div>
-      <button class="gp-nav-btn" data-cat="minimal_modern">瑞士国际主义</button>
-      <button class="gp-nav-btn" data-cat="editorial_min">编辑式极简</button>
-      <button class="gp-nav-btn" data-cat="tech_min">科技极简</button>
-      <button class="gp-nav-btn" data-cat="warm_min">温暖极简</button>
-      <button class="gp-nav-btn" data-cat="luxury_min">奢华极简</button>
-      <button class="gp-nav-btn" data-cat="monochrome">单色主义</button>
+      <div class="gp-nav-group">Minimal & Modern</div>
+      <button class="gp-nav-btn" data-cat="minimal_modern">Swiss Style</button>
+      <button class="gp-nav-btn" data-cat="editorial_min">Editorial Minimal</button>
+      <button class="gp-nav-btn" data-cat="tech_min">Tech Minimal</button>
+      <button class="gp-nav-btn" data-cat="warm_min">Warm Minimal</button>
+      <button class="gp-nav-btn" data-cat="luxury_min">Luxury Minimal</button>
+      <button class="gp-nav-btn" data-cat="monochrome">Monochrome</button>
 
-      <div class="gp-nav-group">材质与空间</div>
-      <button class="gp-nav-btn" data-cat="glassmorphism">玻璃拟态</button>
-      <button class="gp-nav-btn" data-cat="paper_cutout">纸张拼贴</button>
+      <div class="gp-nav-group">Material & Space</div>
+      <button class="gp-nav-btn" data-cat="glassmorphism">Glassmorphism</button>
+      <button class="gp-nav-btn" data-cat="paper_cutout">Paper / Cutout</button>
 
-      <div class="gp-nav-group">未来科技</div>
-      <button class="gp-nav-btn" data-cat="cyberpunk">赛博朋克</button>
-      <button class="gp-nav-btn" data-cat="scifi_hud">科幻 HUD</button>
-      <button class="gp-nav-btn" data-cat="dark_tech">暗黑科技</button>
+      <div class="gp-nav-group">Futuristic & Sci-Fi</div>
+      <button class="gp-nav-btn" data-cat="cyberpunk">Cyberpunk</button>
+      <button class="gp-nav-btn" data-cat="scifi_hud">Sci-Fi HUD</button>
+      <button class="gp-nav-btn" data-cat="dark_tech">Dark Technology</button>
 
-      <div class="gp-nav-group">影视叙事</div>
-      <button class="gp-nav-btn" data-cat="cinematic">电影感暗色</button>
-      <button class="gp-nav-btn" data-cat="film_noir">黑色电影</button>
+      <div class="gp-nav-group">Cinematic & Narrative</div>
+      <button class="gp-nav-btn" data-cat="cinematic">Cinematic Dark</button>
+      <button class="gp-nav-btn" data-cat="film_noir">Film Noir</button>
+      <button class="gp-nav-btn" data-cat="cinematic_editorial">Cinematic Editorial</button>
 
-      <div class="gp-nav-group">图形与实验</div>
-      <button class="gp-nav-btn" data-cat="neo_brutalism">新粗野主义</button>
-      <button class="gp-nav-btn" data-cat="anti_design">反设计</button>
-      <button class="gp-nav-btn" data-cat="maximalism">极繁主义</button>
-      <button class="gp-nav-btn" data-cat="memphis">孟菲斯</button>
-      <button class="gp-nav-btn" data-cat="glitch">故障艺术</button>
-      <button class="gp-nav-btn" data-cat="kinetic_typo">动态字体</button>
-      <button class="gp-nav-btn" data-cat="surreal_3d">超现实 3D</button>
+      <div class="gp-nav-group">Graphic & Experimental</div>
+      <button class="gp-nav-btn" data-cat="neo_brutalism">Neo-Brutalism</button>
+      <button class="gp-nav-btn" data-cat="anti_design">Anti-Design</button>
+      <button class="gp-nav-btn" data-cat="maximalism">Maximalism</button>
+      <button class="gp-nav-btn" data-cat="memphis">Memphis</button>
+      <button class="gp-nav-btn" data-cat="glitch">Glitch Art</button>
+      <button class="gp-nav-btn" data-cat="kinetic_typo">Kinetic Typography</button>
+      <button class="gp-nav-btn" data-cat="surreal_3d">Surreal 3D</button>
 
-      <div class="gp-nav-group">复古与时代</div>
-      <button class="gp-nav-btn" data-cat="bauhaus">包豪斯</button>
-      <button class="gp-nav-btn" data-cat="synthwave">合成波</button>
-      <button class="gp-nav-btn" data-cat="y2k">千禧 Y2K</button>
-      <button class="gp-nav-btn" data-cat="cassette_fut">磁带未来主义</button>
+      <div class="gp-nav-group">Retro & Era</div>
+      <button class="gp-nav-btn" data-cat="bauhaus">Bauhaus</button>
+      <button class="gp-nav-btn" data-cat="synthwave">Synthwave</button>
+      <button class="gp-nav-btn" data-cat="y2k">Y2K Revival</button>
+      <button class="gp-nav-btn" data-cat="cassette_fut">Cassette Futurism</button>
 
-      <div class="gp-nav-group">自然与人文</div>
-      <button class="gp-nav-btn" data-cat="organic_modern">有机现代</button>
-      <button class="gp-nav-btn" data-cat="biophilic">亲生命设计</button>
-      <button class="gp-nav-btn" data-cat="wabi_sabi">侘寂</button>
-      <button class="gp-nav-btn" data-cat="ethereal">梦幻空灵</button>
+      <div class="gp-nav-group">Organic & Humanistic</div>
+      <button class="gp-nav-btn" data-cat="organic_modern">Organic Modern</button>
+      <button class="gp-nav-btn" data-cat="biophilic">Biophilic</button>
+      <button class="gp-nav-btn" data-cat="wabi_sabi">Wabi-Sabi</button>
+      <button class="gp-nav-btn" data-cat="ethereal">Ethereal</button>
     </nav>
     <div class="gp-sidebar-foot">
-      <button class="gp-back-btn" onclick="exitGallery()">← 返回首页</button>
+      <button class="nav-unlock-btn" onclick="openUnlockModal()" style="width:100%;text-align:center;font-size:11px;padding:8px 12px;">Go Unlimited</button>
     </div>
   </div>
 
   <div class="gp-main" id="gp-main">
     <div class="gp-topbar">
-      <div class="gp-topbar-title" id="gp-topbar-title">全部风格 <span>60+</span></div>
-      <input class="gp-search" id="gp-search" type="text" placeholder="搜索风格..." autocomplete="off">
+      <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span>29</span></div>
+      <input class="gp-search" id="gp-search" type="text" placeholder="Search styles..." autocomplete="off">
     </div>
     <div class="gp-waterfall" id="gp-waterfall">
       <div class="gp-waterfall-inner" id="gp-waterfall-inner">
@@ -2027,7 +2972,8 @@
       </div>
     </div>
   </div>
-</div>
+</div><!-- /gallery-portal -->
+</div><!-- /gallery-wrapper -->
 
 <!-- ═══ VIBE MODAL ════════════════════════════════════════ -->
 <div class="vibe-overlay" id="vibe-overlay" onclick="closeVibeModal(event)">
@@ -2039,20 +2985,55 @@
       <button class="vm-close" onclick="closeVibeModal()">✕</button>
     </div>
     <div class="vm-body">
-      <div class="vm-eyebrow">// VI 系统 PROMPT</div>
+      <div class="vm-eyebrow">// VI System Prompt</div>
       <h2 class="vm-title" id="vm-title">Y2K REVIVAL</h2>
-      <div class="vm-brand-row">
-        <label class="vm-brand-label">你的品牌名称</label>
-        <input type="text" id="vm-brand-input" class="vm-brand-input" placeholder="如：LUNA、NovaSkin、玄鸟..." maxlength="40">
+      <div class="vm-meta" id="vm-meta">
+        <div class="vm-meta-tags" id="vm-meta-tags"></div>
+        <div class="vm-meta-origin" id="vm-meta-origin"></div>
+        <div class="vm-meta-desc" id="vm-meta-desc"></div>
       </div>
-      <div class="vm-prompt-wrap">
+      <div class="vm-brand-row">
+        <label class="vm-brand-label">Your Brand Name</label>
+        <input type="text" id="vm-brand-input" class="vm-brand-input" placeholder="e.g. LUNA, NovaSkin, Stellan..." maxlength="40">
+      </div>
+      <div class="vm-palette-row" id="vm-palette-row">
+        <span class="vm-palette-label">Brand Palette</span>
+        <div class="vm-palette-swatches" id="vm-palette-swatches"></div>
+        <button class="vm-palette-reset" id="vm-palette-reset" onclick="resetPalette()">Reset</button>
+      </div>
+      <div class="vm-prompt-wrap" id="vm-prompt-wrap">
         <pre class="vm-prompt" id="vm-prompt"></pre>
+        <div class="vm-prompt-gate" id="vm-prompt-gate">
+          <span class="vm-prompt-gate-label">// Full prompt locked</span>
+          <button class="vm-prompt-gate-btn" onclick="openUnlockModal()">Unlock All Prompts — $49</button>
+        </div>
       </div>
       <div class="vm-foot">
-        <button class="btn-primary" id="vm-copy-btn" onclick="copyVibePrompt()">复制 VI Prompt</button>
-        <button class="btn-ghost" onclick="closeVibeModal()">关闭</button>
+        <button class="btn-primary" id="vm-copy-btn" onclick="copyVibePrompt()">Copy VI Prompt</button>
+        <button class="btn-ghost" onclick="closeVibeModal()">Close</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ UNLOCK MODAL ═══════════════════════════════════════ -->
+<div class="unlock-overlay" id="unlock-overlay" onclick="closeUnlockModal(event)">
+  <div class="unlock-modal" onclick="event.stopPropagation()">
+    <button class="unlock-modal-close" onclick="closeUnlockModal()">✕</button>
+    <div class="unlock-eyebrow">// Lifetime Access</div>
+    <h2 class="unlock-title">GO UNLIMITED</h2>
+    <p class="unlock-sub">Copy any prompt, customize palettes, and access all future styles. Pay once, use forever.</p>
+    <ul class="unlock-features">
+      <li>All 29+ VI style prompts — fully unlocked</li>
+      <li>Brand palette color customization</li>
+      <li>Lifetime updates — new styles added regularly</li>
+      <li>Personal &amp; client work</li>
+    </ul>
+    <div class="unlock-price-row">
+      <span class="unlock-price">$49</span>
+      <span class="unlock-price-note">one-time · no subscription</span>
+    </div>
+    <button class="unlock-buy-btn" onclick="goToCheckout()">Buy Lifetime Access →</button>
   </div>
 </div>
 
@@ -2078,7 +3059,7 @@
               <span class="tag">Colorful</span>
             </div>
           </div>
-        <button class="copy-btn" onclick="copyPrompt(event,'y2k')">复制 Prompt</button>
+        <button class="copy-btn" onclick="copyPrompt(event,'y2k')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2099,7 +3080,7 @@
               <span class="tag">Typography</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'brutalist')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'brutalist')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2121,7 +3102,7 @@
               <span class="tag">Modern</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'glassmorphism')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'glassmorphism')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2144,7 +3125,7 @@
               <span class="tag">High-contrast</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'neubrutalism')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'neubrutalism')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2168,7 +3149,7 @@
               <span class="tag">Animated</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'cyberpunk')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'cyberpunk')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2190,7 +3171,7 @@
               <span class="tag">Type-heavy</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'editorial')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'editorial')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2213,7 +3194,7 @@
               <span class="tag">Luxury</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'minimal')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'minimal')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2235,7 +3216,7 @@
               <span class="tag">Dramatic</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'neon')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'neon')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2263,7 +3244,7 @@
               <span class="tag">Skeuomorphic</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'retro90')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'retro90')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2289,7 +3270,7 @@
               <span class="tag">Calm</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'pastel')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'pastel')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2312,7 +3293,7 @@
               <span class="tag">Vintage</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'darkacademia')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'darkacademia')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2337,7 +3318,7 @@
               <span class="tag">Playful</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'memphis')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'memphis')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2361,7 +3342,7 @@
               <span class="tag">Typographic</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'swiss')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'swiss')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2390,7 +3371,7 @@
               <span class="tag">80s Cyber</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'vaporwave')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'vaporwave')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2414,7 +3395,7 @@
               <span class="tag">Flowing</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'organic')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'organic')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2438,7 +3419,7 @@
               <span class="tag">Hacker</span>
             </div>
           </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'terminal')">复制 Prompt</button>
+          <button class="copy-btn" onclick="copyPrompt(event,'terminal')">Copy Prompt</button>
         </div>
       </div>
 
@@ -2446,30 +3427,25 @@
   </section>
 
 <script>
-// ─── Cursor ───────────────────────────────────────────────
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursor-ring');
-let mx = 0, my = 0, rx = 0, ry = 0;
+// ─── Cursor — disabled (using default OS cursor) ──────────
 
-document.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY;
-  cursor.style.left = mx - 4 + 'px';
-  cursor.style.top = my - 4 + 'px';
-});
 
-function animRing() {
-  rx += (mx - rx) * 0.12;
-  ry += (my - ry) * 0.12;
-  ring.style.left = rx + 'px';
-  ring.style.top = ry + 'px';
-  requestAnimationFrame(animRing);
-}
-animRing();
+// ─── Hero step cycler ─────────────────────────────────────
+(function(){
+  const slides = document.querySelectorAll('.hero-step-slide');
+  const inds = document.querySelectorAll('.hero-step-ind');
+  let cur = 0;
+  function goStep(n) {
+    slides[cur].classList.remove('active');
+    inds[cur].classList.remove('active');
+    cur = n % slides.length;
+    slides[cur].classList.add('active');
+    inds[cur].classList.add('active');
+  }
+  inds.forEach((ind, i) => ind.addEventListener('click', () => { goStep(i); clearInterval(timer); timer = setInterval(() => goStep((cur+1) % slides.length), 3500); }));
+  let timer = setInterval(() => goStep((cur+1) % slides.length), 3500);
+})();
 
-document.querySelectorAll('button, a, .vibe-card').forEach(el => {
-  el.addEventListener('mouseenter', () => ring.classList.add('expand'));
-  el.addEventListener('mouseleave', () => ring.classList.remove('expand'));
-});
 
 // ─── Parallax Background ──────────────────────────────────
 const canvas = document.getElementById('bg-canvas');
@@ -2590,7 +3566,7 @@ function drawCanvas() {
     // Glow for bright stars
     if (s.r > 1.2) {
       const glow = ctx.createRadialGradient(px, py, 0, px, py, s.r * 4);
-      glow.addColorStop(0, `rgba(${s.color},${a * 0.4})`);
+      glow.addColorStop(0, `rgba(${s.color},${a * 0.3})`);
       glow.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = glow;
       ctx.beginPath();
@@ -2624,11 +3600,12 @@ drawCanvas();
 const styles = {
 
   // ══════════════════════════════════════
-  // 极简与现代 | Minimal & Modern
+  // Minimal & Modern
   // ══════════════════════════════════════
 
   swiss_style: {
     title: 'SWISS STYLE',
+    meta: { origin: '1950s Switzerland / Germany', tags: ['Minimal', 'Grid', 'Modernism'], desc: 'The origin of International Modernist graphic design. Strict grids, sans-serif type, information first — every pixel serves function, decoration is sin.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Swiss International Style aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -2691,6 +3668,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: ration
 
   editorial_min: {
     title: 'EDITORIAL MINIMALISM',
+    meta: { origin: 'High-end fashion magazines / 1990s–now', tags: ['Minimal', 'Luxury', 'Typography'], desc: 'Typography language from Vogue and Wallpaper*. Large imagery, generous whitespace, serif fonts — restraint is itself a luxury statement.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Editorial Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -2763,6 +3741,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: fashio
 
   tech_min: {
     title: 'TECH MINIMALISM',
+    meta: { origin: 'Silicon Valley / 2010s–now', tags: ['Minimal', 'Tech', 'SaaS'], desc: 'The aesthetic established by Apple, Linear, and Notion. Light palette, rounded corners, generous whitespace — convey product confidence through interface clarity.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Tech Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -2837,6 +3816,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Apple-
 
   warm_min: {
     title: 'WARM MINIMALISM',
+    meta: { origin: 'Scandinavian design / Lifestyle brands', tags: ['Minimal', 'Warm', 'Natural'], desc: 'Fusion of Nordic design and lifestyle branding. Off-white, warm brown, linen textures — minimalist yet warm, the kind you want to move into.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Warm Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -2900,6 +3880,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Sunday
 
   luxury_min: {
     title: 'LUXURY MINIMALISM',
+    meta: { origin: 'Hermès / Bottega / Haute couture', tags: ['Luxury', 'Minimal', 'Craft'], desc: 'The visual logic of Hermès and Bottega Veneta. The smaller the logo, the more expensive; the more whitespace, the more confident — silent luxury is the ultimate status.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Luxury Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -2969,6 +3950,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Célin
 
   monochrome: {
     title: 'MONOCHROME',
+    meta: { origin: 'Photography / Fashion / Contemporary art', tags: ['B&W', 'Contrast', 'Timeless'], desc: 'Remove color, only form and light remain. Black and white never go out of style — it is the foundation language of all aesthetics and the hardest to get wrong.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Monochrome aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3037,11 +4019,12 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the ul
   },
 
   // ══════════════════════════════════════
-  // 材质与空间 | Material & Spatial
+  // Material & Spatial
   // ══════════════════════════════════════
 
   glassmorphism: {
     title: 'GLASSMORPHISM',
+    meta: { origin: 'Apple macOS Big Sur / 2020–now', tags: ['Glass', 'Blur', 'Depth'], desc: 'The frosted glass aesthetic Apple popularized with Big Sur. Semi-transparent, blurred backgrounds, floating layers — futuristic texture for the digital world.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Glassmorphism aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3092,6 +4075,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: floati
 
   paper_cutout: {
     title: 'PAPER / CUTOUT',
+    meta: { origin: 'Bauhaus paper craft / Matisse late period / Contemporary graphic', tags: ['Collage', 'Handmade', 'Layered'], desc: 'Matisse painted with scissors in his late years, pioneering the paper collage language. Irregular edges, layered shadows — handmade warmth in the digital age.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Paper & Cutout aesthetic — inspired by risograph printing, zine culture, and handmade layers. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3149,11 +4133,12 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: analog
   },
 
   // ══════════════════════════════════════
-  // 未来科技 | Futuristic & Sci-Fi
+  // Futuristic & Sci-Fi
   // ══════════════════════════════════════
 
   cyberpunk: {
     title: 'CYBERPUNK',
+    meta: { origin: '1980s Sci-fi literature / Blade Runner / Ghost in the Shell', tags: ['Neon', 'Dystopia', 'Future'], desc: "William Gibson's prose + Ridley Scott's lens. Neon, rainy cities, high-tech low-life — the visual scripture of dark futures." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cyberpunk aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3216,6 +4201,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Blade 
 
   dark_tech: {
     title: 'DARK TECHNOLOGY',
+    meta: { origin: 'Dev tools / Gaming / Web3 brands', tags: ['Dark', 'Geek', 'Precision'], desc: "The extreme version of Vercel and Linear's dark mode. Pure black, a single neon accent, monospace type — code is aesthetics, precision is style." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Dark Technology aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3267,6 +4253,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: black 
 
   scifi_hud: {
     title: 'SCI-FI HUD',
+    meta: { origin: 'Sci-fi film UI / Iron Man / Alien', tags: ['HUD', 'Data', 'Interface'], desc: "The interface of Jarvis in Iron Man, the ship dashboards in Alien. Scan lines, data streams, holographic frames — the ultimate form of futurism." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Sci-Fi HUD (Heads-Up Display) aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3320,11 +4307,12 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Iron M
   },
 
   // ══════════════════════════════════════
-  // 影视叙事 | Cinematic & Narrative
+  // Cinematic & Narrative
   // ══════════════════════════════════════
 
   cinematic: {
     title: 'CINEMATIC DARK',
+    meta: { origin: 'Hollywood posters / A24 / Nolan aesthetic', tags: ['Cinematic', 'Drama', 'Epic'], desc: "A24's bleakness, Nolan's grandeur, Coen Brothers' grain. Cinematic color grading, wide aspect ratio — give your brand the weight of the silver screen." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cinematic Dark aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3381,6 +4369,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: openin
 
   film_noir: {
     title: 'FILM NOIR',
+    meta: { origin: '1940s American noir / French New Wave', tags: ['Noir', 'Shadow', 'Tension'], desc: "1940s Hollywood's light and shadow experiments. High contrast, oblique lighting, deep shadows — every frame a stage of moral conflict and desire." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Film Noir aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3436,11 +4425,12 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: shadow
   },
 
   // ══════════════════════════════════════
-  // 图形与实验 | Graphic & Experimental
+  // Graphic & Experimental
   // ══════════════════════════════════════
 
   neo_brutalism: {
     title: 'NEO-BRUTALISM',
+    meta: { origin: 'Architectural brutalism / Web design rebellion / 2020s', tags: ['Brutal', 'Raw', 'Anti-polish'], desc: 'Reject rounded corners, reject gradients, reject politeness. Thick borders, hard shadows, saturated color — intentional ugliness is the coolest beauty.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Neo-Brutalism aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3500,6 +4490,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the in
 
   anti_design: {
     title: 'ANTI-DESIGN',
+    meta: { origin: '1990s Italian avant-garde / Postmodernism', tags: ['Destructive', 'Collage', 'Postmodern'], desc: "The most radical rebellion in design history. Torn rules, intentional errors, visual conflict — it's not design failure, it's design questioning itself." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Anti-Design aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3555,6 +4546,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Emigre
 
   maximalism: {
     title: 'MAXIMALISM',
+    meta: { origin: 'Baroque / Pop Art / Contemporary', tags: ['Abundant', 'Excess', 'Sensory'], desc: 'More is more. Layering, accumulation, saturation to overflow — not filling space, but making space itself a container of energy.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Maximalism aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3611,6 +4603,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: More i
 
   memphis: {
     title: 'MEMPHIS',
+    meta: { origin: '1980s Italy — Memphis Group / Ettore Sottsass', tags: ['80s', 'Geometric', 'Playful'], desc: 'Founded by Sottsass in 1981 to mock good taste. Polka dots, zigzag patterns, clashing primaries — seriousness is its only taboo.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Memphis Design aesthetic — inspired by the 1980s Milan design movement. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3661,6 +4654,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Ettore
 
   glitch: {
     title: 'GLITCH ART',
+    meta: { origin: 'Digital error aesthetics / Hacker culture / Net art', tags: ['Glitch', 'Distortion', 'Digital'], desc: 'Turn system crashes into art. RGB shifts, pixel tears, signal noise — post-punk of the digital age, truth through technical flaw.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Glitch Art / Digital Distortion aesthetic — inspired by data corruption, CRT monitors, and digital error culture. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3723,6 +4717,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: digita
 
   kinetic_typo: {
     title: 'KINETIC TYPOGRAPHY',
+    meta: { origin: 'Motion graphics / 1960s experimental film', tags: ['Kinetic', 'Type', 'Rhythm'], desc: "Type becomes the protagonist. Size, speed, and rhythm form visual music — text isn't just read, it's felt." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Kinetic Typography aesthetic — where type IS the design and motion IS the message. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3771,6 +4766,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the wo
 
   surreal_3d: {
     title: 'SURREAL 3D',
+    meta: { origin: 'Dalí surrealism / CGI art / Beeple', tags: ['Surreal', '3D', 'Dreamlike'], desc: 'Dalí painted dreams; today we render them with Blender and AI. Physics broken, logic dissolved — strangeness is the strongest weapon for attention.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Surreal 3D aesthetic — dream spaces, impossible physics, objects at wrong scale. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3819,11 +4815,12 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: betwee
   },
 
   // ══════════════════════════════════════
-  // 复古与时代 | Retro & Era
+  // Retro & Era
   // ══════════════════════════════════════
 
   bauhaus: {
     title: 'BAUHAUS',
+    meta: { origin: '1919 Bauhaus School, Germany / Walter Gropius', tags: ['Functionalism', 'Geometric', 'Origin of Modern Design'], desc: 'The grandfather of all modern design. Form follows function, primary colors, elementary shapes — this school lasted 14 years and defined the next 100 years of aesthetics.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Bauhaus aesthetic — form follows function, elementary geometry, primary colors. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3881,6 +4878,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Gropiu
 
   synthwave: {
     title: 'SYNTHWAVE',
+    meta: { origin: '1980s synth music / Drive / Neon Demon', tags: ['Retro-Future', 'Neon', '80s'], desc: "The future the 1980s never actually got. Hot pink and purple neon, grid horizons, chrome reflections — nostalgia isn't the past, it's another universe." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Synthwave aesthetic — 80s electronics, neon grids, analog synthesizers. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3938,6 +4936,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Kavins
 
   y2k: {
     title: 'Y2K REVIVAL',
+    meta: { origin: '1999–2003 dot-com era / Y2K internet', tags: ['Millennium', 'Retro-Digital', 'Internet'], desc: 'The era that believed the future would be chrome and rainbow gradients. Bubble type, holographic stickers, pixelated borders — naive tech optimism, beautifully excessive.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Y2K Revival aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -3995,6 +4994,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: THE FU
 
   cassette_fut: {
     title: 'CASSETTE FUTURISM',
+    meta: { origin: '1970s–80s sci-fi / Soviet futurism / Alien', tags: ['Retro Sci-Fi', 'Mechanical', 'Worn'], desc: 'Alien spaceships, Soviet space stations, 70s sci-fi magazine covers. The universe imagined on tape — clunky, tactile, gloriously human-flavored futures.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cassette Futurism aesthetic — the analog sci-fi of the late 20th century: physical buttons, CRT screens, magnetic tape, modular hardware. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -4054,11 +5054,12 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the fu
   },
 
   // ══════════════════════════════════════
-  // 自然与人文 | Organic & Humanistic
+  // Organic & Humanistic
   // ══════════════════════════════════════
 
   organic_modern: {
     title: 'ORGANIC MODERN',
+    meta: { origin: 'Contemporary interior design / Lifestyle brands / 2020s', tags: ['Organic', 'Natural', 'Modern'], desc: "The minimalism in high-end homes. Flowing forms, natural material colors, soft curves — not environmentalism, but turning nature into a luxury." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Organic Modern aesthetic. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -4107,6 +5108,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: grown 
 
   biophilic: {
     title: 'BIOPHILIC',
+    meta: { origin: 'Biophilic design theory / Sustainable brand movement', tags: ['Nature', 'Plants', 'Sustainable'], desc: "Humans lived in the wild for millions of years and entered boxes only 200 years ago. Biophilic design rebuilds the path home through the digital interface." },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Biophilic Design aesthetic — connecting humans to nature through digital interfaces. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -4160,6 +5162,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the fo
 
   wabi_sabi: {
     title: 'WABI-SABI',
+    meta: { origin: 'Japanese aesthetic philosophy / Tea ceremony / Zen', tags: ['Wabi-Sabi', 'Imperfection', 'Zen'], desc: 'The kintsugi philosophy — filling cracks with gold. Imperfect, impermanent, incomplete: these three qualities form Japan\'s deepest aesthetic, and the hardest to fake.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Wabi-Sabi aesthetic — the Japanese philosophy of imperfect, incomplete, impermanent beauty. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -4208,6 +5211,7 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: a tea 
 
   ethereal: {
     title: 'ETHEREAL',
+    meta: { origin: 'Romantic painting / Contemporary spiritual aesthetic / Slow living', tags: ['Ethereal', 'Gradient', 'Weightless'], desc: 'Pre-dawn mist, golden hour backlight. Soft gradients, low saturation, pixel-level softness — visual calm calibrated to be just beautiful enough.' },
     vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Ethereal aesthetic — mist, soft light, weightless space, spiritual calm. Generate the following deliverables as production-ready code and specifications:
 
 ## 1. Brand Color System
@@ -4261,29 +5265,124 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: a tea 
 ## 7. Implementation Notes
 Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the moment before dawn, between solid and vapor, between silence and sound.`,
   },
+
+  // ══════════════════════════════════════
+  // Cinematic Editorial
+  // ══════════════════════════════════════
+
+  cinematic_editorial: {
+    title: 'CINEMATIC EDITORIAL',
+    meta: { origin: 'Luxury fashion editorial / Vogue / Interview Magazine', tags: ['Editorial', 'Cinematic', 'Full-Bleed'], desc: 'Full-bleed photography as canvas. Oversized type cuts across the image. No decoration — just photograph, type, white space. The visual language of a $50 magazine.' },
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cinematic Editorial aesthetic — full-bleed photography, oversized typographic headlines, radical white space. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-bg:      #f2f0ec;   /* warm off-white, not pure white */
+  --color-ink:     #0a0a0a;   /* near-black */
+  --color-reverse: #ffffff;   /* white for text on dark imagery */
+  --color-accent:  #c8b89a;   /* warm parchment — one accent only */
+  Rule: Restraint. Color lives in the photography. System palette is ink on paper.
+
+## 2. Typography System
+  Display: Ultra-condensed grotesque or classic editorial serif — Bebas Neue, Druk, or Playfair Display Black
+  Scale: headlines at 120–200px. No middle sizes.
+  Body: "DM Sans" 300 weight — secondary, never competing with image.
+  Tracking: -0.03em on display (tighter = heavier presence).
+  Text can overlap photography — this is intentional.
+
+## 3. Logo Concept for [BRAND]
+  All-caps wordmark, condensed, maximum weight.
+  White version for dark imagery. Black for light backgrounds.
+  No gradients, no effects — pure typographic authority.
+
+## 4. Photography Treatment
+  Full-bleed: images extend to all four edges. No border, no shadow.
+  Ratio: 16:9 or 2.39:1 (anamorphic cinema).
+  Color grade: lifted shadows, slightly desaturated midtones, warm highlights.
+  Overlay text directly on image — full contrast, no scrim.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.editorial-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+.editorial-hero img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: contrast(1.05) saturate(0.9);
+}
+.editorial-headline {
+  position: absolute;
+  bottom: 8%;
+  left: 6%;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(64px, 10vw, 160px);
+  line-height: 0.9;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  mix-blend-mode: normal;
+}
+.editorial-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+.editorial-text-block {
+  padding: 10vw 8vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.editorial-kicker {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 32px;
+}
+.editorial-body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--color-ink);
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Transitions: opacity only, 0.6s ease. Never slide or scale.
+  Scroll reveal: image fades in at full opacity — no translateY movement.
+  No parallax on hero images — keep them anchored, cinematic.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the opening spread of a Vogue editorial — one photograph, one headline, nothing else needed.`,
+  },
 };
 
 // ─── Gallery + Modal ─────────────────────────────────────
 // ─── Vibe data: category assignment ─────────────────────
 const vibeCategories = {
-  // 极简与现代
+  // Minimal & Modern
   swiss_style:    'minimal_modern',
   editorial_min:  'editorial_min',
   tech_min:       'tech_min',
   warm_min:       'warm_min',
   luxury_min:     'luxury_min',
   monochrome:     'monochrome',
-  // 材质与空间
+  // Material & Spatial
   glassmorphism:  'glassmorphism',
   paper_cutout:   'paper_cutout',
-  // 未来科技
+  // Futuristic & Sci-Fi
   cyberpunk:      'cyberpunk',
   dark_tech:      'dark_tech',
   scifi_hud:      'scifi_hud',
-  // 影视叙事
+  // Cinematic & Narrative
   cinematic:      'cinematic',
   film_noir:      'film_noir',
-  // 图形与实验
+  // Graphic & Experimental
   neo_brutalism:  'neo_brutalism',
   anti_design:    'anti_design',
   maximalism:     'maximalism',
@@ -4291,37 +5390,38 @@ const vibeCategories = {
   glitch:         'glitch',
   kinetic_typo:   'kinetic_typo',
   surreal_3d:     'surreal_3d',
-  // 复古与时代
+  // Retro & Era
   bauhaus:        'bauhaus',
   synthwave:      'synthwave',
   y2k:            'y2k',
   cassette_fut:   'cassette_fut',
-  // 自然与人文
+  // Organic & Humanistic
   organic_modern: 'organic_modern',
   biophilic:      'biophilic',
   wabi_sabi:      'wabi_sabi',
   ethereal:       'ethereal',
+  cinematic_editorial: 'cinematic_editorial',
 };
 
 const styleImageMap = {
-  // 极简与现代
+  // Minimal & Modern
   swiss_style:    'images/lark_swiss.jpg',
   editorial_min:  'images/lark_editorial_min.jpg',
   tech_min:       'images/lark_tech_min.webp',
   warm_min:       'images/lark_warm_min.jpg',
   luxury_min:     'images/lark_luxury_min.png',
   monochrome:     'images/lark_monochrome.png',
-  // 材质与空间
+  // Material & Spatial
   glassmorphism:  'images/lark_glassmorphism.png',
   paper_cutout:   'images/lark_paper_cutout.jpg',
-  // 未来科技
+  // Futuristic & Sci-Fi
   cyberpunk:      'images/lark_cyberpunk.jpg',
   dark_tech:      'images/lark_dark_tech.png',
   scifi_hud:      'images/lark_scifi_hud.jpg',
-  // 影视叙事
+  // Cinematic & Narrative
   cinematic:      'images/darkacademia.jpg',
   film_noir:      'images/rave3.jpg',
-  // 图形与实验
+  // Graphic & Experimental
   neo_brutalism:  'images/lark_neo_brutalism.jpg',
   anti_design:    'images/lark_anti_design.jpg',
   maximalism:     'images/lark_maximalism.jpg',
@@ -4329,38 +5429,39 @@ const styleImageMap = {
   glitch:         'images/lark_glitch.jpg',
   kinetic_typo:   'images/lark_kinetic_typo.jpg',
   surreal_3d:     'images/lark_surreal_3d.jpg',
-  // 复古与时代
+  // Retro & Era
   bauhaus:        'images/lark_bauhaus.jpg',
   synthwave:      'images/vaporwave.jpg',
   y2k:            'images/retro90.jpg',
   cassette_fut:   'images/album2.jpg',
-  // 自然与人文
+  // Organic & Humanistic
   organic_modern: 'images/organic.jpg',
   biophilic:      'images/festival3.jpg',
   wabi_sabi:      'images/editorial4.jpg',
   ethereal:       'images/psychedelic2.jpg',
+  cinematic_editorial: 'images/darkacademia.jpg',
 };
 
 // Gradient fallback colors per vibe
 const vibePalette = {
-  // 极简与现代
+  // Minimal & Modern
   swiss_style:    ['#ffffff','#ff0000','#000000'],
   editorial_min:  ['#f5f0eb','#c8b89a','#2a2520'],
   tech_min:       ['#f8f8f8','#e0e0e0','#1a1a1a'],
   warm_min:       ['#f5efe6','#d4b896','#8b6a4f'],
   luxury_min:     ['#fafaf8','#c0a882','#1a1a1a'],
   monochrome:     ['#000000','#555555','#f0f0f0'],
-  // 材质与空间
+  // Material & Spatial
   glassmorphism:  ['#1a1a3e','#4488ff','#ffffff'],
   paper_cutout:   ['#f5e6c8','#d44444','#1a4a8a'],
-  // 未来科技
+  // Futuristic & Sci-Fi
   cyberpunk:      ['#0d0d1a','#00FFFF','#FF00AA'],
   dark_tech:      ['#000000','#00ff00','#003300'],
   scifi_hud:      ['#060612','#39ff14','#ff00ff'],
-  // 影视叙事
+  // Cinematic & Narrative
   cinematic:      ['#1a1410','#8b6914','#d4b896'],
   film_noir:      ['#0a0a0a','#888888','#ffffff'],
-  // 图形与实验
+  // Graphic & Experimental
   neo_brutalism:  ['#FFD60A','#FF6B6B','#000000'],
   anti_design:    ['#ff0000','#0000ff','#ffff00'],
   maximalism:     ['#1a0050','#ff6600','#ffe000'],
@@ -4368,28 +5469,31 @@ const vibePalette = {
   glitch:         ['#060612','#ff00ff','#00ffff'],
   kinetic_typo:   ['#000000','#ff3300','#ffffff'],
   surreal_3d:     ['#1a0040','#8800ff','#ff88cc'],
-  // 复古与时代
+  // Retro & Era
   bauhaus:        ['#f5f0e8','#1a1a1a','#e84444'],
   synthwave:      ['#1a0030','#ff71ce','#01cdfe'],
   y2k:            ['#FF006E','#8338EC','#00BFFF'],
   cassette_fut:   ['#1a0030','#ff71ce','#01cdfe'],
-  // 自然与人文
+  // Organic & Humanistic
   organic_modern: ['#e8e0d0','#8a7a6a','#4a3a2a'],
   biophilic:      ['#2a4a2a','#88cc88','#f5efe6'],
   wabi_sabi:      ['#d4c8b0','#8a7a6a','#3a3028'],
   ethereal:       ['#e8e0f0','#c0a8d8','#ffffff'],
+  cinematic_editorial: ['#0a0a0a','#ffffff','#c8b89a'],
 };
 
 function getVIPrompt(styleId, styleData, brandName) {
-  const brand = brandName || '[你的品牌]';
+  const brand = brandName || '[Your Brand]';
   return styleData.vi.replace(/\[BRAND\]/g, brand);
 }
 
+// ─── Custom palette state ─────────────────────────────────
+let customColors = []; // current user-picked colors for open modal
+let defaultColors = []; // original palette to support reset
+
 // ─── Gallery portal ───────────────────────────────────────
-let currentVibe = null;
 
 function buildWaterfall(cat, query) {
-  const outer = document.getElementById('gp-waterfall');
   const container = document.getElementById('gp-waterfall-inner');
   container.innerHTML = '';
   const q = (query || '').toLowerCase();
@@ -4400,18 +5504,28 @@ function buildWaterfall(cat, query) {
     return true;
   });
 
-  // Build cards (hidden initially for masonry layout calc)
-  const cards = filtered.map(([id, s], i) => {
+  // CSS columns masonry — normal document flow, no absolute positioning
+  const mainW = (document.getElementById('gp-main') || {}).clientWidth || 900;
+  const cols = mainW < 600 ? 2 : mainW < 900 ? 3 : mainW < 1400 ? 4 : 5;
+  container.style.columnCount = cols;
+  container.style.columnGap = '12px';
+
+  filtered.forEach(([id, s], i) => {
     const pal = vibePalette[id] || ['#111','#333','#555'];
     const imgPath = styleImageMap[id];
     const card = document.createElement('div');
     card.className = 'vibe-card';
+    card.style.breakInside = 'avoid';
+    card.style.marginBottom = '12px';
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(16px)';
+    card.style.transition = `opacity 0.45s ease ${i * 30}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${i * 30}ms`;
     card.onclick = () => openVibeModal(id);
     card.innerHTML = `
       <div class="vc-img-wrap">
         <img class="vc-img" src="${imgPath}" alt="${s.title}"
-             onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';fb.style.height='240px';fb.style.position='relative';">
-        <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]})"></div>
+             onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';">
+        <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]});height:200px;"></div>
         <div class="vc-hover">
           <button class="vc-copy-btn" onclick="quickCopy(event,'${id}')">Copy Prompt</button>
         </div>
@@ -4420,77 +5534,22 @@ function buildWaterfall(cat, query) {
         <span class="vc-title">${s.title}</span>
         <span class="vc-cat">${vibeCategories[id] || ''}</span>
       </div>`;
-    card.style.opacity = '0';
     container.appendChild(card);
-    return { card, i };
-  });
-
-  // Masonry layout after images load
-  function layoutMasonry() {
-    const GAP = 12;
-    const outerW = outer.clientWidth - 40; // minus padding
-    const cols = outerW < 600 ? 2 : outerW < 900 ? 3 : outerW < 1400 ? 4 : 5;
-    const colW = Math.floor((outerW - GAP * (cols - 1)) / cols);
-    const colHeights = new Array(cols).fill(0);
-
-    cards.forEach(({ card }, i) => {
-      // Find shortest column
-      const col = colHeights.indexOf(Math.min(...colHeights));
-      const x = col * (colW + GAP);
-      const y = colHeights[col];
-
-      card.style.width = colW + 'px';
-      card.style.left = x + 'px';
-      card.style.top = y + 'px';
-
-      colHeights[col] += card.offsetHeight + GAP;
-    });
-
-    container.style.height = Math.max(...colHeights) + 'px';
 
     // Staggered entrance
-    cards.forEach(({ card }, i) => {
-      card.style.transform = 'translateY(16px)';
-      setTimeout(() => {
-        card.style.transition = `opacity 0.45s ease ${i * 35}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${i * 35}ms`;
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0)';
-      }, 20);
-    });
-  }
-
-  // Wait for images to load before layout (use a short timeout as fallback)
-  let loaded = 0;
-  const total = cards.length;
-  if (total === 0) return;
-
-  function onLoad() {
-    loaded++;
-    layoutMasonry();
-  }
-
-  function onError() {
-    loaded++;
-    setTimeout(layoutMasonry, 20);
-  }
-
-  cards.forEach(({ card }) => {
-    const img = card.querySelector('.vc-img');
-    if (!img) { onLoad(); return; }
-    if (img.complete && img.naturalHeight > 0) { onLoad(); return; }
-    if (img.complete && img.naturalHeight === 0) { onError(); return; }
-    img.addEventListener('load', onLoad, { once: true });
-    img.addEventListener('error', onError, { once: true });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }));
   });
 
-  // Fallback: layout at 200ms and 1500ms regardless
-  setTimeout(layoutMasonry, 200);
-  setTimeout(layoutMasonry, 1500);
-
-  // Re-layout on resize
-  outer._masonryResize = () => layoutMasonry();
-  window.removeEventListener('resize', outer._masonryResize);
-  window.addEventListener('resize', outer._masonryResize);
+  window.removeEventListener('resize', buildWaterfall._resize);
+  buildWaterfall._resize = () => {
+    const mw = (document.getElementById('gp-main') || {}).clientWidth || 900;
+    const c = mw < 600 ? 2 : mw < 900 ? 3 : mw < 1400 ? 4 : 5;
+    container.style.columnCount = c;
+  };
+  window.addEventListener('resize', buildWaterfall._resize);
 }
 
 let activeCat = 'all';
@@ -4518,31 +5577,15 @@ function initGallery() {
   });
 }
 
-// ─── Dream transition ────────────────────────────────────
-function enterGallery() {
-  const btn = document.getElementById('enter-btn');
-  btn.classList.add('firing');
-
-  const dt = document.getElementById('dream-transition');
-  dt.classList.add('active');
-  runDreamAnim(() => {
-    dt.classList.add('done');
-    document.getElementById('gallery-portal').classList.add('active');
-    if (!galleryBuilt) {
-      initGallery();
-      galleryBuilt = true;
-    }
-    document.body.classList.add('in-gallery');
-    setTimeout(() => dt.classList.remove('active', 'done'), 400);
-  });
-}
-
 let galleryBuilt = false;
 
+// ─── Dream transition ────────────────────────────────────
+function enterGallery() {
+  document.getElementById('gallery-portal').scrollIntoView({ behavior: 'smooth' });
+}
+
 function exitGallery() {
-  document.getElementById('gallery-portal').classList.remove('active');
-  document.body.classList.remove('in-gallery');
-  document.getElementById('enter-btn').classList.remove('firing');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ─── Dream canvas animation ──────────────────────────────
@@ -4591,12 +5634,21 @@ function runDreamAnim(onDone) {
 }
 
 // ─── Vibe modal ──────────────────────────────────────────
+let currentVibe = null;
+
 function openVibeModal(id) {
   const s = styles[id];
   if (!s) return;
   currentVibe = id;
 
   document.getElementById('vm-title').textContent = s.title;
+
+  // Render meta
+  const meta = s.meta || {};
+  document.getElementById('vm-meta-origin').textContent = meta.origin ? `↳ ${meta.origin}` : '';
+  document.getElementById('vm-meta-desc').textContent = meta.desc || '';
+  const tagsEl = document.getElementById('vm-meta-tags');
+  tagsEl.innerHTML = (meta.tags || []).map(t => `<span class="vm-meta-tag">${t}</span>`).join('');
 
   const imgEl = document.getElementById('vm-img');
   const fallEl = document.getElementById('vm-fallback');
@@ -4608,36 +5660,224 @@ function openVibeModal(id) {
   probe.onload = () => { imgEl.src = styleImageMap[id]; imgEl.classList.remove('hidden'); };
   probe.src = styleImageMap[id];
 
+  // Init palette
+  defaultColors = [...pal];
+  customColors = [...pal];
+  renderPaletteSwatches();
+
   const input = document.getElementById('vm-brand-input');
   input.value = '';
   renderVibePre();
   input.oninput = renderVibePre;
 
   document.getElementById('vibe-overlay').classList.add('active');
+  updateUnlockUI();
+}
+
+function renderPaletteSwatches() {
+  const container = document.getElementById('vm-palette-swatches');
+  container.innerHTML = '';
+  const names = ['Primary', 'Secondary', 'Accent'];
+  customColors.forEach((hex, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'vm-swatch-wrap';
+
+    const swatch = document.createElement('div');
+    swatch.className = 'vm-swatch';
+    swatch.style.background = hex;
+    swatch.title = `${names[i]}: ${hex}`;
+
+    const picker = document.createElement('input');
+    picker.type = 'color';
+    picker.value = hex;
+    picker.addEventListener('input', function() {
+      customColors[i] = this.value;
+      swatch.style.background = this.value;
+      hexLabel.textContent = this.value.toUpperCase();
+      // Update fallback gradient
+      const fallEl = document.getElementById('vm-fallback');
+      fallEl.style.background = `linear-gradient(135deg,${customColors[0]},${customColors[1]},${customColors[2]})`;
+      renderVibePre();
+    });
+    swatch.appendChild(picker);
+
+    const hexLabel = document.createElement('div');
+    hexLabel.className = 'vm-swatch-hex';
+    hexLabel.textContent = hex.toUpperCase();
+
+    wrap.appendChild(swatch);
+    wrap.appendChild(hexLabel);
+    container.appendChild(wrap);
+  });
+}
+
+function resetPalette() {
+  customColors = [...defaultColors];
+  renderPaletteSwatches();
+  const fallEl = document.getElementById('vm-fallback');
+  fallEl.style.background = `linear-gradient(135deg,${customColors[0]},${customColors[1]},${customColors[2]})`;
+  renderVibePre();
+}
+
+function applyColorsToPalette(promptText) {
+  // For each default color, replace with user's custom color in the prompt
+  let result = promptText;
+  defaultColors.forEach((orig, i) => {
+    if (orig.toLowerCase() !== customColors[i].toLowerCase()) {
+      // Replace all occurrences of the original hex (case insensitive)
+      const escaped = orig.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      result = result.replace(new RegExp(escaped, 'gi'), customColors[i]);
+    }
+  });
+  return result;
 }
 
 function renderVibePre() {
   const s = styles[currentVibe];
   if (!s) return;
   const brand = document.getElementById('vm-brand-input').value.trim();
-  const prompt = getVIPrompt(currentVibe, s, brand);
-  const safe = brand ? brand.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') : null;
-  const html = prompt
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(safe ? new RegExp(safe,'g') : /(?!)/,
-      brand ? `<span class="brand-inject">${brand}</span>` : '');
+  let prompt = getVIPrompt(currentVibe, s, brand);
+  prompt = applyColorsToPalette(prompt);
+
+  // HTML-escape, then highlight brand and custom colors
+  let html = prompt
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Highlight brand name
+  if (brand) {
+    const safe = brand.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    html = html.replace(new RegExp(safe,'g'), `<span class="brand-inject">${brand}</span>`);
+  }
+
+  // Highlight custom colors that differ from default
+  customColors.forEach((hex, i) => {
+    if (hex.toLowerCase() !== defaultColors[i].toLowerCase()) {
+      const escaped = hex.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      html = html.replace(new RegExp(escaped,'gi'), `<span class="color-inject">${hex}</span>`);
+    }
+  });
+
   document.getElementById('vm-prompt').innerHTML = html;
 }
 
+// ─── LICENSE / PAYWALL ────────────────────────────────────────────────────────
+const CREEM_PRODUCT_URL = 'https://creem.io/product/prod_67xRhoIK1u5D7jON4I5VKV';
+const LICENSE_KEY = 'tasto_license';
+
+function isUnlocked() {
+  return true; // TODO: re-enable paywall when payment is ready
+}
+
+function setUnlocked() {
+  localStorage.setItem(LICENSE_KEY, 'true');
+  updateUnlockUI();
+}
+
+function updateUnlockUI() {
+  const unlocked = isUnlocked();
+  // Nav button
+  const navBtn = document.getElementById('nav-unlock-btn');
+  const floatBtn = document.getElementById('float-unlock-btn');
+  if (floatBtn) {
+    floatBtn.textContent = unlocked ? '✓ Unlimited' : 'Go Unlimited';
+    floatBtn.classList.toggle('unlocked', unlocked);
+  }
+  if (navBtn) {
+    navBtn.textContent = unlocked ? '✓ Unlocked' : 'Go Unlimited';
+    navBtn.classList.toggle('unlocked', unlocked);
+    navBtn.onclick = unlocked ? null : openUnlockModal;
+  }
+  // Prompt gate
+  const wrap = document.getElementById('vm-prompt-wrap');
+  const gate = document.getElementById('vm-prompt-gate');
+  if (wrap && gate) {
+    wrap.classList.toggle('vm-prompt-locked', !unlocked);
+    gate.style.display = unlocked ? 'none' : 'flex';
+  }
+}
+
+function openUnlockModal() {
+  document.getElementById('unlock-overlay').classList.add('active');
+}
+
+function closeUnlockModal(e) {
+  if (!e || e.target === document.getElementById('unlock-overlay')) {
+    document.getElementById('unlock-overlay').classList.remove('active');
+  }
+}
+
+function goToCheckout() {
+  window.location.href = CREEM_PRODUCT_URL;
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', () => {
+  // Auto-unlock if redirected back from Creem with ?unlocked=1
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('unlocked') === '1') {
+    setUnlocked();
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  updateUnlockUI();
+  initGallery();
+  galleryBuilt = true;
+  document.body.classList.add('in-gallery');
+
+  // Populate curtain preview cards (8 random style images)
+  const curtainContainer = document.getElementById('hero-curtain-cards');
+  if (curtainContainer) {
+    const previewIds = Object.keys(styleImageMap).slice(0, 8);
+    previewIds.forEach(id => {
+      const pal = vibePalette[id] || ['#111','#333','#555'];
+      const div = document.createElement('div');
+      div.className = 'hero-curtain-card';
+      const img = document.createElement('img');
+      img.src = styleImageMap[id];
+      img.alt = '';
+      const fb = document.createElement('div');
+      fb.className = 'hero-curtain-card-fb';
+      fb.style.background = `linear-gradient(135deg,${pal[0]},${pal[1]})`;
+      img.onerror = () => { img.style.display='none'; fb.style.display='block'; };
+      fb.style.display = 'none';
+      div.appendChild(img);
+      div.appendChild(fb);
+      curtainContainer.appendChild(div);
+    });
+  }
+
+  // Show sidebar when hero scrolls out of view
+  const hero = document.querySelector('.hero');
+  const sidebar = document.getElementById('gp-sidebar');
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      sidebar.classList.remove('visible');
+    } else {
+      sidebar.classList.add('visible');
+    }
+  }, { threshold: 0.05 });
+  observer.observe(hero);
+
+  // Scroll hint click — scroll hero out of view
+  const hint = document.querySelector('.hero-scroll-hint');
+  if (hint) {
+    hint.addEventListener('click', () => {
+      window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+    });
+  }
+});
+
 function copyVibePrompt() {
+  if (!isUnlocked()) { openUnlockModal(); return; }
   const s = styles[currentVibe];
   if (!s) return;
   const brand = document.getElementById('vm-brand-input').value.trim();
-  const text = getVIPrompt(currentVibe, s, brand);
+  let text = getVIPrompt(currentVibe, s, brand);
+  text = applyColorsToPalette(text);
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('vm-copy-btn');
     const orig = btn.textContent;
-    btn.textContent = '✓ 已复制！';
+    btn.textContent = '✓ Copied!';
     setTimeout(() => btn.textContent = orig, 2000);
   });
 }
@@ -4651,6 +5891,7 @@ function closeVibeModal(e) {
 
 function quickCopy(e, id) {
   e.stopPropagation();
+  if (!isUnlocked()) { openUnlockModal(); return; }
   const s = styles[id];
   if (!s) return;
   const text = getVIPrompt(id, s, '');
