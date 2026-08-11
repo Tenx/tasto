@@ -34,7 +34,7 @@
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
       font-weight: 200;
-      min-height: 200vh; /* allows hero to scroll off screen to trigger gallery */
+      min-height: unset; /* hero scroll trigger no longer needed */
       cursor: auto;
     }
 
@@ -65,7 +65,6 @@
     .layout {
       position: relative;
       z-index: 2;
-      min-height: 100vh;
     }
 
     /* Header */
@@ -355,8 +354,8 @@
     /* ═══ HERO — PRISMA STYLE ══════════════════════════════ */
     .hero {
       position: relative;
-      min-height: 100vh;
-      padding: 100px 80px 80px;
+      min-height: 60vh;
+      padding: 100px 80px 60px;
       box-sizing: border-box;
       display: flex;
       align-items: center;
@@ -367,17 +366,10 @@
       display: grid;
       grid-template-columns: 2fr 3fr;
       gap: 80px;
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
       max-width: 1400px;
       margin: 0 auto;
-      position: relative;
-    }
-      align-items: center;
-      width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
-      border-radius: 0;
       position: relative;
     }
 
@@ -571,6 +563,8 @@
       display: flex;
       flex-direction: column;
       gap: 28px;
+      position: sticky;
+      top: 80px;
     }
     .hero-tagline {
       font-family: 'Bebas Neue', sans-serif;
@@ -628,234 +622,122 @@
     }
     .hero-btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
 
-    /* ── Hero right col: step showcase ── */
+    /* ── Hero right col: step showcase — typography-driven ── */
     .hero-right {
       position: relative;
-      height: 480px;
       background: #0d1017;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 16px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-    }
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      padding: 40px 48px;
+      gap: 0;
+      height: 320px;
+      justify-content: center;
     }
     .hero-right-header {
-      padding: 16px 20px 0;
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-shrink: 0;
+      margin-bottom: 40px;
     }
     .hero-right-dot {
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: rgba(255,255,255,0.1);
     }
     .hero-right-title {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 14px;
-      letter-spacing: 0.18em;
+      font-size: 13px;
+      letter-spacing: 0.2em;
       color: var(--text-muted);
       margin-left: 8px;
     }
     .hero-right-title span { color: var(--accent); }
 
-    /* step slides container */
-    .hero-steps-wrap {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-step-slide {
-      position: absolute;
-      inset: 0;
+    /* vertical step rows */
+    .hero-step-row {
       display: flex;
-      align-items: center;
-      padding: 16px 20px;
-      gap: 16px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-      pointer-events: none;
+      align-items: flex-start;
+      gap: 28px;
+      padding: 28px 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      transition: opacity 0.4s ease;
     }
-    .hero-step-slide.active {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
+    .hero-step-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .hero-step-row:not(.active) { opacity: 0.35; }
+    .hero-step-row.active .hero-step-row-bar {
+      background: var(--accent);
     }
 
-    /* style card stack (left side of step panel) */
-    .hero-card-stack {
+    /* left accent bar */
+    .hero-step-row-bar {
+      width: 3px;
+      align-self: stretch;
+      background: transparent;
+      border-radius: 2px;
+      flex-shrink: 0;
+      transition: background 0.4s ease;
+    }
+
+    /* step number */
+    .hero-step-row-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      line-height: 1;
+      color: rgba(232,230,226,0.08);
+      flex-shrink: 0;
+      width: 52px;
+      transition: color 0.4s ease;
+    }
+    .hero-step-row.active .hero-step-row-num {
+      color: var(--accent);
+    }
+
+    /* step content */
+    .hero-step-row-body {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      flex-shrink: 0;
-      width: 120px;
+      gap: 6px;
+      padding-top: 4px;
     }
-    .hero-style-card {
-      width: 120px;
-      height: 60px;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.08);
-      transition: border-color 0.3s;
-      position: relative;
-    }
-    .hero-style-card.highlighted {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px rgba(232,255,71,0.2);
-    }
-    .hero-style-card img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .hero-style-card-label {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(0,0,0,0.7);
-      font-family: 'Space Mono', monospace;
-      font-size: 8px;
-      letter-spacing: 0.1em;
-      color: rgba(255,255,255,0.7);
-      padding: 3px 6px;
-      text-transform: uppercase;
-    }
-
-    /* connector line (SVG) */
-    .hero-connector {
-      flex-shrink: 0;
-      width: 60px;
-      height: 100%;
-      position: relative;
-    }
-    .hero-connector svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-    .hero-connector-path {
-      fill: none;
-      stroke: var(--accent);
-      stroke-width: 1.5;
-      stroke-dasharray: 4 4;
-      opacity: 0.6;
-    }
-
-    /* step panel (right side) */
-    .hero-panel {
-      flex: 1;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(232,255,71,0.15);
-      border-radius: 8px;
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      height: 100%;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-    .hero-panel-label {
+    .hero-step-row-label {
       font-family: 'Space Mono', monospace;
       font-size: 9px;
       letter-spacing: 0.2em;
-      color: var(--accent);
       text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color 0.4s ease;
     }
-    .hero-panel-title {
+    .hero-step-row.active .hero-step-row-label { color: var(--accent); }
+    .hero-step-row-title {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 26px;
-      letter-spacing: 0.1em;
-      color: var(--text);
+      font-size: 32px;
+      letter-spacing: 0.04em;
       line-height: 1;
+      color: rgba(232,230,226,0.4);
+      transition: color 0.4s ease;
     }
-    .hero-panel-lines {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .hero-panel-line {
-      height: 6px;
-      border-radius: 3px;
-      background: rgba(255,255,255,0.08);
-    }
-    .hero-panel-line.accent { background: rgba(232,255,71,0.35); width: 60%; }
-    .hero-panel-line.w80 { width: 80%; }
-    .hero-panel-line.w60 { width: 60%; }
-    .hero-panel-line.w90 { width: 90%; }
-    .hero-panel-line.w50 { width: 50%; }
-    .hero-panel-kit {
-      display: flex;
-      gap: 6px;
-    }
-    .hero-panel-kit img {
-      flex: 1;
-      height: 56px;
-      border-radius: 5px;
-      object-fit: cover;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .hero-panel-copy-btn {
-      align-self: flex-start;
-      margin-top: auto;
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      padding: 8px 16px;
-      font-weight: 700;
-      cursor: auto;
-    }
-
-    /* step indicator bar */
-    .hero-step-indicator {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      padding: 0 28px 20px;
-      flex-shrink: 0;
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-    }
-    .hero-step-ind {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      cursor: auto;
-      padding: 0 12px;
-      border-left: 2px solid transparent;
-      transition: border-color 0.3s;
-    }
-    .hero-step-ind:first-child { padding-left: 0; }
-    .hero-step-ind.active { border-left-color: var(--accent); }
-    .hero-step-ind-num {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      color: var(--text-muted);
-    }
-    .hero-step-ind.active .hero-step-ind-num { color: var(--accent); }
-    .hero-step-ind-label {
+    .hero-step-row.active .hero-step-row-title { color: var(--text); }
+    .hero-step-row-desc {
       font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 360px;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.4s ease, opacity 0.4s ease;
     }
-    .hero-step-ind.active .hero-step-ind-label { color: var(--text); }
+    .hero-step-row.active .hero-step-row-desc {
+      max-height: 80px;
+      opacity: 1;
+    }
 
     .step-code {
       margin-top: 8px;
@@ -2152,12 +2034,12 @@
       background: var(--bg);
     }
 
-    /* Sidebar — always fixed to left */
+    /* Sidebar — slides in when hero scrolls out */
     .gp-sidebar {
       position: fixed;
-      left: 0; top: 0;
+      left: 0; top: 64px;
       width: 200px;
-      height: 100vh;
+      height: calc(100vh - 64px);
       border-right: 1px solid var(--border);
       background: var(--bg2);
       display: flex;
@@ -2312,18 +2194,23 @@
     .gp-search::placeholder { color: var(--text-muted); }
     .gp-search:focus { border-color: var(--border-hover); }
 
-    /* Waterfall / masonry */
+    /* Waterfall / masonry — CSS Grid span masonry */
     .gp-waterfall {
       padding: 20px 20px 60px;
     }
     .gp-waterfall-inner {
+      display: grid;
+      grid-template-columns: repeat(var(--masonry-cols, 4), 1fr);
+      grid-auto-rows: 1px;
+      gap: 0 12px;
       width: 100%;
+      align-items: start;
     }
 
     /* Vibe cards */
     .vibe-card {
-      display: inline-block;
       width: 100%;
+      margin-bottom: 12px;
       cursor: auto;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -2715,6 +2602,93 @@
       color: var(--accent);
       border: 1px solid var(--accent);
     }
+    /* ═══ MOBILE RESPONSIVE ════════════════════════════════ */
+    @media (max-width: 768px) {
+
+      /* Header */
+      header {
+        padding: 12px 20px;
+        gap: 12px;
+      }
+      .logo { font-size: 22px; }
+      nav { display: none; }
+
+      /* Hero — single column */
+      .hero {
+        min-height: auto;
+        padding: 88px 20px 40px;
+        align-items: flex-start;
+      }
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .hero-left {
+        position: static;
+        gap: 20px;
+      }
+      .hero-tagline {
+        font-size: clamp(52px, 14vw, 72px);
+      }
+      .hero-right {
+        height: auto;
+        padding: 28px 24px;
+      }
+      .hero-step-row-desc {
+        max-height: none;
+        opacity: 1;
+        font-size: 12px;
+      }
+      .hero-step-row-title { font-size: 22px; }
+      .hero-step-row-num { font-size: 36px; width: 40px; }
+
+      /* Sidebar — hidden on mobile, show toggle */
+      .gp-sidebar { display: none; }
+      .gp-main { margin-left: 0; }
+
+      /* Topbar */
+      .gp-topbar { padding: 14px 16px; }
+      .gp-topbar-title { font-size: 18px; }
+      .gp-search { width: 140px; font-size: 11px; }
+
+      /* Gallery grid — 1 column on phone, 2 on tablet */
+      .style-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px;
+        padding: 16px;
+      }
+
+      /* Modal */
+      .modal-inner {
+        padding: 24px 20px;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        height: 100dvh;
+        overflow-y: auto;
+      }
+      .modal-backdrop { align-items: flex-end; }
+      .params-grid { grid-template-columns: 1fr; }
+      .prompt-box { font-size: 12px; }
+
+      /* Unlock modal */
+      .unlock-modal-inner {
+        padding: 32px 20px;
+        max-width: 100%;
+        border-radius: 16px 16px 0 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .style-grid {
+        grid-template-columns: 1fr !important;
+        padding: 12px;
+      }
+      .hero-tagline {
+        font-size: clamp(44px, 13vw, 60px);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2740,11 +2714,6 @@
           <span class="line-vibe">YOUR VIBE.</span><br>
           <span class="line-ship">SHIP IT.</span>
         </h1>
-        <p class="hero-desc-new">Browse curated aesthetics by style. Pick your vibe → Copy the prompt → Launch your brand.</p>
-        <div class="hero-btns">
-          <button class="hero-btn-primary" onclick="document.getElementById('gallery-portal').scrollIntoView({behavior:'smooth'})">Explore 29+ Styles ↗</button>
-          <button class="hero-btn-ghost" onclick="document.getElementById('gallery-portal').scrollIntoView({behavior:'smooth'})">See How It Works ↓</button>
-        </div>
       </div>
 
       <!-- RIGHT: step showcase panel -->
@@ -2753,153 +2722,36 @@
           <div class="hero-right-dot"></div>
           <div class="hero-right-dot"></div>
           <div class="hero-right-dot"></div>
-          <div class="hero-right-title">TAST<span>O</span></div>
+          <div class="hero-right-title">HOW IT WORKS</div>
         </div>
 
-        <div class="hero-steps-wrap">
-
-          <!-- STEP 1: SELECT -->
-          <div class="hero-step-slide active" data-step="0">
-            <div class="hero-card-stack">
-              <div class="hero-style-card highlighted">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Bauhaus">
-                <div class="hero-style-card-label">Bauhaus</div>
-              </div>
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_36_20 PM.png" alt="Anti-Design">
-                <div class="hero-style-card-label">Anti-Design</div>
-              </div>
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Organic">
-                <div class="hero-style-card-label">Organic Modern</div>
-              </div>
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_37_49 PM.png" alt="Dark Tech">
-                <div class="hero-style-card-label">Dark Tech</div>
-              </div>
-            </div>
-            <!-- connector dot -->
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-              <div style="width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(232,255,71,0.4));"></div>
-              <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(232,255,71,0.8);"></div>
-              <div style="width:1px;height:40px;background:linear-gradient(to bottom,rgba(232,255,71,0.4),transparent);"></div>
-            </div>
-            <div class="hero-panel">
-              <div class="hero-panel-label">// SELECT STYLE</div>
-              <div class="hero-panel-title">BAUHAUS</div>
-              <div style="display:flex;gap:6px;margin-top:8px;">
-                <div style="flex:1;height:4px;border-radius:2px;background:var(--accent);"></div>
-                <div style="flex:0.4;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);"></div>
-              </div>
-              <div style="display:flex;gap:8px;margin-top:12px;">
-                <div style="width:32px;height:32px;border-radius:4px;background:#E63329;"></div>
-                <div style="width:32px;height:32px;border-radius:4px;background:#F5C400;"></div>
-                <div style="width:32px;height:32px;border-radius:4px;background:#1B4FD8;"></div>
-                <div style="width:32px;height:32px;border-radius:4px;background:#0a0a0a;border:1px solid rgba(255,255,255,0.15);"></div>
-              </div>
-              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px;">Primary color system. Geometric construction language. One typeface family — weight defines hierarchy.</p>
-              <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:9px;color:rgba(232,255,71,0.5);letter-spacing:0.12em;">29 STYLES AVAILABLE ↗</div>
-            </div>
+        <div class="hero-step-row active" data-step="0">
+          <div class="hero-step-row-bar"></div>
+          <div class="hero-step-row-num">01</div>
+          <div class="hero-step-row-body">
+            <div class="hero-step-row-label">// SELECT</div>
+            <div class="hero-step-row-title">PICK YOUR VIBE</div>
+            <div class="hero-step-row-desc">Browse 29 curated aesthetic systems — from Bauhaus to Cyberpunk to Organic Modern. Find the one that feels right.</div>
           </div>
+        </div>
 
-          <!-- STEP 2: COPY PROMPT -->
-          <div class="hero-step-slide" data-step="1">
-            <div class="hero-card-stack">
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Bauhaus">
-                <div class="hero-style-card-label">Bauhaus</div>
-              </div>
-              <div class="hero-style-card highlighted">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_38_47 PM.png" alt="Editorial">
-                <div class="hero-style-card-label">Editorial Min</div>
-              </div>
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Organic">
-                <div class="hero-style-card-label">Organic Modern</div>
-              </div>
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_37_49 PM.png" alt="Dark Tech">
-                <div class="hero-style-card-label">Dark Tech</div>
-              </div>
-            </div>
-            <!-- connector dot -->
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-              <div style="width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(232,255,71,0.4));"></div>
-              <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(232,255,71,0.8);"></div>
-              <div style="width:1px;height:40px;background:linear-gradient(to bottom,rgba(232,255,71,0.4),transparent);"></div>
-            </div>
-            <div class="hero-panel">
-              <div class="hero-panel-label">// COPY PROMPT</div>
-              <div class="hero-panel-title">EDITORIAL MINIMALISM</div>
-              <div style="display:flex;gap:6px;margin-top:8px;">
-                <div style="flex:1;height:4px;border-radius:2px;background:var(--accent);"></div>
-                <div style="flex:0.6;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);"></div>
-              </div>
-              <div style="margin-top:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(232,255,71,0.2);border-radius:6px;padding:10px 12px;">
-                <p style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(232,255,71,0.75);line-height:1.7;letter-spacing:0.03em;">"Editorial minimalism brand identity, oversized typography anchoring the composition, strict monochrome palette with single warm accent, high contrast black and white photography..."</p>
-              </div>
-              <button class="hero-panel-copy-btn" style="margin-top:12px;">COPY PROMPT</button>
-            </div>
+        <div class="hero-step-row" data-step="1">
+          <div class="hero-step-row-bar"></div>
+          <div class="hero-step-row-num">02</div>
+          <div class="hero-step-row-body">
+            <div class="hero-step-row-label">// COPY</div>
+            <div class="hero-step-row-title">GRAB THE PROMPT</div>
+            <div class="hero-step-row-desc">Each style ships with a complete VI prompt. Copy it, drop it into ChatGPT or Midjourney — done.</div>
           </div>
+        </div>
 
-          <!-- STEP 3: BRAND KIT -->
-          <div class="hero-step-slide" data-step="2">
-            <div class="hero-card-stack">
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Bauhaus">
-                <div class="hero-style-card-label">Bauhaus</div>
-              </div>
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_38_47 PM.png" alt="Editorial">
-                <div class="hero-style-card-label">Editorial Min</div>
-              </div>
-              <div class="hero-style-card highlighted">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Organic">
-                <div class="hero-style-card-label">Organic Modern</div>
-              </div>
-              <div class="hero-style-card">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_37_49 PM.png" alt="Dark Tech">
-                <div class="hero-style-card-label">Dark Tech</div>
-              </div>
-            </div>
-            <!-- connector dot -->
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-              <div style="width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(232,255,71,0.4));"></div>
-              <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(232,255,71,0.8);"></div>
-              <div style="width:1px;height:40px;background:linear-gradient(to bottom,rgba(232,255,71,0.4),transparent);"></div>
-            </div>
-            <div class="hero-panel">
-              <div class="hero-panel-label">// OUTPUT KIT</div>
-              <div class="hero-panel-title">BRAND KIT</div>
-              <div style="display:flex;gap:6px;margin-top:8px;">
-                <div style="flex:1;height:4px;border-radius:2px;background:var(--accent);"></div>
-                <div style="flex:0.2;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);"></div>
-              </div>
-              <div class="hero-panel-kit" style="margin-top:12px;">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_44_28 PM.png" alt="Bag">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_45_17 PM.png" alt="Market">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_39_18 PM.png" alt="Product">
-                <img src="portfolio/ChatGPT Image Aug 5, 2026, 12_33_05 PM.png" alt="Tshirt">
-              </div>
-              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px;">Logo · Poster · Packaging · UI · Merch — one style, deployed across every touchpoint.</p>
-            </div>
-          </div>
-
-        </div><!-- /hero-steps-wrap -->
-
-        <!-- step indicator -->
-        <div class="hero-step-indicator">
-          <div class="hero-step-ind active" data-ind="0">
-            <div class="hero-step-ind-num">01 / SELECT</div>
-            <div class="hero-step-ind-label">Select a style, define your visual language</div>
-          </div>
-          <div class="hero-step-ind" data-ind="1">
-            <div class="hero-step-ind-num">02 / COPY</div>
-            <div class="hero-step-ind-label">Copy the prompt, drop it into AI</div>
-          </div>
-          <div class="hero-step-ind" data-ind="2">
-            <div class="hero-step-ind-num">03 / LAUNCH</div>
-            <div class="hero-step-ind-label">Output a complete, cohesive brand kit</div>
+        <div class="hero-step-row" data-step="2">
+          <div class="hero-step-row-bar"></div>
+          <div class="hero-step-row-num">03</div>
+          <div class="hero-step-row-body">
+            <div class="hero-step-row-label">// LAUNCH</div>
+            <div class="hero-step-row-title">SHIP YOUR BRAND</div>
+            <div class="hero-step-row-desc">Logo, poster, packaging, UI, merch — one style, deployed across every touchpoint. Minutes, not months.</div>
           </div>
         </div>
 
@@ -2927,9 +2779,6 @@
 <div class="gallery-wrapper" id="gallery-wrapper">
 <div class="gallery-portal" id="gallery-portal">
   <div class="gp-sidebar" id="gp-sidebar">
-    <div class="gp-sidebar-logo">TAST<span>O</span></div>
-    <div class="gp-sidebar-tagline">Pick your aesthetic.<br>Copy the prompt.<br>Launch your brand.</div>
-    <div class="gp-sidebar-label">// Aesthetic Categories</div>
     <nav class="gp-nav">
       <button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">29</span></button>
 
@@ -3452,18 +3301,16 @@
 
 // ─── Hero step cycler ─────────────────────────────────────
 (function(){
-  const slides = document.querySelectorAll('.hero-step-slide');
-  const inds = document.querySelectorAll('.hero-step-ind');
+  const rows = document.querySelectorAll('.hero-step-row');
+  if (!rows.length) return;
   let cur = 0;
   function goStep(n) {
-    slides[cur].classList.remove('active');
-    inds[cur].classList.remove('active');
-    cur = n % slides.length;
-    slides[cur].classList.add('active');
-    inds[cur].classList.add('active');
+    rows[cur].classList.remove('active');
+    cur = n % rows.length;
+    rows[cur].classList.add('active');
   }
-  inds.forEach((ind, i) => ind.addEventListener('click', () => { goStep(i); clearInterval(timer); timer = setInterval(() => goStep((cur+1) % slides.length), 3500); }));
-  let timer = setInterval(() => goStep((cur+1) % slides.length), 3500);
+  rows.forEach((row, i) => row.addEventListener('click', () => { goStep(i); clearInterval(timer); timer = setInterval(() => goStep((cur+1) % rows.length), 3500); }));
+  let timer = setInterval(() => goStep((cur+1) % rows.length), 3500);
 })();
 
 
@@ -3626,416 +3473,347 @@ const styles = {
   swiss_style: {
     title: 'SWISS STYLE',
     meta: { origin: '1950s Switzerland / Germany', tags: ['Minimal', 'Grid', 'Modernism'], desc: 'The origin of International Modernist graphic design. Strict grids, sans-serif type, information first — every pixel serves function, decoration is sin.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Swiss International Style aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Swiss International Style.
 
-## 1. Brand Color System
-  --color-bg:      #ffffff;
-  --color-text:    #000000;
-  --color-red:     #e8192c;   /* International Klein Red */
-  --color-gray:    #888888;
-  Rule: Maximum 3 colors. No gradients. Color used as signal, not decoration.
+AESTHETIC
+Rational order, objective clarity, the grid as worldview. Every element earns its place; decoration is a mistake. Swiss modernism at its most precise.
 
-## 2. Typography System
-  Display: "Helvetica Neue" or "Inter" — 700 weight, tight tracking (-0.03em)
-  Body: "Helvetica Neue" — 400 weight, 16px, line-height 1.5
-  Grid: 12-column with 20px gutters. Mathematical spacing.
-  Rule: Asymmetric layouts. Text always left-aligned or justified. Never centered.
+PALETTE
+A warm cream ground (#f0f0d8) carrying flat blocks of primary and secondary hues, all matte with hard edges and no gradients:
+- Cream / paper white — #f0f0d8 (background)
+- Deep navy — #001830 (the anchor "black")
+- Vermilion red — #f03018 (primary accent, the loudest element)
+- Golden yellow — #f0a800
+- Butter yellow — #f0d890
+- Sage / muted teal — #78a8a8
+- Powder blue — #90a8c0
+- Deep teal — #186078
+Colors sit side by side as solid geometric fields — used as structure and signal, never as decoration or shading.
 
-## 3. Logo Concept for [BRAND]
-  Pure wordmark in Helvetica Neue Bold. Red rule above or below.
-  Optional: simple geometric mark (circle, square, triangle) in red.
-  Grid-locked positioning. Never decorative.
+TYPOGRAPHY
+Grotesque sans-serif (Helvetica Neue / Inter). Headlines heavy (700 weight) with tight tracking; body regular at comfortable reading size. Built on a strict 12-column grid with mathematical spacing. Type is left-aligned or justified — never centered, never angled.
 
-## 4. Layout Principles
-  Strict grid adherence. Heavy use of white space as active element.
-  Diagonal or angled type strictly prohibited.
-  Photography: black & white or single-color duotone.
+FORM & LAYOUT
+Asymmetric grid compositions built from flat geometric fields — circles, half-circles, rectangles, triangles, and ruled stripes interlocking edge to edge. Hard edges, zero border-radius, matte fills, no shadows. White space is an active structural element. Logo: a pure Helvetica wordmark set on or beside the color blocks, optionally paired with a single geometric mark.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.btn {
-  background: #000;
-  color: #fff;
-  border: none;
-  border-radius: 0;
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 12px 24px;
-}
-.btn-accent { background: #e8192c; }
-.card {
-  background: #fff;
-  border: 1px solid #000;
-  border-radius: 0;
-  padding: 24px;
-}
-.rule-red {
-  border: none;
-  border-top: 2px solid #e8192c;
-  margin: 32px 0;
-}
-\`\`\`
+MOTION
+Minimal and structural. Elements snap and reveal in ~0.3s, no bounce. Transitions feel mechanical and precise, never soft.
 
-## 6. Motion & Animation
-  Minimal. Reveal text left-to-right in 0.3s. No bounce, no spring.
-  Hover: border-color shift black→red in 0.15s ease.
+MOOD
+Precise, confident, timeless, engineered — the design equivalent of a well-set equation.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: rational order, objective clarity, the grid as worldview. Swiss modernism at its most precise.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), render the flat geometric blocks and wordmark as clean screen-print or single-pass color; respect the material — cotton weave, matte ceramic, paper stock — but keep the artwork crisp and hard-edged. On digital products (websites, apps, landing pages, social posts), keep the strict grid, generous whitespace, and flat color fields; hierarchy comes from type weight and block placement, never from ornament. The logo and geometric marks stay identical across every medium.
+
+DO: honor the grid, build with flat geometric color blocks, use whitespace boldly, let type weight create hierarchy.
+DON'T: use gradients, drop-shadows, rounded corners, decorative flourishes, or centered / diagonal type.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
+  },
+
+  swiss_geometric: {
+    title: 'SWISS GEOMETRIC',
+    meta: { origin: '1950s–60s Switzerland', tags: ['Geometric', 'Grid', 'Modernism'], desc: 'Pure shape as language. Diagonal tension, primary forms, red-black-white at maximum contrast — the visual grammar of Swiss modernism distilled to its bones.' },
+    vi: `Brand: [BRAND] — Visual identity in the Swiss Geometric aesthetic.
+
+AESTHETIC
+Pure shape as language. Diagonal tension, primary forms, red-black-white at maximum contrast — the visual grammar of Swiss modernism distilled to its bones. Geometry as ideology, every shape a decision.
+
+PALETTE
+Flat structural color at maximum contrast on a warm off-white ground — matte fills, hard edges, never a gradient:
+- Warm off-white — #f0f0d8 (background / paper)
+- Pure black — #000000 (the anchor)
+- Vivid Swiss red — #d81800 (primary accent, the loudest element)
+- Cream — #f0f0d8
+Color carries weight, not decoration — a small vocabulary of solid geometric fields, red doing the shouting, black doing the structure.
+
+TYPOGRAPHY
+Grotesque sans-serif (Helvetica Neue / Inter). Display extremely heavy with tight tracking; body regular at comfortable reading size. Type follows the grid — left-aligned or justified, never centered. Diagonal elements echo the geometric tension of the logo.
+
+FORM & LAYOUT
+Built on a 6-column grid with a strict baseline; shapes snap to grid intersections and any diagonal crosses grid corners exactly. Logo is a geometric primitive — rectangle plus circle plus diagonal line — that works identically from favicon to billboard. Buttons are flat fills with zero rounding and an offset solid border; cards are hard-edged with color-block headers and no drop-shadow; dividers are solid black or red, never gray.
+
+MOTION
+Structural, not decorative. Transitions are linear and near-instant — no easing, no bounce. Movement snaps into place.
+
+MOOD
+Rational, confrontational, precise, ideological, timeless — Josef Müller-Brockmann meets a stop sign.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), render the flat geometric blocks and wordmark as single-pass screen print — crisp hard edges on cotton, matte ceramic, or paper stock, red and black on off-white. On digital products (websites, apps, landing pages, social posts), keep the strict grid, snapped shapes, and diagonal tension; hierarchy comes from scale and placement, never ornament. The geometric mark stays identical across every medium.
+
+DO: build from flat geometric fields, honor the grid, let diagonals cross grid corners exactly, keep the palette to red-black-white on off-white.
+DON'T: use gradients, drop-shadows, rounded corners, gray, or centered type.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
+  },
+
+  swiss_typo_bw: {
+    title: 'SWISS TYPOGRAPHY',
+    meta: { origin: 'Basel School / 1960s–now', tags: ['Typography', 'Black & White', 'Modernism'], desc: 'Type as architecture. Ultra-bold Helvetica at monumental scale, horizontal rules as structural beams, information hierarchy through weight alone — zero ornament, pure order.' },
+    vi: `Brand: [BRAND] — Visual identity in the Swiss Typography aesthetic.
+
+AESTHETIC
+Type as architecture. Ultra-bold Helvetica at monumental scale, horizontal rules as structural beams, information hierarchy built through weight alone — zero ornament, pure order. Typography is the only decoration needed.
+
+PALETTE
+Black and white only, with grays as the sole permitted expansion — no hue anywhere:
+- Near-white paper — #f0f0f0 (background)
+- Pure black — #000000 (text / structure)
+- Mid gray — #909090 (secondary weight)
+- Light gray — #d8d8d8
+- Dark gray — #787878
+Never use color where weight can do the job — value and type weight carry the entire hierarchy.
+
+TYPOGRAPHY
+Helvetica Neue across the board with extreme weight contrast: Black used at monumental hero scale against Light for tension, Regular for body with tight letter-spacing. Weight contrast IS the design. Everything aligns to a strict baseline grid at all sizes.
+
+FORM & LAYOUT
+A strict 12-column grid with generous gutters. Thin horizontal rules act as structural dividers between sections, positioned at exact cap-height or baseline distances. Logo is a logotype only — a tightly-tracked Helvetica Black wordmark, optionally paired with a hairline rule above or below. Headers are oversized weight-contrast lockups; tables use hairline rules and no backgrounds; callouts invert to white type on a black block flush to the grid edge. Imagery is high-contrast black-and-white only, no tints.
+
+MOTION
+Minimal and crisp. Reveals snap along the grid, transitions are quick and mechanical — nothing soft, nothing bouncing.
+
+MOOD
+Monumental, austere, disciplined, architectural, authoritative — the Basel School turned up to full volume.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print bold black type on white or reversed white-on-black, single-color and crisp — the wordmark large and confident, rules as thin structural lines. On digital products (websites, apps, landing pages, social posts), keep the strict grid, weight-contrast headlines, hairline dividers, and baseline alignment. The logotype stays identical across every medium.
+
+DO: use weight contrast for hierarchy, align to the baseline grid, use hairline rules as structure, keep it black and white with grays.
+DON'T: introduce any hue, use drop-shadows, center type, or add decorative flourishes.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
+  },
+
+  swiss_dots_color: {
+    title: 'SWISS DOTS',
+    meta: { origin: 'Swiss Pop / 1960s–70s', tags: ['Halftone', 'Circle', 'Graphic'], desc: 'Halftone rhythm meets primary geometry. Dot fields as texture, oversized circles as anchors, cobalt and yellow at maximum saturation — Swiss structure with a playful pulse.' },
+    vi: `Brand: [BRAND] — Visual identity in the Swiss Dots aesthetic.
+
+AESTHETIC
+Halftone rhythm meets primary geometry. Dot fields as texture, oversized circles as anchors, cobalt and yellow at maximum saturation — Swiss rationalism made joyful through rhythm and circle.
+
+PALETTE
+A small vivid set on warm paper, meeting at hard edges with no gradients:
+- Process yellow — #f0c000 (primary, the dominant field)
+- Cobalt blue — #0048a8 (secondary anchor)
+- Cream / warm off-white — #f0f0d8 (background)
+- Black — #000000
+Three colors plus the ground; they meet at hard edges and never blend — color as signal and rhythm, never shading.
+
+TYPOGRAPHY
+Helvetica Neue — Bold for confident, grid-anchored display; Regular for body at a comfortable reading size. Type and dots coexist without competing: type always sits in calm, dot-free zones.
+
+FORM & LAYOUT
+Built on a halftone dot pattern used as texture — sparse dots for backgrounds, dense fields for feature panels, all on a 45-degree rhythm. One to three solid circles per composition anchor the layout, snapped to the grid, never shadowed; a circle's size matches the cap-height of the display type. Logo is a wordmark inside a circle enclosure, or a lettermark built from a dot grid. Heroes place a large yellow or blue circle as the anchor over a dot field; buttons are solid circular pills; section dividers are rows of dots that grow in size as visual rhythm.
+
+MOTION
+Playful but controlled. Circles scale up gently on entrance; dots appear with a staggered rhythm — the beat is the point.
+
+MOOD
+Rhythmic, joyful, structured, punchy, optimistic — Swiss grid discipline with a pop pulse.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print the halftone dot fields and solid circles as flat spot colors — yellow, blue, and black on cream, crisp and screen-print clean. On digital products (websites, apps, landing pages, social posts), keep the dot-field textures, circular anchors, and pill buttons, with type in calm zones. The circle-enclosed wordmark stays identical across every medium.
+
+DO: build rhythm with halftone dot fields, anchor with solid circles snapped to grid, keep type in calm zones.
+DON'T: use gradients, let dots crowd the type, or add a fourth color.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   editorial_min: {
     title: 'EDITORIAL MINIMALISM',
     meta: { origin: 'High-end fashion magazines / 1990s–now', tags: ['Minimal', 'Luxury', 'Typography'], desc: 'Typography language from Vogue and Wallpaper*. Large imagery, generous whitespace, serif fonts — restraint is itself a luxury statement.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Editorial Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Editorial Minimalism aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #faf9f7;   /* warm off-white */
-  --color-text:    #1a1814;   /* warm near-black */
-  --color-mid:     #c8b89a;   /* warm stone */
-  --color-accent:  #2a2520;   /* deep brown-black */
-  Rule: Warm whites and near-blacks. No cool grays. Ink-on-paper feeling.
+AESTHETIC
+The typography language of Vogue and Wallpaper*. Large imagery, generous white space, serif elegance — restraint is itself a luxury statement. Fashion-magazine intelligence: large, slow, considered.
 
-## 2. Typography System
-  Display: Large serif (Playfair Display / Cormorant) — editorial scale 64–120px
-  Body: "DM Sans" — 300 weight, generous line-height 1.8
-  Caption: "Space Mono" — 11px, tracked +0.15em, uppercase
-  Mixing serif + sans-serif is intentional and essential.
+PALETTE
+Warm ink-on-paper neutrals, no cool grays anywhere:
+- Warm stone / greige — #d8d8c0 (background / paper)
+- Soft blush stone — #d8c0c0
+- Warm taupe — #d8c0a8
+- Umber brown — #786048
+- Deep espresso — #603018
+- Warm near-black — #483018 (text / ink)
+Everything reads as ink on warm paper — the palette stays quiet so the photography and type carry the drama.
 
-## 3. Logo Concept for [BRAND]
-  Thin serif wordmark with editorial proportions (wide tracking).
-  Optional: single letter monogram in large display serif.
-  Always on warm white or warm dark backgrounds.
+TYPOGRAPHY
+Large display serif (Playfair Display / Cormorant) at editorial scale, paired with a light sans body (DM Sans) at generous line-height, and a monospace caption (Space Mono) tracked wide and uppercase. Mixing serif with sans is intentional and essential. Pull-quotes set in italic display serif.
 
-## 4. Layout Principles
-  Magazine-style: large images dominate, text blocks as counterbalance.
-  Asymmetric column grids (1+2, 2+1). Running white space.
-  Full-bleed photography with thin caption bars.
+FORM & LAYOUT
+Magazine-style composition — large images dominate, text blocks act as counterbalance, with asymmetric column grids and running white space. Full-bleed photography with thin caption bars. Logo is a thin serif wordmark with wide editorial tracking, or a single large-serif monogram, always on warm white or warm dark. Buttons are hairline-outlined uppercase serif; cards are clean image-plus-caption units.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.btn-editorial {
-  background: transparent;
-  border: 1px solid #1a1814;
-  color: #1a1814;
-  font-family: 'Playfair Display', serif;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  padding: 14px 32px;
-}
-.card-editorial {
-  background: #faf9f7;
-}
-.card-editorial img {
-  width: 100%;
-  aspect-ratio: 4/3;
-  object-fit: cover;
-}
-.card-editorial .caption {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #c8b89a;
-  padding: 12px 0 0;
-}
-.pull-quote {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-size: clamp(24px, 4vw, 48px);
-  line-height: 1.3;
-  color: #1a1814;
-}
-\`\`\`
+MOTION
+Slow and deliberate. Fades are unhurried, images drift with gentle parallax at a fraction of scroll speed, page transitions crossfade — no bounce, no spring.
 
-## 6. Motion & Animation
-  Slow, deliberate. Fade in 0.6s ease. Image parallax 0.2× scroll speed.
-  Page transitions: crossfade 0.4s. No bounce, no spring.
+MOOD
+Refined, restrained, editorial, luxurious, unhurried — the opening pages of a high-end fashion magazine.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: fashion magazine intelligence — large, slow, considered.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), keep it spare and premium — a small tracked serif wordmark on warm natural stock, lots of empty space, muted ink tones. On digital products (websites, apps, landing pages, social posts), lead with large imagery, asymmetric columns, running white space, and the serif/sans/mono type mix. The wordmark stays identical across every medium.
+
+DO: lead with large imagery, use generous white space, mix serif and sans intentionally, keep tones warm.
+DON'T: use cool grays, crowd the layout, add ornament, or center everything.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   tech_min: {
     title: 'TECH MINIMALISM',
     meta: { origin: 'Silicon Valley / 2010s–now', tags: ['Minimal', 'Tech', 'SaaS'], desc: 'The aesthetic established by Apple, Linear, and Notion. Light palette, rounded corners, generous whitespace — convey product confidence through interface clarity.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Tech Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Tech Minimalism aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #f8f8f8;
-  --color-surface: #ffffff;
-  --color-text:    #111111;
-  --color-dim:     #888888;
-  --color-accent:  #0066ff;   /* single precise blue */
-  --color-border:  rgba(0,0,0,0.08);
-  Rule: Near-white backgrounds. One accent blue. Maximum restraint.
+AESTHETIC
+The aesthetic established by Apple, Linear, and Notion. Light palette, rounded corners, generous white space — product confidence conveyed through interface clarity. Apple-meets-Linear precision, every pixel justified, nothing decorative.
 
-## 2. Typography System
-  Display: "Inter" — 600 weight, -0.02em tracking
-  Body: "Inter" — 400 weight, 15px, line-height 1.6
-  Mono: "JetBrains Mono" — for code, data, precision labels
-  Scale: 11 · 13 · 15 · 18 · 24 · 32 · 48 · 64px
+PALETTE
+Cool near-white surfaces anchored by a deep navy-charcoal and one precise blue:
+- Off-white ground — #f8f8f8 (background)
+- Pure white — #ffffff (surfaces / cards)
+- Deep navy-charcoal — #181830 (text / anchor)
+- Cool blue-white — #d8d8f0
+- Hairline gray — #d8d8d8 (borders)
+- Precise blue — #0066ff (single accent)
+Near-white backgrounds, one accent blue, maximum restraint — the accent appears only where it carries meaning.
 
-## 3. Logo Concept for [BRAND]
-  Geometric wordmark or letterform. Clean edges, no serifs.
-  Monochrome. Optional: subtle geometric symbol.
-  Works in light and dark contexts.
+TYPOGRAPHY
+Inter throughout — semibold with slightly tight tracking for display, regular for body at comfortable line-height. JetBrains Mono for code, data, and precision labels. A clean typographic scale with meaningful steps; nothing decorative.
 
-## 4. UI Component Library (CSS)
-\`\`\`css
-.btn {
-  background: #0066ff;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 10px 20px;
-  transition: opacity 0.2s ease;
-}
-.btn:hover { opacity: 0.85; }
-.card {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 12px;
-  padding: 20px;
-  transition: box-shadow 0.2s ease;
-}
-.card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-.input {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 8px;
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  padding: 10px 14px;
-  transition: border-color 0.15s ease;
-}
-.input:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.12); }
-\`\`\`
+FORM & LAYOUT
+A 12-column grid with an 8px baseline; nothing breaks the grid. Comfortable density — never cramped like a data dashboard. Rounded corners on cards and buttons, hairline borders, subtle soft shadows on hover only. Logo is a geometric monochrome wordmark or letterform with clean edges, working in both light and dark contexts. Loading, empty, and error states are all deliberately designed.
 
-## 5. Layout Principles
-  Grid: 12-column, 8px baseline. Nothing breaks the grid.
-  Density: comfortable — not cramped like data dashboards.
-  States: loading skeletons, empty states, error states all designed.
+MOTION
+Micro-interactions only, quick and calm. Cards lift subtly on hover, buttons dim, page transitions are a short fade — nothing slides or bounces. Focus rings appear instantly for accessibility.
 
-## 6. Motion & Animation
-  Micro-interactions only. 0.2s ease. No drama.
-  Loading: thin progress bar (#0066ff), no spinners.
-  Hover: card lifts (box-shadow deepens), button dims (opacity 0.85).
-  Page transition: 150ms fade. Nothing slides — that's too playful.
-  Focus: blue ring appears instantly (no animation on accessibility states).
+MOOD
+Clean, precise, confident, calm, modern — a well-run SaaS product, Apple and Linear.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Apple-meets-Linear precision — every pixel justified, nothing decorative.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), keep it minimal and premium — the monochrome wordmark on white or light stock, one small blue accent, clean matte finish. On digital products (websites, apps, landing pages, social posts), keep the 12-column grid, rounded cards, hairline borders, generous white space, and single blue accent with subtle micro-interactions. The wordmark stays identical across every medium.
+
+DO: keep to near-white surfaces, use one blue accent sparingly, respect the grid, design every state.
+DON'T: add multiple accent colors, use heavy shadows or dramatic motion, or crowd the layout.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   warm_min: {
     title: 'WARM MINIMALISM',
     meta: { origin: 'Scandinavian design / Lifestyle brands', tags: ['Minimal', 'Warm', 'Natural'], desc: 'Fusion of Nordic design and lifestyle branding. Off-white, warm brown, linen textures — minimalist yet warm, the kind you want to move into.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Warm Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Warm Minimalism aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #faf6f0;   /* warm cream */
-  --color-surface: #f5efe6;
-  --color-text:    #2d2419;   /* warm dark brown */
-  --color-mid:     #a08870;
-  --color-accent:  #c87941;   /* terracotta */
-  Rule: Earthy, warm, never cool. Inspired by natural materials.
+AESTHETIC
+A fusion of Nordic design and lifestyle branding. Off-white, warm brown, linen texture — minimalist yet warm, the kind of space you want to move into. A Sunday morning in a Scandinavian kitchen: warm, unhurried, material.
 
-## 2. Typography System
-  Display: Rounded sans or soft serif — approachable weight
-  Body: "DM Sans" — 300–400 weight, generous spacing
-  Caption: italic, slightly smaller, warm tone
-  Feeling: handwritten warmth without actual handwriting
+PALETTE
+Earthy warm neutrals, never cool, drawn from natural materials:
+- Warm taupe — #c0a890 (background / base)
+- Muted clay — #c0a8a8
+- Sage-tan — #a8a890
+- Warm beige-brown — #a89078
+- Deep walnut — #604830 (text)
+- Terracotta — #c87941 (accent)
+Earthy and warm throughout, with terracotta as the single accent — colors feel like linen, ceramic, and wood.
 
-## 3. Logo Concept for [BRAND]
-  Soft wordmark, possibly with subtle rounded letterforms.
-  Natural texture optional (grain overlay at 8% opacity).
-  Earthy palette only.
+TYPOGRAPHY
+A rounded sans or soft serif at approachable weight for display; DM Sans at light-to-regular weight with generous spacing for body; captions in warm italic. The feeling is handwritten warmth without any actual handwriting.
 
-## 4. Layout Principles
-  Generous white (warm white) space. Rounded cards.
-  Natural photography: plants, ceramics, linen, skin.
-  Nothing sharp, nothing cold.
+FORM & LAYOUT
+Generous warm-white space and softly rounded cards with a warm border. Nothing sharp, nothing cold — every corner eased. Natural photography of plants, ceramics, linen, and skin. Logo is a soft wordmark, possibly with subtly rounded letterforms, on an earthy palette with an optional faint grain overlay. Buttons are fully rounded pills in terracotta; dividers are hairline warm lines.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.btn-warm {
-  background: #c87941;
-  color: #faf6f0;
-  border: none;
-  border-radius: 24px;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
-  padding: 12px 28px;
-  transition: background 0.2s ease;
-}
-.btn-warm:hover { background: #a06030; }
-.card-warm {
-  background: #f5efe6;
-  border: 2px solid #d4b896;
-  border-radius: 16px;
-  padding: 24px;
-}
-.divider-warm {
-  border: none;
-  border-top: 1px solid #d4b896;
-  margin: 32px 0;
-}
-\`\`\`
+MOTION
+Gentle and slow. Transitions ease softly with no snapping; hover brings a warm glow; elements fade up gently on entrance.
 
-## 6. Motion & Animation
-  Gentle and slow. Transitions: 0.35s ease. No snapping.
-  Hover: warm glow (box-shadow 0 4px 20px rgba(200,121,65,0.15)).
-  Entrance: fade-up 0.5s ease, 24px translateY offset.
+MOOD
+Warm, calm, natural, tactile, inviting — Scandinavian lifestyle branding, unhurried and material.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Sunday morning in a Scandinavian kitchen — warm, unhurried, material.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), favor natural materials and earthy inks — the soft wordmark on unbleached cotton, kraft, or matte ceramic, with a subtle terracotta accent. On digital products (websites, apps, landing pages, social posts), keep warm-white space, rounded cards and pills, soft borders, and gentle motion. The wordmark stays identical across every medium.
+
+DO: keep everything warm and earthy, soften every corner, use terracotta as the single accent, leave generous space.
+DON'T: use cool grays or sharp edges, add saturated bright colors, or use snappy mechanical motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   luxury_min: {
     title: 'LUXURY MINIMALISM',
     meta: { origin: 'Hermès / Bottega / Haute couture', tags: ['Luxury', 'Minimal', 'Craft'], desc: 'The visual logic of Hermès and Bottega Veneta. The smaller the logo, the more expensive; the more whitespace, the more confident — silent luxury is the ultimate status.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Luxury Minimalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Luxury Minimalism aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #fafaf8;
-  --color-text:    #1a1a18;
-  --color-gold:    #c0a060;   /* restrained gold */
-  --color-mid:     #888880;
-  Rule: Extreme restraint. Gold used sparingly — one detail, not a theme.
+AESTHETIC
+The visual logic of Hermès and Bottega Veneta. The smaller the logo the more expensive; the more white space the more confident — silent luxury as the ultimate status. Céline, The Row, Bottega: presence through restraint, luxury through absence.
 
-## 2. Typography System
-  Display: High-contrast serif (Didot / Bodoni style) — extreme thin/thick contrast
-  Body: Light sans, 14–16px, generous line-height 1.9
-  Tracking: Wide on all uppercase labels (+0.2em minimum)
-  Scale: Fewer sizes, larger jumps. Nothing ordinary.
+PALETTE
+Extreme restraint — a very dark near-black navy against an off-white ground, with gold used only as a single detail:
+- Off-white ground — #fafaf8 (background)
+- Very dark navy-black — #001830 (text / anchor)
+- Pure black — #000000
+- Restrained gold — #c0a060 (rare accent)
+Gold appears sparingly — one detail, never a theme — and the whole palette stays hushed so absence reads as luxury.
 
-## 3. Logo Concept for [BRAND]
-  Thin serif wordmark with optically corrected spacing.
-  Optional monogram in contrasting weight.
-  Embossed/letterpress effect via CSS (text-shadow simulation).
+TYPOGRAPHY
+A high-contrast serif (Didot / Bodoni style) with extreme thin-to-thick contrast for display; a light sans for body at generous line-height. Wide tracking on all uppercase labels. Fewer sizes, larger jumps — nothing ordinary.
 
-## 4. Layout Principles
-  Massive white space — content as precious object.
-  Single-column or 2-column editorial. Never crowded.
-  Photography: high fashion, architectural, product still.
+FORM & LAYOUT
+Massive white space treats content as a precious object. Single-column or two-column editorial layouts, never crowded. Photography is high-fashion, architectural, or product still-life. Logo is a thin serif wordmark with optically corrected spacing, optionally a monogram in contrasting weight, sometimes with a subtle embossed or letterpress feel. Buttons are hairline-outlined uppercase serif that invert on hover; cards are borderless image objects with tiny tracked captions; a hairline gold rule appears rarely.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.btn-luxury {
-  background: transparent;
-  border: 0.5px solid #1a1a18;
-  color: #1a1a18;
-  font-family: 'Didot', 'Bodoni MT', serif;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  padding: 16px 40px;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
-}
-.btn-luxury:hover { background: #1a1a18; color: #fafaf8; }
-.card-luxury {
-  background: #fafaf8;
-  border: none;
-  overflow: hidden;
-}
-.card-luxury img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
-.card-luxury-caption {
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #888880;
-  padding: 12px 0 0;
-}
-.divider-gold { border: none; border-top: 0.5px solid #c0a060; margin: 48px 0; }
-\`\`\`
+MOTION
+Stillness is luxury. Every transition is slow and deliberate — no bounce, no spring. Subtle lifts, slow image reveals on scroll. Gold only ever fades in; it never animates as color.
 
-## 6. Motion & Animation
-  Philosophy: Stillness is luxury. Every transition is deliberate and slow.
-  Transitions: 0.5s cubic-bezier(0.25, 0, 0, 1). No bounce, no spring.
-  Hover lift: translateY(-2px), box-shadow 0 12px 40px rgba(0,0,0,0.08).
-  Image reveal: clip-path expand from bottom over 0.8s on scroll entrance.
-  Gold accent: fade-in only, never animate gold color itself.
+MOOD
+Refined, quiet, confident, exclusive, timeless — quiet luxury, the whisper that outclasses the shout.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Céline, The Row, Bottega — presence through restraint, luxury through absence.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), keep it spare and precious — a tiny embossed or debossed serif wordmark, gold-foil detail used once, premium natural materials, endless empty space. On digital products (websites, apps, landing pages, social posts), keep massive white space, high-contrast serif display, and slow deliberate motion. The wordmark stays identical across every medium.
+
+DO: use extreme white space, high-contrast serif type, gold as one rare detail, slow deliberate motion.
+DON'T: enlarge the logo, add multiple colors, crowd the layout, or use bouncy motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   monochrome: {
     title: 'MONOCHROME',
     meta: { origin: 'Photography / Fashion / Contemporary art', tags: ['B&W', 'Contrast', 'Timeless'], desc: 'Remove color, only form and light remain. Black and white never go out of style — it is the foundation language of all aesthetics and the hardest to get wrong.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Monochrome aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Monochrome aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #ffffff;
-  --color-text:    #000000;
-  --color-100:     #f5f5f5;
-  --color-300:     #cccccc;
-  --color-600:     #666666;
-  --color-900:     #111111;
-  Rule: Zero hue. Hierarchy built entirely from value (light/dark), weight, and scale.
+AESTHETIC
+Remove color, and only form and light remain. Black and white never go out of style — it is the foundation language of all aesthetics and the hardest to get wrong. The ultimate constraint: when you remove color, every other decision matters more.
 
-## 2. Typography System
-  Display: One typeface family, all weights — from Ultra Light to Black
-  Body: Same family, Regular, generous spacing
-  Technique: Use weight contrast aggressively to build visual hierarchy.
+PALETTE
+A full grayscale value ramp from white to black, zero hue:
+- White — #ffffff (background)
+- Light gray — #d8d8d8
+- Silver — #c0c0c0
+- Mid gray — #a8a8a8
+- Dim gray — #909090
+- Black — #000000 (text / ink)
+Hierarchy is built entirely from value, weight, and scale — never from hue.
 
-## 3. Logo Concept for [BRAND]
-  Pure wordmark. No color. No icon.
-  Multiple versions: black on white, white on black, reversed.
+TYPOGRAPHY
+One typeface family used across its full weight range, from ultra-light to black. Body in the same family at regular weight with generous spacing. Weight contrast is used aggressively to build hierarchy.
 
-## 4. Layout Principles
-  Photography: black & white, high contrast, graphic.
-  Texture: subtle grain or halftone at low opacity for depth.
-  Ink: every element feels like it was typeset.
+FORM & LAYOUT
+Every element feels typeset, like ink on the page. Photography is high-contrast black-and-white and graphic, sometimes with a subtle grain or halftone at low opacity for depth. Logo is a pure wordmark with no color and no icon, delivered in black-on-white, white-on-black, and reversed versions. Buttons are solid black or hairline-outlined that invert on interaction; cards are outlined in black; images are pushed to grayscale with lifted contrast.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.btn-mono {
-  background: #000;
-  color: #fff;
-  border: none;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 14px 32px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-.btn-mono:hover { background: #fff; color: #000; outline: 1px solid #000; }
-.btn-mono-outline {
-  background: transparent;
-  color: #000;
-  border: 1px solid #000;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 14px 32px;
-}
-.card-mono {
-  background: #fff;
-  border: 1px solid #000;
-  padding: 24px;
-  overflow: hidden;
-}
-.img-mono { filter: grayscale(100%) contrast(1.1); width: 100%; }
-\`\`\`
+MOTION
+Crisp and binary — on or off. Hover inverts background and foreground with no gradient blending. Entrances are simple fades with no drift; monochrome does not float. Focus states are a solid black outline, no glow.
 
-## 6. Motion & Animation
-  Transitions: 0.2s ease. Crisp and binary — on or off.
-  Hover invert: background and color swap, no gradient blending.
-  Entrance: fadeIn 0.4s linear. No translateY drift — Monochrome doesn't float.
-  Focus states: 2px solid #000 outline, no color glow.
+MOOD
+Timeless, graphic, disciplined, contrasty, refined — fine-art photography and fashion in pure black and white.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the ultimate constraint — when you remove color, every other decision matters more.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print single-color black on white or white on black — the wordmark crisp, high-contrast imagery converted to grayscale halftone. On digital products (websites, apps, landing pages, social posts), build hierarchy from value and weight, invert on interaction, keep motion binary. The wordmark stays identical across every medium.
+
+DO: build hierarchy from value and weight, use the full gray ramp, invert cleanly, keep motion crisp.
+DON'T: introduce any hue, use soft floating motion, or add colored glows.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   // ══════════════════════════════════════
@@ -4045,111 +3823,78 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the ul
   glassmorphism: {
     title: 'GLASSMORPHISM',
     meta: { origin: 'Apple macOS Big Sur / 2020–now', tags: ['Glass', 'Blur', 'Depth'], desc: 'The frosted glass aesthetic Apple popularized with Big Sur. Semi-transparent, blurred backgrounds, floating layers — futuristic texture for the digital world.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Glassmorphism aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Glassmorphism aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      linear-gradient(135deg, #1a1a4e, #0d0d2b);
-  --glass-bg:      rgba(255,255,255,0.08);
-  --glass-border:  rgba(255,255,255,0.18);
-  --glass-blur:    16px;
-  --color-accent:  #6699ff;
-  --color-glow:    rgba(100,150,255,0.4);
+AESTHETIC
+The frosted-glass aesthetic Apple popularized with Big Sur. Semi-transparent, blurred backgrounds, floating layers — futuristic texture for the digital world. Floating interfaces, depth without weight, the UI as polished ice.
 
-## 2. Typography System
-  Display: "Inter" — 300–600 weight, white/near-white
-  Body: "Inter" — 300 weight, rgba(255,255,255,0.85)
-  Labels: all-caps, tracked +0.1em, rgba(255,255,255,0.5)
+PALETTE
+Frosted translucent tints of blue, lavender, and cyan floating over a deep indigo base:
+- Deep indigo base — #0d0d2b (background)
+- Frosted powder blue — #c0d8f0
+- Sky blue — #90c0f0
+- Pale cyan — #d8f0f0
+- Soft lavender — #c0a8f0
+- Periwinkle — #c0c0f0
+Colors read as light passing through frosted glass — translucent tints and glows over a dark base, never flat opaque fills.
 
-## 3. Core Glass Effect (CSS)
-\`\`\`css
-.glass-panel {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-}
-\`\`\`
+TYPOGRAPHY
+Inter across a light-to-medium weight range in white and near-white. Body in light weight at high transparency; labels all-caps, tracked wide, and dimmed. Type sits cleanly on top of the glass, never blurred itself.
 
-## 4. UI Component Library
-  Buttons: glass bg + accent glow border + inner highlight
-  Cards: layered glass panels, depth via blur variation
-  Navigation: frosted bar with gradient border
-  Modals: deep blur (24px), prominent glass frame
+FORM & LAYOUT
+Layered glass panels with soft blur, thin luminous white borders, and an inner top highlight give the sense of stacked frosted sheets. Depth comes from varying blur and opacity across layers — base panels are faint, cards more present, modals the most frosted. Background is an animated gradient mesh. Logo sits as a crisp white or accent mark on or above the glass. Buttons are glass with a glowing accent border; navigation is a frosted bar.
 
-## 5. Depth System
-  Layer 0 (background): animated gradient mesh
-  Layer 1 (base panels): blur 8px, opacity 0.06
-  Layer 2 (cards): blur 16px, opacity 0.10
-  Layer 3 (modals/popups): blur 24px, opacity 0.14
+MOTION
+Panels float with a gentle vertical oscillation. On hover, blur and border luminosity increase. Entrances scale up slightly from transparent with a soft spring — everything drifts, nothing snaps.
 
-## 6. Motion & Animation
-  Float: subtle translateY oscillation 4px over 4s ease-in-out
-  Hover: increase backdrop blur + border opacity
-  Entrance: scale(0.96)→scale(1) + opacity 0→1, 0.4s spring
+MOOD
+Futuristic, weightless, luminous, sleek, atmospheric — Apple Big Sur, translucent OS surfaces.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: floating interfaces, depth without weight, the UI as polished ice.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), simulate the frosted look with soft translucent gradients, luminous edges, and glossy or holographic finishes on dark stock — the mark reading like glass over indigo. On digital products (websites, apps, landing pages, social posts), use real backdrop blur, layered glass panels, luminous borders, and gentle floating motion over a gradient mesh. The mark stays identical across every medium.
+
+DO: layer translucent frosted panels, vary blur for depth, use luminous thin borders, keep a dark gradient base.
+DON'T: use flat opaque fills, hard edges, heavy drop-shadows, or a light flat background.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   paper_cutout: {
     title: 'PAPER / CUTOUT',
     meta: { origin: 'Bauhaus paper craft / Matisse late period / Contemporary graphic', tags: ['Collage', 'Handmade', 'Layered'], desc: 'Matisse painted with scissors in his late years, pioneering the paper collage language. Irregular edges, layered shadows — handmade warmth in the digital age.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Paper & Cutout aesthetic — inspired by risograph printing, zine culture, and handmade layers. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Paper & Cutout aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #f5e6c8;   /* aged newsprint */
-  --color-ink:     #1a1a2e;
-  --color-red:     #d44444;   /* risograph red */
-  --color-blue:    #1a4a8a;   /* risograph blue */
-  --color-yellow:  #f0c040;
-  Key: Colors overlap with multiply blend-mode — simulate mis-registration.
+AESTHETIC
+Matisse painted with scissors in his late years, pioneering the paper-collage language; risograph printing and zine culture carry it forward. Irregular edges, layered shadows, overprinting — analog sincerity, DIY publishing, the imperfect beauty of handmade things.
 
-## 2. Typography System
-  Display: "Bebas Neue" — mix with slight rotations (±2°)
-  Body: "Space Mono" — typewriter feel, 400 weight
-  Cut-out letters: appear clipped from different sources, mismatched weights
-  Rule: intentional misalignment is correct.
+PALETTE
+Warm paper tones with dark ink and a teal accent, colors overprinting like mis-registered risograph layers:
+- Paper cream — #f0d8a8 (aged newsprint ground)
+- Warm tan — #d8c0a8
+- Greige — #d8d8c0
+- Dark ink — #303030
+- Teal — #486060 (accent)
+Colors overlap and multiply to simulate ink mis-registration — flat spot tones layered on warm paper, never smooth gradients.
 
-## 3. Logo Concept for [BRAND]
-  Cut-and-paste wordmark. Rubber stamp variant.
-  Box with uneven ink pressure (box-shadow offset).
+TYPOGRAPHY
+A bold condensed display face (Bebas Neue) set with slight rotations, mixed with a typewriter monospace body (Space Mono). Cut-out letters look clipped from different sources with mismatched weights — intentional misalignment is correct.
 
-## 4. Collage Layout Principles
-  Layered elements with mix-blend-mode: multiply
-  Torn paper edges via CSS clip-path polygon
-  Tape effects: semi-transparent rectangles at slight angles
-  Image treatment: halftone dot, duotone, high-contrast B&W
+FORM & LAYOUT
+Layered collage elements overprint with a multiply feel; torn-paper edges, tape strips at slight angles, and uneven ink pressure. Images are treated as halftone dots, duotone, or high-contrast black-and-white. Cards sit at slight rotations with a hard offset shadow like a physical scrap. Logo is a cut-and-paste wordmark or a rubber-stamp variant set in a box with uneven ink. Nothing is perfectly aligned.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.paper-card {
-  background: var(--color-bg);
-  border: 1px solid rgba(26,26,46,0.15);
-  transform: rotate(calc(var(--r, 0) * 1deg));
-  box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
-}
-.stamp {
-  border: 3px solid var(--color-ink);
-  font-family: 'Space Mono', monospace;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  display: inline-block;
-  transform: rotate(-2deg);
-}
-\`\`\`
+MOTION
+Elements appear already placed, like collage — little default transition. Hover exaggerates rotation slightly, like paper rustling; stamps pop in with a small overshoot; on scroll, scraps drift in from a tilt and settle. Every interaction feels like peeling tape or tearing paper.
 
-## 6. Motion & Animation
-  Transitions: none by default — elements appear already placed, like collage.
-  Hover: slight rotation exaggeration (+1° extra), paper rustling feel.
-  Stamp reveal: scale(0.8) → scale(1) + slight overshoot, 0.25s ease-out.
-  Scroll: elements drift in from slight rotations, settle on scroll.
-  Sound metaphor: each interaction is like peeling tape or tearing paper.
+MOOD
+Handmade, imperfect, tactile, rebellious, sincere — zine culture, risograph, Matisse cut-outs.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: analog sincerity, DIY publishing, the imperfect beauty of handmade things.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), lean into spot-color overprint and mis-registration, torn edges, and stamp marks on kraft or cream stock — the medium itself feels printed by hand. On digital products (websites, apps, landing pages, social posts), layer collaged scraps with multiply blends, slight rotations, tape strips, and hard offset shadows. The cut-and-paste wordmark stays identical across every medium.
+
+DO: overprint spot colors with multiply, tear and rotate edges, mismatch letter weights, embrace mis-registration.
+DON'T: use smooth gradients, perfect alignment, polished shadows, or clean vector precision.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   // ══════════════════════════════════════
@@ -4159,171 +3904,117 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: analog
   cyberpunk: {
     title: 'CYBERPUNK',
     meta: { origin: '1980s Sci-fi literature / Blade Runner / Ghost in the Shell', tags: ['Neon', 'Dystopia', 'Future'], desc: "William Gibson's prose + Ridley Scott's lens. Neon, rainy cities, high-tech low-life — the visual scripture of dark futures." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cyberpunk aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Cyberpunk aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #050510;
-  --color-surface: #0d0d1a;
-  --color-cyan:    #00ffff;
-  --color-magenta: #ff00aa;
-  --color-yellow:  #ffee00;
-  --color-text:    rgba(200,220,255,0.9);
-  Rule: Dark base, neon accents. Colors appear as light sources.
+AESTHETIC
+William Gibson's prose through Ridley Scott's lens: neon-drenched rain-slick megacities, high-tech and low-life, the beautiful decay of a hypercapitalist future.
 
-## 2. Typography System
-  Display: "Bebas Neue" — 400 weight, tight tracking, neon text-shadow
-  Body: "Space Mono" or "JetBrains Mono" — monospace for authenticity
-  Effect: RGB channel offset on hero text (2px cyan left, 2px magenta right)
+PALETTE
+A near-black, rain-dark base lit by neon that reads as emitted light, not paint:
+- Deep blue-black — #001018 (base / night)
+- Dark teal-navy surface — #003030
+- Electric cyan — #00e5ff (primary glow)
+- Hot magenta — #ff2fa0
+- Soft neon purple — #9078a8 (holographic mid-tones)
+- Cool blue-white — #c8dcff (text / highlights)
+Cyan, magenta, and purple bleed into atmospheric haze and wet reflections; blacks stay deep so every neon reads as a light source.
 
-## 3. Logo Concept for [BRAND]
-  Glitched wordmark with neon glow: text-shadow 0 0 20px #00ffff
-  Kanji/ideographic elements optional as decorative layer
-  Usage: dark backgrounds only
+TYPOGRAPHY
+Condensed display face (Bebas Neue) carrying a neon glow; monospace body (Space Mono / JetBrains Mono) for machine-terminal authenticity. Hero text takes an RGB channel offset — a slight cyan shadow left, magenta right — like a mis-registered signal.
 
-## 4. Glitch & Neon Effects (CSS)
-\`\`\`css
-.neon-text {
-  color: #00ffff;
-  text-shadow: 0 0 4px #00ffff, 0 0 16px #00ffff, 0 0 40px rgba(0,255,255,0.4);
-}
-.glitch {
-  position: relative;
-}
-.glitch::before {
-  content: attr(data-text);
-  position: absolute;
-  left: 2px;
-  color: #ff00aa;
-  clip-path: inset(30% 0 50% 0);
-  animation: glitch-anim 3s infinite;
-}
-@keyframes glitch-anim {
-  0%,90%,100% { transform: translateX(0); }
-  92% { transform: translateX(-4px); clip-path: inset(20% 0 60% 0); }
-  96% { transform: translateX(4px); clip-path: inset(70% 0 10% 0); }
-}
-\`\`\`
+FORM & LAYOUT
+Dark UI with glowing 1px neon borders, scanline overlays, and HUD-style data readouts. Optional ideographic / kanji accents as decorative signal. Glitch is a feature: momentary displacement, clipped bands, flicker. Logo: a glitched wordmark with a cyan neon glow, on dark backgrounds only.
 
-## 5. UI Component Library
-  Buttons: dark bg + neon border + glow on hover
-  Cards: dark surface, 1px neon border, scanline overlay
-  Progress bars: animated neon gradient
-  Data: monospace, green or cyan
+MOTION
+A glitch loop every 5–8s, CRT scanline scroll, glow that intensifies on hover, entrances that translate up with a neon flicker.
 
-## 6. Motion & Animation
-  Glitch loop every 5–8s. CRT scanline scroll.
-  Hover: increase text-shadow glow intensity.
-  Entrance: translate from bottom + neon flicker.
+MOOD
+Electric, dystopian, seductive, dangerous — Blade Runner at street level, Ghost in the Shell HUD.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Blade Runner neon, Ghost in the Shell HUD, the beautiful decay of hypercapitalist futurity.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), lean into dark base materials with neon-bright print — glowing cyan/magenta artwork on black cotton or matte packaging, glitched wordmark, holographic or foil accents where possible. On digital products (websites, apps, landing pages, social posts), keep the dark UI, neon glow, scanline texture, and monospace data readouts; motion and glitch bring it alive. The glitched neon logo stays identical across every medium.
+
+DO: keep the base dark, treat color as emitted light, use monospace for data, let a few elements glitch.
+DON'T: use light backgrounds, flatten the glow, overuse glitch until it's noise, or introduce warm pastel tones.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   dark_tech: {
     title: 'DARK TECHNOLOGY',
     meta: { origin: 'Dev tools / Gaming / Web3 brands', tags: ['Dark', 'Geek', 'Precision'], desc: "The extreme version of Vercel and Linear's dark mode. Pure black, a single neon accent, monospace type — code is aesthetics, precision is style." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Dark Technology aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Dark Technology aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #000000;
-  --color-surface: #0a0a0a;
-  --color-border:  rgba(255,255,255,0.06);
-  --color-text:    rgba(255,255,255,0.9);
-  --color-dim:     rgba(255,255,255,0.4);
-  --color-accent:  #00ff88;   /* single cold green */
-  Rule: Maximum darkness. Accent is surgical, not decorative.
+AESTHETIC
+The extreme version of Vercel and Linear's dark mode. Pure black, a single neon accent, monospace type — code is aesthetics, precision is style. A black mirror surface, precision instruments, the control room of the future.
 
-## 2. Typography System
-  Display: "Space Mono" or "JetBrains Mono" — monospace, precision feel
-  Body: "Inter" — 300 weight, high contrast on dark
-  All UI labels: uppercase, tracked, small caps
-  Numbers: tabular figures, monospace
+PALETTE
+Near-black surfaces with faint hairline borders and one surgical cold-green accent:
+- Deep navy-black — #001830 (background)
+- Blackest black — #000018
+- Dark blue surface — #183048
+- Steel-blue surface — #304860
+- Cold neon green — #00ff88 (single accent)
+The accent is surgical, not decorative — used only on live values and key signals; text is bright on near-black, everything else stays dark.
 
-## 3. Logo Concept for [BRAND]
-  Terminal-style wordmark. Optional: blinking cursor after name.
-  Strict black background. White or green text only.
+TYPOGRAPHY
+Monospace display (Space Mono / JetBrains Mono) for a precision, terminal feel; Inter light for body at high contrast on dark. UI labels are uppercase, tracked, small; numbers are tabular monospace figures.
 
-## 4. UI Component Library (CSS)
-\`\`\`css
-.panel {
-  background: #0a0a0a;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 4px;
-}
-.label {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(255,255,255,0.4);
-}
-.value {
-  color: #00ff88;
-  font-variant-numeric: tabular-nums;
-}
-\`\`\`
+FORM & LAYOUT
+Dark panels with faint 1px borders and minimal rounding. Logo is a terminal-style wordmark, optionally with a blinking cursor after the name, on a strict black background in white or green only. Labels are dim uppercase mono; values glow in the green accent. Density is instrument-like and exact — every element reads like a readout.
 
-## 6. Motion & Animation
-  Minimal. Data updates: number tick. Progress: linear fill.
-  No decorative animation. Every motion carries information.
+MOTION
+Minimal and informational. Numbers tick, progress fills linearly, updates flash briefly. No decorative animation — every motion carries data.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: black mirror surface, precision instruments, control room of the future.`,
+MOOD
+Precise, dark, technical, controlled, futuristic — Vercel and Linear dark mode, a mission control terminal.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print on black — the terminal wordmark in white or a single glowing green, monospace labels, matte or subtle-gloss finish. On digital products (websites, apps, landing pages, social posts), keep pure-dark surfaces, hairline borders, monospace readouts, and the single green accent on live values. The terminal wordmark stays identical across every medium.
+
+DO: keep surfaces near-black, use one cold-green accent on live values, use monospace for data, keep motion informational.
+DON'T: use light backgrounds, multiple accent colors, decorative animation, or heavy ornament.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   scifi_hud: {
     title: 'SCI-FI HUD',
     meta: { origin: 'Sci-fi film UI / Iron Man / Alien', tags: ['HUD', 'Data', 'Interface'], desc: "The interface of Jarvis in Iron Man, the ship dashboards in Alien. Scan lines, data streams, holographic frames — the ultimate form of futurism." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Sci-Fi HUD (Heads-Up Display) aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Sci-Fi HUD aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #020814;
-  --color-primary: #00d4ff;   /* HUD cyan */
-  --color-secondary:#39ff14;  /* scan green */
-  --color-warning: #ff6600;
-  --color-text:    rgba(0,212,255,0.85);
-  Rule: All elements feel like projected light on transparent surfaces.
+AESTHETIC
+The interface of Jarvis in Iron Man, the ship dashboards in Alien. Scan lines, data streams, holographic frames — futurism as a heads-up display. Iron Man HUD, Westworld interface, mission control in 2077.
 
-## 2. Typography System
-  Display: "Orbitron" or "Space Mono" — mechanical, all-caps
-  Data readouts: monospace, tabular, small (11–13px)
-  Scanning labels: uppercase, wide tracking (+0.2em)
+PALETTE
+Deep space navy and teal-black lit by projected cyan glow, with green and orange for status:
+- Deep space navy — #001830 (background)
+- Teal-black — #001818
+- Dark blue panel — #183048
+- Deep teal — #003030
+- HUD cyan — #00d4ff (primary glow)
+- Scan green — #39ff14 (status) and warning orange — #ff6600 (alerts)
+Every element feels like projected light on a transparent surface — cyan lines and glows over near-black, with green and orange reserved for status and alerts.
 
-## 3. HUD Frame Elements (CSS)
-\`\`\`css
-.hud-frame {
-  border: 1px solid rgba(0,212,255,0.3);
-  position: relative;
-}
-.hud-frame::before, .hud-frame::after {
-  content: '';
-  position: absolute;
-  width: 16px; height: 16px;
-  border-color: #00d4ff;
-  border-style: solid;
-}
-.hud-frame::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-.hud-frame::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-.scanline {
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(0,212,255,0.03) 2px, rgba(0,212,255,0.03) 4px
-  );
-}
-\`\`\`
+TYPOGRAPHY
+A mechanical all-caps display (Orbitron / Space Mono) for headers; small tabular monospace for data readouts; scanning labels in wide-tracked uppercase. Type reads like instrument annotation.
 
-## 4. UI Patterns
-  Corner brackets on all panels. Status indicators (●/○).
-  Progress arcs (SVG stroke-dasharray animation).
-  Radar/sweep animation on maps.
+FORM & LAYOUT
+Panels wear corner brackets and thin cyan frames; scanlines texture the surfaces. Status dots, progress arcs, and radar sweeps convey live data. Logo is a HUD-framed mark with corner ticks and a faint cyan glow, on dark only. Everything looks projected onto glass, layered like an augmented overlay.
 
-## 6. Motion & Animation
-  Scan line scroll: 8s linear infinite.
-  Data update: instant replace with brief flash.
-  Loading: circular arc progress indicator.
+MOTION
+Scanlines scroll slowly; data updates snap in with a brief flash; loading is a circular arc sweep; radar elements rotate. Motion is technical and continuous, never soft.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Iron Man HUD, Westworld interface, mission control in 2077.`,
+MOOD
+Futuristic, technical, luminous, alert, cinematic — Iron Man's Jarvis, Alien's Nostromo, a 2077 control room.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print glowing cyan HUD frames, corner brackets, and readout type on black stock — neon-bright artwork on dark material, foil or gloss where possible. On digital products (websites, apps, landing pages, social posts), use corner-bracket frames, scanline textures, progress arcs, and cyan glow with technical motion. The HUD-framed mark stays identical across every medium.
+
+DO: frame panels with corner brackets, treat color as projected light, use cyan for structure and green/orange for status, add scanlines.
+DON'T: use light backgrounds, flat opaque fills, warm pastels, or soft decorative motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   // ══════════════════════════════════════
@@ -4333,115 +4024,79 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Iron M
   cinematic: {
     title: 'CINEMATIC DARK',
     meta: { origin: 'Hollywood posters / A24 / Nolan aesthetic', tags: ['Cinematic', 'Drama', 'Epic'], desc: "A24's bleakness, Nolan's grandeur, Coen Brothers' grain. Cinematic color grading, wide aspect ratio — give your brand the weight of the silver screen." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cinematic Dark aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Cinematic Dark aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #080808;
-  --color-surface: #111111;
-  --color-text:    rgba(240,235,225,0.9);   /* warm white like film grain */
-  --color-dim:     rgba(240,235,225,0.4);
-  --color-accent:  #c8a060;   /* warm amber */
-  --color-border:  rgba(255,255,255,0.06);
+AESTHETIC
+A24's bleakness, Nolan's grandeur, the Coen Brothers' grain. Cinematic color grading, wide aspect ratios — the weight of the silver screen given to a brand. The opening titles of an A24 film: dark, deliberate, cinematic gravity.
 
-## 2. Typography System
-  Display: Dramatic serif or condensed sans — cinematic weight
-  Body: "DM Sans" — 300 weight, wide line-height 1.8
-  Captions: "Space Mono" — 11px, tracked, film-strip feel
+PALETTE
+Near-black lit by deep warm amber and orange shadow tones — a teal-orange film grade pushed dark:
+- Pure black — #000000 (background)
+- Deep maroon shadow — #180000
+- Dark olive shadow — #181800
+- Warm ember — #301818
+- Amber-brown — #483018
+- Warm film-grain white — #f0ebe1 (text)
+Warm amber is the single accent, glowing out of crushed shadows — the whole frame reads like graded film with warm highlights and deep blacks.
 
-## 3. Logo Concept for [BRAND]
-  High-contrast wordmark on black. Letterpress or cold foil effect.
-  Optional: film sprocket motif or wide-ratio letterboxing.
+TYPOGRAPHY
+A dramatic serif or condensed sans at cinematic weight for display, tracked wide and uppercase for title cards; DM Sans light for body at wide line-height; Space Mono captions with a film-strip feel.
 
-## 4. Layout Principles
-  Cinematic 21:9 or 16:9 hero sections.
-  Vignette overlays on photography.
-  Text overlaid on dark imagery — always legible.
+FORM & LAYOUT
+Wide 21:9 or 16:9 hero scenes with vignette overlays; text overlaid on dark imagery, always legible. Logo is a high-contrast wordmark on black with a letterpress or cold-foil feel, optionally with a film-sprocket motif or letterboxing. A subtle grain overlay sits across everything.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.scene {
-  background: #080808;
-  position: relative;
-}
-.scene::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
-  pointer-events: none;
-}
-.film-title {
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: #f0ebe1;
-}
-\`\`\`
+MOTION
+Slow and deliberate. Dissolves are unhurried, imagery drifts with gentle parallax, titles reveal with a mask wipe. A faint animated grain breathes over the frame. No bounce.
 
-## 6. Motion & Animation
-  Slow dissolves: 0.8s ease. Parallax at 0.3× scroll speed.
-  Text: cinematic reveal — mask wipe left to right.
-  Ambient: subtle grain overlay animation (3% opacity).
+MOOD
+Dramatic, brooding, epic, atmospheric, cinematic — A24, Nolan, the graded silver screen.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: opening titles of an A24 film — dark, deliberate, cinematic gravity.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print on black or deep-charcoal stock with a warm amber accent — the high-contrast wordmark, matte finish, a graded still-frame feel. On digital products (websites, apps, landing pages, social posts), use wide cinematic hero frames, vignettes, grain, overlaid title type, and slow dissolves. The wordmark stays identical across every medium.
+
+DO: keep frames dark and graded, use warm amber sparingly, go wide-ratio with vignettes and grain, move slowly.
+DON'T: use bright flat backgrounds, cool clinical tones, snappy motion, or busy ornament.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   film_noir: {
     title: 'FILM NOIR',
     meta: { origin: '1940s American noir / French New Wave', tags: ['Noir', 'Shadow', 'Tension'], desc: "1940s Hollywood's light and shadow experiments. High contrast, oblique lighting, deep shadows — every frame a stage of moral conflict and desire." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Film Noir aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Film Noir aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #0a0a0a;
-  --color-text:    #e8e0d0;
-  --color-shadow:  #000000;
-  --color-highlight: #ffffff;
-  --color-amber:   #d4a030;   /* single warm accent */
-  Rule: Pure black & white with one amber warmth. High contrast is the language.
+AESTHETIC
+1940s Hollywood's light-and-shadow experiments. High contrast, oblique lighting, deep shadows — every frame a stage of moral conflict and desire. Shadows with secrets, every frame a confession, the beauty of moral ambiguity in monochrome.
 
-## 2. Typography System
-  Display: Classic condensed serif or slab — 1940s newspaper energy
-  Body: "Space Mono" — typewriter rhythm
-  Captions: italic, faded, worn
-  Shadows: text-shadow to simulate deep contrast lighting
+PALETTE
+Cool blue-grays and charcoal with muted violet shadows — a black-and-white world cast in blue, warmed by a single amber:
+- Blue-charcoal — #181830 (background / night)
+- Slate blue-gray — #303048
+- Neutral gray — #484848
+- Muted violet shadow — #483048
+- Mid gray — #606060
+- Warm amber — #d4a030 (single accent)
+High contrast is the language — crushed cool shadows and hard highlights, with amber warmth used only once, like a lit cigarette.
 
-## 3. Logo Concept for [BRAND]
-  Typeset wordmark in vintage condensed style.
-  Usage: white on black or black on warm paper.
-  Optional: detective badge or film reel motif.
+TYPOGRAPHY
+A classic condensed serif or slab with 1940s newspaper energy for display; Space Mono for body with a typewriter rhythm; captions faded and italic, worn. Deep contrast lighting simulated with heavy text shadow.
 
-## 4. Photography Treatment
-  Black & white only. High contrast — crush the shadows.
-  Venetian blind lighting effect via CSS.
-  Rain texture overlay (low opacity).
+FORM & LAYOUT
+Panels are near-black with faint borders. Venetian-blind lighting, spotlight pools, and a low-opacity rain texture set the atmosphere. Photography is high-contrast black-and-white with crushed shadows. Logo is a typeset vintage-condensed wordmark used white-on-black or black-on-warm-paper, optionally with a detective-badge or film-reel motif.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.noir-panel {
-  background: #0a0a0a;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-.spotlight {
-  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,0.06) 0%, transparent 70%);
-}
-.venetian-blind {
-  background: repeating-linear-gradient(
-    0deg, rgba(0,0,0,0.4), rgba(0,0,0,0.4) 6px,
-    transparent 6px, transparent 20px
-  );
-}
-\`\`\`
+MOTION
+Slow, like drifting smoke — nothing snappy. Venetian-blind slats open on entrance; hover lifts brightness slightly with no scale, because shadows do not bounce. The cursor is a crosshair, part of the atmosphere; backgrounds parallax slower than content for depth.
 
-## 6. Motion & Animation
-  Transitions: 0.3s ease. Slow fade, like smoke. Nothing snappy.
-  Venetian-blind entrance: clip-path horizontal slats open over 0.6s.
-  Hover: subtle brightness increase (+10%), no scale — shadows don't bounce.
-  Cursor: crosshair. The cursor is part of the atmosphere.
-  Scroll parallax: background image slower than content, deepens the noir depth.
+MOOD
+Moody, tense, shadowy, mysterious, seductive — 1940s American noir, French New Wave.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: shadows with secrets, every frame a confession, the beauty of moral ambiguity in monochrome.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print stark high-contrast black-and-white with a single amber accent — the vintage wordmark, venetian-blind shadow motifs, matte finish. On digital products (websites, apps, landing pages, social posts), use spotlight and blind-slat lighting, crushed B&W imagery, smoke-slow transitions, and a crosshair cursor. The wordmark stays identical across every medium.
+
+DO: crush contrast, cast cool blue shadows, use amber once, move like smoke.
+DON'T: use bright saturated color, soft even lighting, bouncy motion, or clean flat backgrounds.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   // ══════════════════════════════════════
@@ -4451,387 +4106,269 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: shadow
   neo_brutalism: {
     title: 'NEO-BRUTALISM',
     meta: { origin: 'Architectural brutalism / Web design rebellion / 2020s', tags: ['Brutal', 'Raw', 'Anti-polish'], desc: 'Reject rounded corners, reject gradients, reject politeness. Thick borders, hard shadows, saturated color — intentional ugliness is the coolest beauty.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Neo-Brutalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Neo-Brutalism aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #ffffff;
-  --color-text:    #000000;
-  --color-primary: #FFD60A;   /* brutal yellow */
-  --color-accent2: #FF6B6B;   /* coral red */
-  --color-accent3: #4ECDC4;   /* teal */
-  Rule: White base, hard offset shadows, bold saturated accent.
+AESTHETIC
+Reject rounded corners, reject gradients, reject politeness. Thick borders, hard shadows, saturated color — intentional ugliness as the coolest beauty. The internet eating itself, Figma but honest, brutality as UX philosophy.
 
-## 2. Typography System
-  Display: "Arial Black" / "Space Grotesk" — 900 weight, all caps
-  Body: "Space Mono" — monospace, confrontational
-  Rule: No optical refinements. Set it ugly, set it loud.
+PALETTE
+Bold, raw, high-contrast blocks — saturated primaries slammed against black on white:
+- Sky blue — #48a8d8 (primary block)
+- Vivid yellow — #f0a800 (loud accent)
+- Deep blue — #4890c0
+- Black — #000000 (borders / shadows)
+- Coral pink — #f09090
+White is the base; color arrives in flat saturated blocks with hard black offset shadows — color carries weight, never subtlety.
 
-## 3. Neo-Brutalist Shadow System (CSS)
-\`\`\`css
-.neo-card {
-  background: #FFD60A;
-  border: 2px solid #000;
-  box-shadow: 4px 4px 0 #000;
-  border-radius: 0;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-.neo-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
-}
-.neo-btn {
-  background: #000;
-  color: #FFD60A;
-  border: 2px solid #000;
-  box-shadow: 3px 3px 0 #FFD60A;
-  font-family: 'Space Mono', monospace;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 12px 24px;
-  cursor: pointer;
-}
-.neo-btn:active {
-  transform: translate(3px, 3px);
-  box-shadow: none;
-}
-\`\`\`
+TYPOGRAPHY
+Heavy display (Arial Black / Space Grotesk) at 900 weight, all caps; Space Mono monospace body, confrontational. No optical refinements — set it ugly, set it loud.
 
-## 4. Layout Principles
-  Hard grids. No gradients. No border-radius (or extremely rare).
-  Elements stack with visible layering and hard offset.
+FORM & LAYOUT
+Hard grids, no gradients, zero border-radius (or extremely rare). Elements stack with visible layering and hard offset. Cards and buttons carry thick black borders and solid offset drop-shadows; on press, the shadow collapses as the element shifts into it. Logo is a heavy blocky wordmark, often in a bordered box, high-contrast and blunt.
 
-## 6. Motion & Animation
-  Bounce on hover (transform spring). Click: compress shadow.
-  No slow fades. Everything is instant or snappy.
+MOTION
+Snappy and physical. Hover nudges elements and deepens the hard shadow; click compresses the element into its shadow. No slow fades — everything is instant or springy.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the internet eating itself, Figma but honest, brutality as UX philosophy.`,
+MOOD
+Raw, loud, defiant, playful, blunt — brutalist architecture translated to a rebellious web.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print bold flat blocks with thick black outlines and hard offset shadows — the blocky wordmark, saturated spot colors, no gradients. On digital products (websites, apps, landing pages, social posts), keep thick borders, hard offset shadows, zero rounding, and snappy press feedback. The blocky wordmark stays identical across every medium.
+
+DO: use thick black borders, hard offset shadows, flat saturated blocks, snappy physical feedback.
+DON'T: use gradients, rounded corners, soft shadows, or timid muted color.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   anti_design: {
     title: 'ANTI-DESIGN',
     meta: { origin: '1990s Italian avant-garde / Postmodernism', tags: ['Destructive', 'Collage', 'Postmodern'], desc: "The most radical rebellion in design history. Torn rules, intentional errors, visual conflict — it's not design failure, it's design questioning itself." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Anti-Design aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Anti-Design aesthetic.
 
-## 1. Brand Color System
-  No fixed palette. Colors are chosen to clash, contradict, overwhelm.
-  Use primary red, blue, yellow at full saturation simultaneously.
-  White and black as punctuation, not foundation.
+AESTHETIC
+The most radical rebellion in design history. Torn rules, intentional errors, visual conflict — not design failure but design questioning itself. Emigre magazine, David Carson, the violence of pure graphic intent.
 
-## 2. Typography System
-  Display: Multiple conflicting typefaces in the same layout
-  Mix: serif + sans + monospace + script
-  Rotation: text at ±15° to ±45° intentionally
-  Size: extreme contrast, 8px next to 120px
+PALETTE
+Clashing, contradictory tones layered on dark — chosen to fight, not to harmonize:
+- Beige — #d8c0a8
+- Near-black — #181818 (ground)
+- Mustard — #c09018
+- Muddy tan — #c0a890
+- Teal — #306078
+- Magenta — #c06078
+Colors are picked to clash, contradict, and overwhelm — full-saturation primaries thrown together, black and white as punctuation rather than foundation.
 
-## 3. Anti-Design Layout Principles
-  Grid: deliberately broken. Elements overflow their containers.
-  Overlap: intentional, not accidental.
-  Margin: negative margin as aesthetic choice.
-  Cursor: unexpected, custom, disorienting.
+TYPOGRAPHY
+Multiple conflicting typefaces in one layout — serif, sans, monospace, and script mixed on purpose. Text rotated at wild angles; extreme size contrast, tiny type beside enormous type. Legibility is negotiable.
 
-## 4. UI Component Library (CSS)
-\`\`\`css
-.anti-container {
-  position: relative;
-  overflow: visible; /* elements escape */
-}
-.anti-text {
-  mix-blend-mode: multiply;
-  position: absolute;
-  transform: rotate(var(--r, -12deg));
-}
-.anti-btn {
-  border: 3px solid red;
-  background: yellow;
-  color: blue;
-  font-family: 'Times New Roman', serif;
-  font-size: 20px;
-  padding: 8px 12px;
-  transform: rotate(-3deg);
-  cursor: crosshair;
-}
-\`\`\`
+FORM & LAYOUT
+The grid is deliberately broken; elements overflow their containers, overlap intentionally, and use negative margins as an aesthetic. Multiply blends stack conflicting layers. The cursor is unexpected and disorienting. Logo can shift, rotate, and clash from placement to placement — instability is the point.
 
-## 6. Motion & Animation
-  Anti-design rejects smooth transitions — use jarring, instant state changes.
-  Hover: random rotation shift (CSS custom property reassignment).
-  Click: element jumps position by 8–20px — deliberately wrong feedback.
-  Scroll: parallax in wrong direction on some elements. Rules are for breaking.
-  Cursor: glitch/crosshair, custom SVG that feels inappropriate.
+MOTION
+Anti-design rejects smooth transitions — states change with jarring, instant jumps. Hover reshuffles rotation; clicks jolt elements to the wrong place; some elements parallax in the wrong direction. Rules exist to be broken.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Emigre magazine, David Carson, the violence of pure graphic intent.`,
+MOOD
+Chaotic, confrontational, ironic, raw, disorienting — postmodern Italian avant-garde and 90s deconstruction.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print clashing overlapping type and colors, off-register and tilted — deliberately wrong compositions that still read as intentional. On digital products (websites, apps, landing pages, social posts), break the grid, overlap and overflow elements, mix conflicting type, and use jarring instant motion. The (unstable) wordmark keeps its core letterforms recognizable across every medium.
+
+DO: clash colors and typefaces on purpose, break the grid, overlap and overflow, use jarring instant motion.
+DON'T: harmonize the palette, align to a tidy grid, smooth the transitions, or make it comfortable.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   maximalism: {
     title: 'MAXIMALISM',
     meta: { origin: 'Baroque / Pop Art / Contemporary', tags: ['Abundant', 'Excess', 'Sensory'], desc: 'More is more. Layering, accumulation, saturation to overflow — not filling space, but making space itself a container of energy.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Maximalism aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Maximalism aesthetic.
 
-## 1. Brand Color System
-  Use everything. Every strong color is valid.
-  --color-purple:  #7b2fff;
-  --color-orange:  #ff6600;
-  --color-yellow:  #ffe000;
-  --color-pink:    #ff3399;
-  --color-green:   #00cc66;
-  Key rule: colors must fight each other and look intentional, not accidental.
+AESTHETIC
+More is more. Layering, accumulation, saturation to overflow — not filling space but making space itself a container of energy. A feast for the eyes where restraint is the only sin.
 
-## 2. Typography System
-  Multiple display typefaces. Massive scale. Type as texture.
-  Body text can be small — contrast with enormous display elements.
-  Layer text on top of images, over other text, fill every void.
+PALETTE
+A busy, layered everything-at-once mix of warm creams, deep blues, and gold:
+- Warm cream — #f0d8c0 (base layer)
+- Pale gold-cream — #f0d8a8
+- Deep teal-blue — #003048
+- Midnight blue — #001830
+- Slate blue — #486090
+- Gold — #f0a800 (accent)
+Every strong color is valid; they must fight each other and still look intentional — layered blocks, patterns, and gradient meshes stacked, never a single flat field.
 
-## 3. Layout Principles
-  No white space. Every pixel earns its place or is replaced.
-  Layers: 3–5 overlapping elements per section minimum.
-  Patterns: geometric tiles, gradient meshes, texture fills.
+TYPOGRAPHY
+Multiple display typefaces at massive scale, type used as texture. Body text can be small to contrast enormous display elements. Layer text over images, over other text, filling every void.
 
-## 4. Texture & Pattern System
-\`\`\`css
-.pattern-dots {
-  background-image: radial-gradient(#7b2fff 1px, transparent 1px);
-  background-size: 12px 12px;
-}
-.pattern-lines {
-  background-image: repeating-linear-gradient(
-    45deg, #ff6600, #ff6600 1px, transparent 1px, transparent 8px
-  );
-}
-.layer-mix {
-  mix-blend-mode: multiply;
-  position: absolute;
-  inset: 0;
-}
-\`\`\`
+FORM & LAYOUT
+No white space — every pixel earns its place or is replaced. Three to five overlapping layers per section minimum, with dot patterns, diagonal line fills, gradient meshes, and multiply blends. Restraint is the only sin. Logo is a rich, ornamented mark that can carry pattern fills, sitting confidently amid the chaos.
 
-## 5. Philosophy
-  More is more. Every element competes for attention and all elements win simultaneously.
-  Restraint is the only sin.
+MOTION
+Everything moves, simultaneously, on loop. Background patterns scroll and rotate at different speeds for parallax chaos; hover bursts with scale, brightness, and shadow; elements enter staggered from every direction; something on screen is always subtly animating.
 
-## 6. Motion & Animation
-  Everything moves. Simultaneously. On loop.
-  Background patterns: slow scroll or rotate at different speeds (parallax chaos).
-  Hover: scale(1.05) + brightness boost + drop-shadow burst.
-  Entrance: each element animates in from a different direction, staggered 50ms.
-  Continuous: at least one element on screen is always subtly animating.
+MOOD
+Abundant, exuberant, loud, layered, sensory — Baroque excess meets pop-art overload.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: More is more. A feast for the eyes where restraint is the only sin.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), pack the surface edge to edge with layered pattern, type, and saturated color — all-over prints, busy wraps, the ornamented mark riding on top. On digital products (websites, apps, landing pages, social posts), stack overlapping layers, patterns, and gradient meshes with everything moving. The ornamented mark stays identical across every medium.
+
+DO: fill every void, stack layers and patterns, clash colors intentionally, keep things moving.
+DON'T: leave calm white space, use a single flat color, or hold back — restraint is the only sin.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   memphis: {
     title: 'MEMPHIS',
     meta: { origin: '1980s Italy — Memphis Group / Ettore Sottsass', tags: ['80s', 'Geometric', 'Playful'], desc: 'Founded by Sottsass in 1981 to mock good taste. Polka dots, zigzag patterns, clashing primaries — seriousness is its only taboo.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Memphis Design aesthetic — inspired by the 1980s Milan design movement. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Memphis Design aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #ffffff;
-  --color-yellow:  #fff700;
-  --color-red:     #ff4444;
-  --color-blue:    #00aaff;
-  --color-black:   #000000;
-  --color-pink:    #ff88cc;
-  Rule: Pure primaries + secondaries on white. No gradients in the classic version.
+AESTHETIC
+Founded by Ettore Sottsass in 1981 to mock good taste. Polka dots, zigzag patterns, clashing primaries — seriousness is its only taboo. Sottsass at full volume: geometry as party, pattern as rebellion against good taste.
 
-## 2. Typography System
-  Display: Bold geometric sans (Futura-style) — high contrast, 700+ weight
-  Body: Same family, regular weight
-  Labels: all-caps, tracked
+PALETTE
+Playful 80s clash — mint, yellow, pink, and indigo bouncing on white:
+- Mint teal — #90c0c0 (dominant field)
+- Warm yellow — #f0c030
+- Soft pink — #f0c0d8
+- Indigo — #4848a8
+- Hot pink — #f06090
+- Deep navy — #001860 (outlines / anchor)
+Pure playful hues used as flat blocks on white, meeting at hard edges — no gradients in the classic version, color clashing on purpose.
 
-## 3. Memphis Pattern System (CSS)
-\`\`\`css
-.memphis-dots {
-  background: radial-gradient(circle, #000 1.5px, transparent 1.5px);
-  background-size: 16px 16px;
-}
-.memphis-squiggle {
-  background: repeating-linear-gradient(
-    90deg, transparent, transparent 6px,
-    #ff4444 6px, #ff4444 7px
-  );
-}
-.memphis-zigzag {
-  background: linear-gradient(135deg, #fff700 25%, transparent 25%),
-              linear-gradient(225deg, #fff700 25%, transparent 25%);
-  background-size: 20px 20px;
-}
-\`\`\`
+TYPOGRAPHY
+Bold geometric sans (Futura-style) at heavy weight and high contrast for display; the same family regular for body; labels all-caps and tracked.
 
-## 4. Shape Language
-  Squiggly lines, polka dots, lightning bolts, palm trees.
-  Geometric shapes: triangles, circles, squares — always outlined or filled solid.
-  Nothing rounded unless it is a perfect circle.
+FORM & LAYOUT
+The shape vocabulary is squiggly lines, polka dots, lightning bolts, palm trees, triangles, circles, and squares — always outlined or filled solid, nothing rounded unless it is a perfect circle. Patterns (dot fields, squiggle stripes, zigzag tiles) fill panels. Compositions scatter shapes with joyful imbalance. Logo is a bold geometric wordmark surrounded by scattered Memphis shapes.
 
-## 6. Motion & Animation
-  Bounce with spring physics. Geometric shapes rotate.
-  Pattern tiles slide on enter. Jump cuts, no fades.
+MOTION
+Springy and playful. Shapes bounce and rotate, pattern tiles slide in on entrance, transitions are jump cuts rather than fades.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Ettore Sottsass at full volume — geometry as party, pattern as rebellion against good taste.`,
+MOOD
+Playful, irreverent, energetic, clashing, nostalgic — the 1980s Milan Memphis Group at a party.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print flat clashing spot colors, scattered squiggles, dots, and geometric shapes on white — bold, playful, screen-print clean. On digital products (websites, apps, landing pages, social posts), scatter geometric shapes and patterns, clash the primaries, and use springy bouncy motion. The bold wordmark stays identical across every medium.
+
+DO: scatter geometric shapes and patterns, clash bright hues on white, keep edges hard, bounce playfully.
+DON'T: use gradients, muted or tasteful color, soft rounded blobs, or a serious tone.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   glitch: {
     title: 'GLITCH ART',
     meta: { origin: 'Digital error aesthetics / Hacker culture / Net art', tags: ['Glitch', 'Distortion', 'Digital'], desc: 'Turn system crashes into art. RGB shifts, pixel tears, signal noise — post-punk of the digital age, truth through technical flaw.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Glitch Art / Digital Distortion aesthetic — inspired by data corruption, CRT monitors, and digital error culture. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Glitch Art aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #050510;
-  --color-cyan:    #00ffff;
-  --color-magenta: #ff00ff;
-  --color-yellow:  #ffff00;
-  --color-white:   #ffffff;
-  Rule: Colors appear as RGB channel separation (offset R, G, B layers)
+AESTHETIC
+Turn system crashes into art. RGB shifts, pixel tears, signal noise — the post-punk of the digital age, truth through technical flaw. Digital corruption as art, the beauty of broken signals, cyberpunk meeting net.art.
 
-## 2. Typography System
-  Display: "Space Mono" or "IBM Plex Mono" — monospace, 700 weight
-  Glitch style: text with CSS text-shadow creating RGB offset (2–4px R/G/B split)
-  Effect: occasional character corruption — replace letters with █ or ▓ symbols
+PALETTE
+A dark navy-black field torn by RGB-split cyan and blue digital artifacts:
+- Blackest navy — #000018 (background)
+- Deep navy — #000030
+- Blue-black — #181830
+- Dark teal-navy — #001830
+- Signal blue — #184860 (artifact glow)
+Colors appear as separated RGB channels — offset cyan, magenta, and blue layers glitching over near-black, never smooth blends.
 
-## 3. Glitch Effect System (CSS)
-\`\`\`css
-@keyframes glitch-1 {
-  0%,95%,100% { clip-path: inset(0); transform: translateX(0); }
-  96% { clip-path: inset(20% 0 60% 0); transform: translateX(-8px); }
-  97% { clip-path: inset(50% 0 20% 0); transform: translateX(8px); }
-  98% { clip-path: inset(80% 0 5% 0); transform: translateX(-4px); }
-}
-.glitch-text {
-  position: relative;
-  color: #fff;
-}
-.glitch-text::before {
-  content: attr(data-text);
-  position: absolute;
-  left: 2px;
-  color: #ff00ff;
-  animation: glitch-1 4s infinite;
-}
-.glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  left: -2px;
-  color: #00ffff;
-  animation: glitch-1 4s infinite 0.1s;
-}
-\`\`\`
+TYPOGRAPHY
+Monospace display (Space Mono / IBM Plex Mono) at heavy weight. Text carries an RGB channel offset — cyan and magenta ghosts split a few pixels apart. Occasional character corruption swaps letters for block glyphs.
 
-## 5. UI Component Library
-  Scanlines: repeating horizontal lines via background
-  VHS tracking: slight vertical offset on large image blocks
-  Error state: red/white striped border on form errors
-  Loading: terminal-style blinking cursor + "LOADING..." text
+FORM & LAYOUT
+Scanlines texture the surfaces; large image blocks show VHS tracking offsets. Error states use red-and-white striped borders; loading is a terminal blinking cursor with "LOADING..." text. Logo is a glitched wordmark with an RGB split, on dark only. Layers displace, clip into bands, and flicker.
 
-## 6. Motion & Animation
-  Glitch trigger: on hover or load, run @keyframes glitch-shift 0.2s 3 times.
-  Continuous: scanline overlay scrolls top-to-bottom at 0.5px/frame.
-  Text: RGB channel split on hover (translateX ±3px for ::before/::after).
-  Transition: none between states — glitch appearance is instantaneous.
-  Audio metaphor: every interaction sounds like static or a dropped signal.
+MOTION
+Glitch triggers on hover or load — rapid displacement and channel-split bursts; a scanline overlay scrolls continuously; text splits its RGB channels on hover. Transitions between states are instantaneous — glitch appears, it does not ease. Every interaction feels like static or a dropped signal.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: digital corruption as art, the beauty of broken signals, cyberpunk meets net.art.`,
+MOOD
+Corrupted, electric, unstable, digital, rebellious — data corruption, CRT monitors, net.art.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print RGB-split glitched artwork and scanline textures on black stock — offset channels, torn bands, the glitched wordmark, neon-on-dark. On digital products (websites, apps, landing pages, social posts), use RGB channel offsets, scanlines, VHS tracking, and instant glitch bursts. The glitched wordmark stays identical across every medium.
+
+DO: split colors into offset RGB channels, add scanlines and VHS tears, glitch on trigger, keep the base dark.
+DON'T: use smooth gradients, light backgrounds, gentle eased transitions, or clean untouched type.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   kinetic_typo: {
     title: 'KINETIC TYPOGRAPHY',
     meta: { origin: 'Motion graphics / 1960s experimental film', tags: ['Kinetic', 'Type', 'Rhythm'], desc: "Type becomes the protagonist. Size, speed, and rhythm form visual music — text isn't just read, it's felt." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Kinetic Typography aesthetic — where type IS the design and motion IS the message. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Kinetic Typography aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #0a0a0a;
-  --color-text:    #ffffff;
-  --color-accent:  #ff3300;   /* single kinetic accent */
-  Rule: Reduce to black, white, one accent. Let the motion provide richness.
+AESTHETIC
+Type becomes the protagonist. Size, speed, and rhythm form visual music — text isn't just read, it's felt. The word as image, language as spectacle, motion as meaning.
 
-## 2. Typography System
-  Only 1–2 typefaces, but used at extreme scale range.
-  Display: Condensed grotesque or variable font (for animation)
-  Minimum: 8px (caption) to 360px (full-screen letter)
-  Variable fonts preferred for weight/width animation.
+PALETTE
+A warm cream ground carrying bold orange-red type, with a teal accent for contrast:
+- Warm cream — #f0d8c0 (ground)
+- Bold orange-red — #f06030 (primary type / accent)
+- Teal — #78a8a8 (secondary accent)
+Reduced to a small set so the motion provides the richness — one warm ground, one loud type color, one cool accent.
 
-## 3. Kinetic Text Animation System (CSS)
-\`\`\`css
-@keyframes word-reveal {
-  from { clip-path: inset(0 100% 0 0); }
-  to   { clip-path: inset(0 0% 0 0); }
-}
-@keyframes char-up {
-  from { transform: translateY(110%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-@keyframes weight-pulse {
-  0%,100% { font-variation-settings: 'wght' 200; }
-  50%     { font-variation-settings: 'wght' 900; }
-}
-.reveal-word { animation: word-reveal 0.6s cubic-bezier(0.77,0,0.175,1) both; }
-.reveal-char { animation: char-up 0.5s cubic-bezier(0.23,1,0.32,1) both; }
-\`\`\`
+TYPOGRAPHY
+Only one or two typefaces, but used across an extreme scale range — from tiny captions to full-screen single letters. A condensed grotesque or variable font is preferred so weight and width can animate. Counters, time displays, and number sequences act as hero elements.
 
-## 4. Layout Principles
-  Text is layout. No decoration needed — type fills the canvas.
-  Single word can occupy a full viewport. This is intentional.
-  Counters, time displays, number sequences as hero elements.
+FORM & LAYOUT
+Text is the layout — no decoration needed; type fills the canvas. A single word can occupy a full viewport, intentionally. Composition is driven by scale contrast and rhythm rather than ornament or imagery. Logo is a pure typographic mark that can flex weight and width.
 
-## 6. Motion Vocabulary
-  Reveal: mask wipe (clip-path), line-by-line, char-by-char
-  Exit: compress to 0 height, reverse reveal
-  Continuous: scroll-linked, physics-based following
+MOTION
+Motion is the message. Reveals use mask wipes line-by-line and character-by-character; letters rise and settle; weight pulses. Exits compress and reverse the reveal. Continuous motion is scroll-linked and physics-based, type following with momentum.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the word as image, language as spectacle, motion as meaning.`,
+MOOD
+Rhythmic, bold, expressive, kinetic, musical — motion-graphics title sequences and experimental type film.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), let oversized cropped type dominate the surface — a single word or letter at extreme scale in orange-red on cream, type as the whole graphic. On digital products (websites, apps, landing pages, social posts), animate type reveals, weight pulses, and scroll-linked motion, letting words fill the viewport. The typographic mark stays identical across every medium.
+
+DO: let type fill the canvas, use extreme scale contrast, animate reveals and weight, keep the palette tight.
+DON'T: add decorative imagery, use many typefaces, clutter with ornament, or keep everything static.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   surreal_3d: {
     title: 'SURREAL 3D',
     meta: { origin: 'Dalí surrealism / CGI art / Beeple', tags: ['Surreal', '3D', 'Dreamlike'], desc: 'Dalí painted dreams; today we render them with Blender and AI. Physics broken, logic dissolved — strangeness is the strongest weapon for attention.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Surreal 3D aesthetic — dream spaces, impossible physics, objects at wrong scale. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Surreal 3D aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #1a0a40;   /* deep violet dream */
-  --color-surface: #2d1a6e;
-  --color-glow:    #8800ff;
-  --color-pink:    #ff88cc;
-  --color-white:   #f8f0ff;
-  Gradients: purple→pink, violet→electric blue. Always atmospheric.
+AESTHETIC
+Dalí painted dreams; today we render them with Blender and AI. Physics broken, logic dissolved, objects at the wrong scale — strangeness as the strongest weapon for attention. Between sleep and waking, where proportion is feeling and space is emotion.
 
-## 2. Typography System
-  Display: Elegant serif or rounded display — dreamlike softness
-  Body: "DM Sans" — 300 weight, floaty line-height 2.0
-  Text feels like it's floating, not anchored.
+PALETTE
+Soft pastel lavender, pink, and lilac dreamy render tones:
+- Lilac — #c0a8c0 (base)
+- Periwinkle gray — #a8a8c0
+- Blush — #d8c0c0
+- Soft pink — #f0c0c0
+- Pale lavender — #d8c0d8
+- Muted violet — #a890c0
+Atmospheric pastel gradients drift between these tones — soft, glowing, never harsh; color reads as diffused dream light on rendered forms.
 
-## 3. 3D CSS Illusion System
-\`\`\`css
-.floating-object {
-  animation: float 6s ease-in-out infinite;
-  filter: drop-shadow(0 40px 60px rgba(136,0,255,0.4));
-}
-@keyframes float {
-  0%,100% { transform: translateY(0) rotate(0deg); }
-  33%     { transform: translateY(-20px) rotate(2deg); }
-  66%     { transform: translateY(-10px) rotate(-1deg); }
-}
-.surreal-bg {
-  background: radial-gradient(ellipse at 30% 20%, #8800ff 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, #ff88cc 0%, transparent 50%),
-              #1a0a40;
-}
-\`\`\`
+TYPOGRAPHY
+An elegant serif or rounded display for dreamlike softness; DM Sans light for body at very open line-height. Text feels like it is floating, not anchored.
 
-## 4. Visual Vocabulary
-  Objects at impossible scale: giant everyday objects.
-  Portals, mirrors, infinite reflections.
-  Soft atmospheric fog/haze on all depth layers.
+FORM & LAYOUT
+Impossible physics: everyday objects at giant scale, portals, mirrors, infinite reflections, soft atmospheric fog on every depth layer. Forms cast long soft glows and float. Logo is a soft mark that can sit as a rendered 3D object within the dream space. Composition prizes depth, haze, and impossible proportion over grid.
 
-## 6. Motion & Animation
-  Everything floats with slight rotation.
-  Parallax: foreground moves 3× faster than background.
-  Entrance: scale from 0.5 + blur 20px → normal, 1s spring.
+MOTION
+Everything floats with slight rotation. Foreground parallaxes faster than background; entrances scale up from small and blurred into focus with a soft spring. Motion is weightless and continuous.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: between sleep and waking, where proportion is feeling and space is emotion.`,
+MOOD
+Dreamlike, surreal, weightless, uncanny, soft — Dalí, Beeple, and CGI dreamscapes.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print soft pastel dreamscapes with floating oversized objects and hazy glows — rendered surreal imagery, the soft mark placed within it. On digital products (websites, apps, landing pages, social posts), float 3D-feeling objects in pastel fog with depth parallax and soft spring entrances. The mark stays identical across every medium.
+
+DO: float objects with soft glows, use pastel atmospheric gradients, break scale and physics, keep motion weightless.
+DON'T: use hard edges, saturated harsh color, rigid grids, or snappy mechanical motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   // ══════════════════════════════════════
@@ -4841,236 +4378,157 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: betwee
   bauhaus: {
     title: 'BAUHAUS',
     meta: { origin: '1919 Bauhaus School, Germany / Walter Gropius', tags: ['Functionalism', 'Geometric', 'Origin of Modern Design'], desc: 'The grandfather of all modern design. Form follows function, primary colors, elementary shapes — this school lasted 14 years and defined the next 100 years of aesthetics.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Bauhaus aesthetic — form follows function, elementary geometry, primary colors. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Bauhaus aesthetic.
 
-## 1. Brand Color System
-  --color-red:     #e8192c;
-  --color-yellow:  #f5d800;
-  --color-blue:    #0057a8;
-  --color-black:   #000000;
-  --color-white:   #ffffff;
-  Rule: ONLY these 5 colors. Any tint is a betrayal.
+AESTHETIC
+The grandfather of all modern design. Form follows function, elementary shapes, primary color — a school that lasted 14 years and defined the next hundred. Gropius's school made digital: elementary forms, revolutionary function, timeless geometry.
 
-## 2. Typography System
-  Display: Universal typeface (geometric sans — Futura, Bauhaus 93)
-  No decorative fonts. No serifs.
-  Body: geometric sans, regular weight, 16px
-  All type aligns to invisible grid axes.
+PALETTE
+Elementary primaries and warm neutrals, flat and unmixed:
+- Cream / tan ground — #f0d8a8 (background)
+- Warm tan — #d8c090
+- Deep teal — #003030 (anchor)
+- Golden yellow — #d89000
+- Orange — #d89000
+- Red-orange — #c03000
+Colors are pure flat fills — a compact primary-leaning set on warm ground, any muddy tint is a betrayal.
 
-## 3. Logo Concept for [BRAND]
-  Geometric construction using only circles, squares, triangles.
-  Primary color fill. Black outline optional.
-  Can be assembled from pure CSS shapes — no SVG files needed.
+TYPOGRAPHY
+A geometric sans (Universal / Futura / Bauhaus-style) — no serifs, no decorative fonts. Display geometric and confident, body the same family at regular weight. All type aligns to invisible grid axes.
 
-## 4. Geometric Design System (CSS)
-\`\`\`css
-.bauhaus-circle { border-radius: 50%; }
-.bauhaus-square { border-radius: 0; }
-.bauhaus-triangle {
-  width: 0; height: 0;
-  border-left: 40px solid transparent;
-  border-right: 40px solid transparent;
-  border-bottom: 70px solid #e8192c;
-}
-.bauhaus-composition {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  background: #000;
-}
-\`\`\`
+FORM & LAYOUT
+Everything derives from the grid. Compositions are built from only circles, squares, and triangles in primary fills with optional black outline, arranged in asymmetric balance — heavy on one side, light on the other. Photography uses geometric crops or primary-color duotone. Logo is a geometric construction from pure elementary shapes.
 
-## 5. Layout Principles
-  Grid first. Everything derives from the grid.
-  Asymmetric balance: heavy left, light right (or vice versa).
-  Photography: geometric crop, primary color duotone.
+MOTION
+Structural, not decorative — only purposeful transitions. Motion is mechanical and linear with no easing curves or spring; hover shifts along a single axis; color blocks swap with a quick crossfade. No rotation, blur, or shadow animation — geometry is static by nature.
 
-## 6. Motion & Animation
-  Motion is structural, not decorative. Only purposeful transitions.
-  Transitions: 0.25s linear — no ease curves, no spring. Bauhaus is mechanical.
-  Hover: single-axis translate (left 4px or up 4px) — axis-aligned only.
-  State change: color block swaps with 0.15s linear crossfade.
-  No rotation, no blur, no shadow animations — geometry is static by nature.
+MOOD
+Rational, elemental, functional, bold, timeless — the 1919 Bauhaus school, Gropius, Kandinsky.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Gropius's school made digital — elementary forms, revolutionary function, timeless geometry.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print flat primary shapes — circles, squares, triangles — in single-pass color on warm or white stock, the geometric mark crisp and hard-edged. On digital products (websites, apps, landing pages, social posts), build from the grid with elementary shapes in primary fills, asymmetric balance, and mechanical linear motion. The geometric mark stays identical across every medium.
+
+DO: build from circles, squares, and triangles, use flat primary color, derive everything from the grid, keep motion axis-aligned.
+DON'T: use gradients, muddy tints, decorative fonts, or rotation and blur effects.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   synthwave: {
     title: 'SYNTHWAVE',
     meta: { origin: '1980s synth music / Drive / Neon Demon', tags: ['Retro-Future', 'Neon', '80s'], desc: "The future the 1980s never actually got. Hot pink and purple neon, grid horizons, chrome reflections — nostalgia isn't the past, it's another universe." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Synthwave aesthetic — 80s electronics, neon grids, analog synthesizers. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Synthwave aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #0d0020;
-  --color-purple:  #7b2fff;
-  --color-pink:    #ff71ce;
-  --color-blue:    #01cdfe;
-  --color-yellow:  #fffb96;
-  --color-grid:    rgba(123,47,255,0.3);
-  Gradients: always diagonal or radial, purple→pink or dark→neon.
+AESTHETIC
+The future the 1980s never actually got. Hot pink and purple neon, grid horizons, chrome reflections — nostalgia isn't the past, it's another universe. Kavinsky, Perturbator, Outrun: nostalgia for a future that never existed.
 
-## 2. Typography System
-  Display: "Orbitron", "Syncopate", or retro-future geometric sans
-  Body: "Rajdhani" or clean geometric — 300 weight, slightly wide tracking
-  All-caps for hero elements. Neon glow on headlines.
+PALETTE
+A retro sunset gradient from pink into deep blues and purples:
+- Sunset pink — #f0c0c0 (glow / highlight)
+- Royal blue — #3060a8
+- Cornflower — #6078c0
+- Steel blue — #4878a8
+- Periwinkle purple — #7878c0
+- Deep space purple base — implied dark ground beneath the grid
+Gradients are always diagonal or radial, running dark into neon and pink into blue — color reads as glowing light, not flat fill.
 
-## 3. Synthwave Visual System (CSS)
-\`\`\`css
-.synthwave-bg {
-  background:
-    linear-gradient(0deg, rgba(123,47,255,0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(123,47,255,0.3) 1px, transparent 1px),
-    linear-gradient(180deg, #0d0020 0%, #1a0050 50%, #0d0020 100%);
-  background-size: 40px 40px, 40px 40px, 100% 100%;
-  perspective: 400px;
-}
-.neon-glow {
-  color: #ff71ce;
-  text-shadow:
-    0 0 4px #ff71ce,
-    0 0 20px rgba(255,113,206,0.5),
-    0 0 60px rgba(255,113,206,0.2);
-}
-.chrome-text {
-  background: linear-gradient(180deg, #fffb96, #ff71ce, #7b2fff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-\`\`\`
+TYPOGRAPHY
+A retro-future geometric sans (Orbitron / Syncopate) for display, all-caps with neon glow on headlines; a clean geometric sans (Rajdhani) for body at light weight with slightly wide tracking.
 
-## 4. Elements
-  Perspective grid (horizon line, vanishing point).
-  Sun: large semicircle with horizontal stripe cutouts.
-  Mountains: dark silhouette on horizon.
-  Palm trees: dark outline, neon highlight edge.
+FORM & LAYOUT
+The signature elements are a perspective grid receding to a horizon and vanishing point, a large striped sun, dark mountain silhouettes, and palm trees with neon-edge highlights. Chrome-gradient text and neon glow define headlines. Logo is a chrome or neon wordmark over the grid horizon. Composition is centered and horizon-anchored.
 
-## 6. Motion & Animation
-  Grid scroll: perspective grid moves toward viewer (translateZ).
-  Sun stripes: slow descend animation.
-  Text: neon flicker (opacity 0.8→1 rapid oscillation).
+MOTION
+The perspective grid scrolls toward the viewer; sun stripes descend slowly; headline text flickers with a subtle neon oscillation. Motion is smooth and hypnotic.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Kavinsky, Perturbator, Outrun — nostalgia for a future that never existed.`,
+MOOD
+Nostalgic, neon, retro-futuristic, dreamy, electric — 80s synth music, Drive, Outrun.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print glowing gradient grids, striped suns, and neon-edged chrome type on dark stock — sunset-to-blue gradients, foil or gloss where possible. On digital products (websites, apps, landing pages, social posts), use the perspective grid, striped sun, neon glow, and chrome text with hypnotic forward motion. The chrome/neon wordmark stays identical across every medium.
+
+DO: use diagonal neon gradients, perspective grids and striped suns, chrome and neon glow, smooth forward motion.
+DON'T: use flat daylight color, hard matte fills, rigid corporate grids, or snappy abrupt motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   y2k: {
     title: 'Y2K REVIVAL',
     meta: { origin: '1999–2003 dot-com era / Y2K internet', tags: ['Millennium', 'Retro-Digital', 'Internet'], desc: 'The era that believed the future would be chrome and rainbow gradients. Bubble type, holographic stickers, pixelated borders — naive tech optimism, beautifully excessive.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Y2K Revival aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Y2K Revival aesthetic.
 
-## 1. Brand Color System
-  --color-primary:   #FF006E;   /* hot pink */
-  --color-secondary: #8338EC;   /* electric purple */
-  --color-chrome:    #C0C0C0;   /* metallic silver */
-  --color-neon-blue: #00BFFF;
-  --color-bg:        #0a0010;
-  All gradients diagonal (135deg). Iridescent/holographic shimmer effects.
+AESTHETIC
+The era that believed the future would be chrome and rainbow gradients. Bubble type, holographic stickers, pixelated borders — naive tech optimism, beautifully excessive. THE FUTURE IS NOW energy: chrome, holographic, neon, maximalist, the optimism of 1999–2004.
 
-## 2. Typography System
-  Display: "Impact" or "Bebas Neue" — 900 weight, ALL CAPS, metallic shine
-  Body: "Tahoma" — 400 weight, 14–16px
-  Special: rainbow gradient text-fill-color on hero titles.
+PALETTE
+Glossy metallic blues and purples with iridescent shimmer:
+- Chrome blue — #1860a8
+- Royal blue — #3060a8
+- Cyan-blue — #3078a8
+- Lilac — #c0a8c0
+- Electric purple — #604890
+- Metallic silver highlight — implied chrome sheen across all
+All gradients are diagonal with an iridescent, holographic shimmer — surfaces look wet, chromed, and reflective, never matte flat.
 
-## 3. Logo Concept for [BRAND]
-  Chrome gradient wordmark: linear-gradient(135deg, #C0C0C0, #fff, #C0C0C0)
-  Drop shadow in hot pink: 2px 2px 0 #FF006E
-  Star/diamond motifs (★ ✦ ◆) as logo mark.
+TYPOGRAPHY
+A bold display (Impact / Bebas Neue) at heavy weight, all caps, with a metallic shine; Tahoma for body. Hero titles carry a rainbow or chrome gradient fill.
 
-## 4. Y2K Visual Effects (CSS)
-\`\`\`css
-.holographic {
-  background: conic-gradient(
-    #FF006E, #8338EC, #00BFFF, #FF006E
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: holo-rotate 3s linear infinite;
-}
-@keyframes holo-rotate {
-  to { filter: hue-rotate(360deg); }
-}
-.chrome-border {
-  border: 2px solid;
-  border-image: linear-gradient(135deg, #C0C0C0, #fff, #C0C0C0, #888) 1;
-}
-\`\`\`
+FORM & LAYOUT
+Chrome-gradient wordmarks with hot-accent drop shadows, star and diamond motifs, iridescent foil borders, and glossy beveled surfaces. Buttons combine chrome borders with diagonal gradient hovers; badges use holographic foil; cards have iridescent borders and chrome inner shadows. Logo is a chrome-gradient wordmark with star/diamond marks. Everything looks like a shiny sticker or bubble.
 
-## 5. UI Component Library
-  Buttons: hot pink + chrome border + diagonal gradient hover
-  Cards: iridescent border, dark surface, chrome inner shadow
-  Badges: holographic foil gradient background
-  Progress: animated gradient fill with star endpoint
+MOTION
+Holographic elements rotate their hue; entrances pop in with a brash spring; a sparkle or star trail follows the cursor; chrome gradients shimmer by shifting position. Motion is playful and immediate.
 
-## 6. Motion & Animation
-  Holo-rotate: filter hue-rotate 360deg in 3s on hover (chrome/holographic elements).
-  Entrance: scale(0) → scale(1) with 0.3s spring — brash and immediate.
-  Cursor trail: sparkle/star particles follow the cursor.
-  Text shimmer: background-position shift across chrome gradient.
+MOOD
+Glossy, optimistic, futuristic, playful, excessive — the dot-com millennium, chrome and holographic 2000s.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: THE FUTURE IS NOW energy — chrome, holographic, neon, maximalist, futuristic optimism of 1999–2004.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), lean into holographic foil, chrome gradients, and glossy finishes — iridescent stickers, star motifs, shiny wraps. On digital products (websites, apps, landing pages, social posts), use chrome and rainbow gradients, iridescent borders, sparkle motion, and glossy bevels. The chrome-gradient wordmark stays identical across every medium.
+
+DO: use chrome and iridescent gradients, star and diamond motifs, glossy bevels, sparkle motion.
+DON'T: use flat matte color, muted restraint, hairline minimalism, or slow subdued motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   cassette_fut: {
     title: 'CASSETTE FUTURISM',
     meta: { origin: '1970s–80s sci-fi / Soviet futurism / Alien', tags: ['Retro Sci-Fi', 'Mechanical', 'Worn'], desc: 'Alien spaceships, Soviet space stations, 70s sci-fi magazine covers. The universe imagined on tape — clunky, tactile, gloriously human-flavored futures.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cassette Futurism aesthetic — the analog sci-fi of the late 20th century: physical buttons, CRT screens, magnetic tape, modular hardware. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Cassette Futurism aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #1a1a1a;
-  --color-surface: #2a2a2a;
-  --color-text:    #e8e0cc;   /* warm off-white */
-  --color-amber:   #ff9900;   /* LED amber */
-  --color-green:   #00cc44;   /* phosphor green */
-  --color-chrome:  #999999;
-  Textures: brushed aluminum, matte plastic, rubber grip.
+AESTHETIC
+Alien spaceships, Soviet space stations, 70s sci-fi magazine covers — the universe imagined on tape. Physical buttons, CRT screens, magnetic tape, modular hardware: clunky, tactile, gloriously human-flavored futures. The future as imagined by 1978 — warm, tactile, mechanical, beautifully analog.
 
-## 2. Typography System
-  Display: "VT323", "Share Tech Mono", or "Courier New" — terminal/label feel
-  Body: "Space Mono" — technical documentation style
-  Physical labels: embossed all-caps, tight tracking
+PALETTE
+Deep midnight blue and purple retro-future darkness lit by amber and phosphor:
+- Midnight blue — #000030 (background)
+- Deep blue panel — #001848
+- Black — #000000
+- Indigo — #181848
+- Deep blue-violet — #181860
+- Dark purple — #301848
+Warm amber LEDs and phosphor-green readouts glow out of the dark hardware; surfaces suggest brushed aluminum, matte plastic, and rubber grip.
 
-## 3. Hardware Interface System (CSS)
-\`\`\`css
-.cassette-panel {
-  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-  border: 1px solid #444;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 8px rgba(0,0,0,0.5);
-  border-radius: 4px;
-}
-.led-indicator {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #ff9900;
-  box-shadow: 0 0 6px #ff9900, 0 0 12px rgba(255,153,0,0.5);
-  animation: led-pulse 2s ease-in-out infinite;
-}
-.crt-screen {
-  background: #000;
-  color: #00cc44;
-  font-family: 'Space Mono', monospace;
-  text-shadow: 0 0 4px #00cc44;
-  border-radius: 8px;
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-}
-\`\`\`
+TYPOGRAPHY
+A terminal/label face (VT323 / Share Tech Mono / Courier) for display; Space Mono for body in a technical-documentation style; physical labels embossed all-caps with tight tracking.
 
-## 5. Physical Control Language
-  Recessed buttons with embossed labels.
-  LED status indicators (pulse animation).
-  VU meters and analog dials (SVG arcs).
-  Tape reel animation (spinning circles).
+FORM & LAYOUT
+Hardware-panel construction: recessed buttons with embossed labels, glowing LED status indicators, VU meters and analog dials, spinning tape reels. Panels have inset highlights and heavy drop-shadows like molded plastic. CRT screens glow phosphor-green with inset shadow. Logo is a stamped or embossed label-plate wordmark on a hardware panel.
 
-## 6. Motion & Animation
-  Mechanical, not digital. Transitions mimic physical movement.
-  Tape reel: rotate 360deg linear infinite, speed tied to "playback state".
-  VU meter: height lerp based on data value, 60fps update.
-  Button press: translateY(2px) + inner shadow deepens — feels physical.
-  Loading: analog dial sweep 0→270deg over 1.5s ease-in-out.
+MOTION
+Mechanical, not digital — motion mimics physical movement. Tape reels rotate, VU meters lerp with data, buttons depress with deepening inner shadow, loading is an analog dial sweep. Everything feels weighted and tactile.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the future as imagined by 1978 — warm, tactile, mechanical, beautifully analog.`,
+MOOD
+Analog, tactile, mechanical, retro-futuristic, worn — Alien's Nostromo, Soviet futurism, 70s sci-fi hardware.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print hardware-panel graphics — embossed label plates, LED dots, VU meters, tape reels — with amber and phosphor accents on dark stock. On digital products (websites, apps, landing pages, social posts), build molded hardware panels with recessed buttons, glowing indicators, CRT readouts, and mechanical motion. The label-plate wordmark stays identical across every medium.
+
+DO: build tactile hardware panels, glow amber and phosphor-green, use dials, LEDs, and tape reels, move mechanically.
+DON'T: use flat clean UI, bright saturated color, weightless motion, or glossy modern minimalism.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   // ══════════════════════════════════════
@@ -5080,210 +4538,156 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the fu
   organic_modern: {
     title: 'ORGANIC MODERN',
     meta: { origin: 'Contemporary interior design / Lifestyle brands / 2020s', tags: ['Organic', 'Natural', 'Modern'], desc: "The minimalism in high-end homes. Flowing forms, natural material colors, soft curves — not environmentalism, but turning nature into a luxury." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Organic Modern aesthetic. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Organic Modern aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #f5f0e8;   /* warm linen */
-  --color-surface: #ede8de;
-  --color-text:    #2d2419;
-  --color-mid:     #a08870;
-  --color-accent:  #7a6050;   /* warm brown */
-  --color-green:   #8a9a7a;   /* muted sage */
-  Rule: No sharp colors. Everything muted, warm, natural.
+AESTHETIC
+The minimalism found in high-end homes. Flowing forms, natural material colors, soft curves — not environmentalism, but turning nature into a luxury. Grown, not made: the comfort of natural rhythm, the intelligence of living forms.
 
-## 2. Typography System
-  Display: Soft serif or humanist sans — approachable, never cold
-  Body: "DM Sans" — 300 weight, generous line-height 1.9
-  Organic letterforms: slight irregularity is preferred.
+PALETTE
+Sage and olive greens grounded by warm earth and terracotta:
+- Sage green — #486048 (primary)
+- Warm sand — #a8a878
+- Olive — #909060
+- Pale moss — #c0c090
+- Deep earth — #484830 (text)
+- Terracotta — #a86030 (accent)
+Everything is muted, warm, and natural — no sharp or bright colors, tones like clay, moss, and stone.
 
-## 3. Organic Shape Language (CSS)
-\`\`\`css
-.organic-card {
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-  background: var(--color-surface);
-}
-.blob {
-  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-  animation: morph 8s ease-in-out infinite;
-}
-@keyframes morph {
-  0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-  50%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-}
-\`\`\`
+TYPOGRAPHY
+A soft serif or humanist sans — approachable, never cold — for display; DM Sans light for body at generous line-height. Slight irregularity in letterforms is preferred over mechanical precision.
 
-## 4. Layout Principles
-  Asymmetric organic curves in section backgrounds.
-  No hard edges. Every corner is softened.
-  Photography: natural materials, skin, plants, ceramics, stone.
+FORM & LAYOUT
+Organic asymmetric curves in section backgrounds; no hard edges — every corner softened, with blob and pebble shapes. Photography features natural materials, skin, plants, ceramics, and stone. Cards take irregular organic radii. Logo is a soft mark that could be hand-drawn or pebble-like. Composition breathes with asymmetry.
 
-## 6. Motion & Animation
-  Slow morphing shapes as ambient background.
-  Scroll: gentle parallax 0.15× speed.
-  Hover: soft scale 1.02 with shadow bloom.
+MOTION
+Slow morphing shapes drift as ambient background; scroll parallax is gentle; hover brings a soft scale and shadow bloom. Nothing snaps — everything grows and eases.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: grown not made — the comfort of natural rhythm, the intelligence of living forms.`,
+MOOD
+Calm, natural, warm, tactile, refined — contemporary organic interiors and elevated lifestyle brands.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), use earthy natural inks and soft organic shapes on unbleached, ceramic, or stone-like materials — the soft mark, muted greens and terracotta. On digital products (websites, apps, landing pages, social posts), use organic curved sections, blob shapes, softened corners, and slow morphing motion. The soft mark stays identical across every medium.
+
+DO: use flowing organic curves, muted earthy greens and terracotta, soften every corner, move slowly.
+DON'T: use hard edges, bright saturated color, rigid grids, or snappy mechanical motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   biophilic: {
     title: 'BIOPHILIC',
     meta: { origin: 'Biophilic design theory / Sustainable brand movement', tags: ['Nature', 'Plants', 'Sustainable'], desc: "Humans lived in the wild for millions of years and entered boxes only 200 years ago. Biophilic design rebuilds the path home through the digital interface." },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Biophilic Design aesthetic — connecting humans to nature through digital interfaces. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Biophilic Design aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #f0f5ed;   /* morning leaf */
-  --color-deep:    #1a3a1a;   /* forest shadow */
-  --color-green1:  #5a8a5a;   /* mid-canopy */
-  --color-green2:  #88cc88;   /* new growth */
-  --color-earth:   #a08060;
-  --color-light:   #e8f0e0;   /* dappled sunlight */
+AESTHETIC
+Humans lived in the wild for millions of years and entered boxes only 200 years ago. Biophilic design rebuilds the path home through the digital interface — connecting people to nature. The forest floor translated to pixels: alive, breathing, quietly intelligent.
 
-## 2. Typography System
-  Display: Humanist serif — organic intelligence, not corporate
-  Body: "DM Sans" — 300 weight, breathing line-height 1.9
-  Rhythm: spacing mimics breath cycles (exhale = open space)
+PALETTE
+Deep forest greens with warm sand and a rust accent:
+- Warm sand — #d8c090 (light ground / dappled light)
+- Forest shadow — #183018 (deepest green)
+- Canopy green — #304818
+- Rust / clay — #c04800 (accent)
+- Dark moss — #484818
+Greens dominate as the living base, sand brings dappled light, and rust-clay is the single warm accent — natural, layered, never neon.
 
-## 3. Natural Texture System (CSS)
-\`\`\`css
-.leaf-texture {
-  background-image: url("data:image/svg+xml,...");  /* leaf vein SVG pattern */
-  background-size: 200px 200px;
-  opacity: 0.04;
-}
-.dappled-light {
-  background: radial-gradient(ellipse 60% 40% at 30% 20%,
-    rgba(232,240,224,0.6) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 70% 60%,
-    rgba(200,225,180,0.4) 0%, transparent 50%),
-    #f0f5ed;
-}
-.organic-divider {
-  height: 80px;
-  background: url("wave-path.svg") no-repeat center;
-  background-size: cover;
-}
-\`\`\`
+TYPOGRAPHY
+A humanist serif with organic intelligence (never corporate) for display; DM Sans light for body at breathing line-height. Spacing mimics breath cycles — open space reads as an exhale.
 
-## 5. Principles
-  Photography: golden hour, close-up textures, water, plants, stone.
-  Icons: botanical line drawings, never geometric icons.
-  Motion: breathing, flowing, growing — never mechanical.
+FORM & LAYOUT
+Natural textures throughout: faint leaf-vein patterns, dappled-light gradients, organic wave dividers. Photography favors golden hour, close-up textures, water, plants, and stone. Icons are botanical line drawings, never geometric. Logo is a botanical or leaf-inspired mark. Composition flows and grows rather than snapping to grid.
 
-## 6. Motion & Animation
-  Breathing rhythm: elements scale 1→1.02→1 over 4s ease-in-out, infinite.
-  Water ripple: radial gradient pulse on interaction (opacity 0.15→0 over 0.8s).
-  Scroll reveal: fade-up 32px, 0.6s ease. No snap or bounce.
-  Transitions: 0.4s ease. Never instant. Growth takes time.
+MOTION
+Breathing rhythm — elements scale gently in a slow inhale-exhale loop; interactions ripple like water; scroll reveals fade up slowly. Never instant, never mechanical — growth takes time.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the forest floor translated to pixels — alive, breathing, quietly intelligent.`,
+MOOD
+Natural, calm, breathing, alive, restorative — biophilic architecture and sustainable brand movements.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print botanical line art and leaf textures in forest greens with a rust accent on natural, recycled, or unbleached materials. On digital products (websites, apps, landing pages, social posts), use leaf-vein textures, dappled-light gradients, organic dividers, botanical icons, and breathing motion. The botanical mark stays identical across every medium.
+
+DO: use layered forest greens with a rust accent, botanical textures and icons, breathing organic motion, natural materials.
+DON'T: use neon or cool synthetic color, geometric icons, rigid grids, or instant mechanical motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   wabi_sabi: {
     title: 'WABI-SABI',
     meta: { origin: 'Japanese aesthetic philosophy / Tea ceremony / Zen', tags: ['Wabi-Sabi', 'Imperfection', 'Zen'], desc: 'The kintsugi philosophy — filling cracks with gold. Imperfect, impermanent, incomplete: these three qualities form Japan\'s deepest aesthetic, and the hardest to fake.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Wabi-Sabi aesthetic — the Japanese philosophy of imperfect, incomplete, impermanent beauty. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Wabi-Sabi aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #f0ebe0;   /* aged paper */
-  --color-surface: #e8e0d0;
-  --color-text:    #3a3028;   /* warm ink */
-  --color-mid:     #8a7a6a;
-  --color-moss:    #7a8a6a;
-  --color-rust:    #8a5a40;
-  Rule: Muted, aged, impure tones. No brightness. Colors look weathered.
+AESTHETIC
+The kintsugi philosophy — filling cracks with gold. Imperfect, impermanent, incomplete: these three qualities form Japan's deepest aesthetic, and the hardest to fake. A tea bowl with a crack that makes it more beautiful — finding perfection in imperfection.
 
-## 2. Typography System
-  Display: Thin serif or brush-influenced letterforms
-  Body: Light weight, generously spaced — reading as meditation
-  Imperfection: slight optical irregularity is correct, not a mistake.
+PALETTE
+Muted clay, stone, and greige — imperfect, weathered earthy neutrals:
+- Warm greige — #c0c0a8 (aged paper ground)
+- Muted clay — #c0a8a8
+- Pale stone — #d8c0c0
+- Sage-stone — #a8a890
+- Deep ink-teal — #183030 (text / shadow)
+- Warm taupe — #c0a890
+Every tone is muted, aged, and impure — no brightness, colors look weathered and touched by time.
 
-## 3. Texture Language (CSS)
-\`\`\`css
-.washi-texture {
-  background-image:
-    url("data:image/svg+xml,..."); /* fiber noise pattern */
-  background-blend-mode: multiply;
-}
-.cracked-border {
-  border: 1px solid rgba(58,48,40,0.15);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
-}
-.aged-photo {
-  filter: sepia(0.3) contrast(0.9) brightness(0.95);
-}
-\`\`\`
+TYPOGRAPHY
+A thin serif or brush-influenced letterform for display; a light, generously spaced body that reads like meditation. Slight optical irregularity is correct, not a mistake.
 
-## 4. Design Principles
-  Empty space is the most important element — not negative space but ma (間).
-  Asymmetry preferred. Nothing perfectly centered.
-  Objects appear used, touched, alive — not pristine.
-  Photography: worn surfaces, water stains, natural weathering.
+FORM & LAYOUT
+Empty space is the most important element — not negative space but ma, active emptiness. Asymmetry is preferred; nothing perfectly centered. Textures suggest washi paper fiber, hairline cracks, and gentle weathering. Objects appear used, touched, alive — not pristine. Photography shows worn surfaces, water stains, and natural aging. Logo is a quiet, slightly imperfect mark, perhaps brush-drawn.
 
-## 6. Motion & Animation
-  Extremely slow. Fade 1.2s ease. Nothing jarring.
-  Rain, falling leaves, gentle water ripple as ambient elements.
+MOTION
+Extremely slow and unhurried — long soft fades, nothing jarring. Ambient elements like drifting rain, falling leaves, or a gentle water ripple. Stillness dominates.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: a tea bowl with a crack that makes it more beautiful — find perfection in imperfection.`,
+MOOD
+Serene, imperfect, weathered, contemplative, humble — the Japanese tea ceremony and Zen.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), favor natural, textured, imperfect materials — the quiet mark printed with subtle irregularity on unbleached or stoneware surfaces, embracing the grain. On digital products (websites, apps, landing pages, social posts), use active empty space, asymmetry, paper-fiber textures, and extremely slow fades. The quiet mark stays identical across every medium.
+
+DO: honor active emptiness (ma), embrace asymmetry and imperfection, use muted weathered tones, move extremely slowly.
+DON'T: use bright pristine color, perfect centered symmetry, glossy finishes, or snappy motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   ethereal: {
     title: 'ETHEREAL',
     meta: { origin: 'Romantic painting / Contemporary spiritual aesthetic / Slow living', tags: ['Ethereal', 'Gradient', 'Weightless'], desc: 'Pre-dawn mist, golden hour backlight. Soft gradients, low saturation, pixel-level softness — visual calm calibrated to be just beautiful enough.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Ethereal aesthetic — mist, soft light, weightless space, spiritual calm. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Ethereal aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #f5f0ff;   /* lavender white */
-  --color-surface: #ede8f8;
-  --color-text:    #2a2040;
-  --color-mid:     #9080b0;
-  --color-glow:    #c0a8e0;
-  --color-mist:    rgba(255,255,255,0.6);
-  Gradients: soft, large, diffuse — like light through frosted glass.
+AESTHETIC
+Pre-dawn mist, golden-hour backlight. Soft gradients, low saturation, pixel-level softness — visual calm calibrated to be just beautiful enough. The moment before dawn, between solid and vapor, between silence and sound.
 
-## 2. Typography System
-  Display: Ultra-light serif or thin humanist sans — almost weightless
-  Body: "DM Sans" — 200 weight, wide line-height 2.0
-  Letter spacing: +0.05em — each letter breathes.
+PALETTE
+Soft golden and sage muted greens in a dreamy pastel haze:
+- Soft gold — #c0a878
+- Warm amber-gold — #d8a860
+- Muted sage — #a8a878
+- Pale gold — #d8c078
+- Soft green-gray — #90a890
+- Dusty green — #609078
+Gradients are soft, large, and diffuse — like light through frosted glass; tones blend gently with no hard edge anywhere.
 
-## 3. Ethereal Effects System (CSS)
-\`\`\`css
-.mist-layer {
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 30%,
-    rgba(255,255,255,0.7) 0%,
-    rgba(192,168,224,0.2) 50%,
-    transparent 100%
-  );
-}
-.floating-element {
-  animation: float-soft 8s ease-in-out infinite;
-  filter: blur(0.5px);
-}
-@keyframes float-soft {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%     { transform: translateY(-12px) scale(1.01); }
-}
-.glass-veil {
-  background: rgba(255,255,255,0.4);
-  backdrop-filter: blur(20px) brightness(1.1);
-  border: 1px solid rgba(255,255,255,0.6);
-}
-\`\`\`
+TYPOGRAPHY
+An ultra-light serif or thin humanist sans, almost weightless, for display; DM Sans at very light weight for body with wide line-height and slightly open letter spacing so each letter breathes.
 
-## 4. Visual Language
-  Soft gradients replacing hard edges. Everything diffuse.
-  Photography: backlighting, silhouettes, fog, reflections.
-  Particles: soft bokeh, floating dust motes.
+FORM & LAYOUT
+Soft gradients replace hard edges — everything diffuse. Mist layers, glass veils with heavy blur, and soft bokeh or floating dust particles create depth. Photography uses backlighting, silhouettes, fog, and reflections. Logo is a delicate, weightless mark. Composition floats with generous space and no rigid structure.
 
-## 6. Motion & Animation
-  All at 0.6–1.2s duration. Ease-in-out only. Never bounce.
-  Ambient: gentle particle float, slow mist movement.
+MOTION
+All slow and eased, never bouncing. Elements float and drift softly; mist moves gently; particles drift; a faint blur keeps everything dreamlike. Ambient and continuous.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the moment before dawn, between solid and vapor, between silence and sound.`,
+MOOD
+Serene, weightless, dreamy, luminous, spiritual — Romantic painting and contemporary slow-living calm.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), print soft diffuse gradients and delicate weightless marks in muted gold and sage — gentle, low-contrast, dreamy artwork on soft-touch materials. On digital products (websites, apps, landing pages, social posts), use diffuse gradients, glass veils, floating particles, and slow drifting motion. The delicate mark stays identical across every medium.
+
+DO: use soft diffuse gradients, weightless light type, mist and glass veils, slow floating motion.
+DON'T: use hard edges, saturated high-contrast color, heavy bold type, or snappy motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
   // ══════════════════════════════════════
@@ -5293,92 +4697,40 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the mo
   cinematic_editorial: {
     title: 'CINEMATIC EDITORIAL',
     meta: { origin: 'Luxury fashion editorial / Vogue / Interview Magazine', tags: ['Editorial', 'Cinematic', 'Full-Bleed'], desc: 'Full-bleed photography as canvas. Oversized type cuts across the image. No decoration — just photograph, type, white space. The visual language of a $50 magazine.' },
-    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Cinematic Editorial aesthetic — full-bleed photography, oversized typographic headlines, radical white space. Generate the following deliverables as production-ready code and specifications:
+    vi: `Brand: [BRAND] — Visual identity in the Cinematic Editorial aesthetic.
 
-## 1. Brand Color System
-  --color-bg:      #f2f0ec;   /* warm off-white, not pure white */
-  --color-ink:     #0a0a0a;   /* near-black */
-  --color-reverse: #ffffff;   /* white for text on dark imagery */
-  --color-accent:  #c8b89a;   /* warm parchment — one accent only */
-  Rule: Restraint. Color lives in the photography. System palette is ink on paper.
+AESTHETIC
+Full-bleed photography as canvas. Oversized type cuts across the image, no decoration — just photograph, type, and white space. The visual language of a $50 magazine, the opening spread of a Vogue editorial: one photograph, one headline, nothing else needed.
 
-## 2. Typography System
-  Display: Ultra-condensed grotesque or classic editorial serif — Bebas Neue, Druk, or Playfair Display Black
-  Scale: headlines at 120–200px. No middle sizes.
-  Body: "DM Sans" 300 weight — secondary, never competing with image.
-  Tracking: -0.03em on display (tighter = heavier presence).
-  Text can overlap photography — this is intentional.
+PALETTE
+Ink on warm paper, with color living in the photography rather than the system:
+- Warm off-white — #f2f0ec (background / parchment ground)
+- Near-black ink — #000000 (text / anchor)
+- Warm sepia shadow — #301800
+- Deep maroon — #180000
+- Amber-brown film tone — #483018
+- Warm parchment — #786048 (single accent)
+The system palette is ink on warm paper — restrained near-black and parchment — while all the vivid color lives inside the full-bleed photography.
 
-## 3. Logo Concept for [BRAND]
-  All-caps wordmark, condensed, maximum weight.
-  White version for dark imagery. Black for light backgrounds.
-  No gradients, no effects — pure typographic authority.
+TYPOGRAPHY
+An ultra-condensed grotesque or classic editorial serif (Bebas Neue, Druk, Playfair Display Black) at massive headline scale with no middle sizes; DM Sans light as a quiet secondary that never competes with the image. Display tracking is tight for heavier presence. Text can overlap photography — this is intentional. Kickers in tracked uppercase monospace.
 
-## 4. Photography Treatment
-  Full-bleed: images extend to all four edges. No border, no shadow.
-  Ratio: 16:9 or 2.39:1 (anamorphic cinema).
-  Color grade: lifted shadows, slightly desaturated midtones, warm highlights.
-  Overlay text directly on image — full contrast, no scrim.
+FORM & LAYOUT
+Full-bleed imagery extends to all four edges with no border or shadow, in cinematic 16:9 or anamorphic ratios, graded with lifted shadows, slightly desaturated midtones, and warm highlights. Oversized headlines overlay the image at full contrast, no scrim. Split editorial sections pair full-height imagery with generous text blocks. Logo is an all-caps condensed maximum-weight wordmark — white on dark imagery, black on light — no gradients or effects, pure typographic authority.
 
-## 5. UI Component Library (CSS)
-\`\`\`css
-.editorial-hero {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-  overflow: hidden;
-}
-.editorial-hero img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  filter: contrast(1.05) saturate(0.9);
-}
-.editorial-headline {
-  position: absolute;
-  bottom: 8%;
-  left: 6%;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(64px, 10vw, 160px);
-  line-height: 0.9;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-  mix-blend-mode: normal;
-}
-.editorial-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
-}
-.editorial-text-block {
-  padding: 10vw 8vw;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.editorial-kicker {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  opacity: 0.5;
-  margin-bottom: 32px;
-}
-.editorial-body {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 300;
-  line-height: 1.9;
-  color: var(--color-ink);
-}
-\`\`\`
+MOTION
+Restrained — opacity only, slow, never sliding or scaling. Images fade in at full opacity on scroll with no translate; hero images stay anchored with no parallax, keeping the composition cinematic and still.
 
-## 6. Motion & Animation
-  Transitions: opacity only, 0.6s ease. Never slide or scale.
-  Scroll reveal: image fades in at full opacity — no translateY movement.
-  No parallax on hero images — keep them anchored, cinematic.
+MOOD
+Bold, editorial, cinematic, confident, spare — luxury fashion magazines, Vogue and Interview.
 
-## 7. Implementation Notes
-Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the opening spread of a Vogue editorial — one photograph, one headline, nothing else needed.`,
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), pair full-bleed graded imagery with a single oversized condensed headline and the authoritative wordmark — image plus type, nothing else. On digital products (websites, apps, landing pages, social posts), use full-bleed cinematic imagery, oversized overlapping headlines, radical white space, and opacity-only motion. The condensed wordmark stays identical across every medium.
+
+DO: go full-bleed with graded imagery, set oversized condensed headlines, overlap type on image, keep the system palette ink-on-paper.
+DON'T: add decoration or scrims, use middle type sizes, crowd with elements, or use sliding motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 };
 
@@ -5386,7 +4738,10 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: the op
 // ─── Vibe data: category assignment ─────────────────────
 const vibeCategories = {
   // Minimal & Modern
-  swiss_style:    'minimal_modern',
+  swiss_style:         'minimal_modern',
+  swiss_geometric:     'minimal_modern',
+  swiss_typo_bw:       'minimal_modern',
+  swiss_dots_color:    'minimal_modern',
   editorial_min:  'editorial_min',
   tech_min:       'tech_min',
   warm_min:       'warm_min',
@@ -5425,47 +4780,53 @@ const vibeCategories = {
 
 const styleImageMap = {
   // Minimal & Modern
-  swiss_style:    'images/lark_swiss.jpg',
-  editorial_min:  'images/lark_editorial_min.jpg',
-  tech_min:       'images/lark_tech_min.webp',
-  warm_min:       'images/lark_warm_min.jpg',
-  luxury_min:     'images/lark_luxury_min.png',
-  monochrome:     'images/lark_monochrome.png',
-  // Material & Spatial
-  glassmorphism:  'images/lark_glassmorphism.png',
-  paper_cutout:   'images/lark_paper_cutout.jpg',
+  swiss_style:         'images/styles/swiss_style/preview.png',
+  swiss_geometric:     'images/styles/swiss_geometric/preview.png',
+  swiss_typo_bw:       'images/styles/swiss_typo_bw/preview.png',
+  swiss_dots_color:    'images/styles/swiss_dots_color/preview.png',
+  editorial_min:  'images/styles/editorial_min/preview.png',
+  tech_min:       'images/styles/tech_min/preview.png',
+  warm_min:       'images/styles/warm_min/preview.png',
+  luxury_min:     'images/styles/luxury_min/preview.png',
+  monochrome:     'images/styles/monochrome/preview.png',
+  // Material & Space
+  glassmorphism:  'images/styles/glassmorphism/preview.png',
+  paper_cutout:   'images/styles/paper_cutout/preview.png',
   // Futuristic & Sci-Fi
-  cyberpunk:      'images/lark_cyberpunk.jpg',
-  dark_tech:      'images/lark_dark_tech.png',
-  scifi_hud:      'images/lark_scifi_hud.jpg',
+  cyberpunk:      'images/styles/cyberpunk/preview.png',
+  dark_tech:      'images/styles/dark_tech/preview.png',
+  scifi_hud:      'images/styles/scifi_hud/preview.png',
   // Cinematic & Narrative
-  cinematic:      'images/darkacademia.jpg',
-  film_noir:      'images/rave3.jpg',
+  cinematic:      'images/styles/cinematic/preview.png',
+  film_noir:      'images/styles/film_noir/preview.png',
   // Graphic & Experimental
-  neo_brutalism:  'images/lark_neo_brutalism.jpg',
-  anti_design:    'images/lark_anti_design.jpg',
-  maximalism:     'images/lark_maximalism.jpg',
-  memphis:        'images/lark_memphis.jpg',
-  glitch:         'images/lark_glitch.jpg',
-  kinetic_typo:   'images/lark_kinetic_typo.jpg',
-  surreal_3d:     'images/lark_surreal_3d.jpg',
+  neo_brutalism:  'images/styles/neo_brutalism/preview.png',
+  anti_design:    'images/styles/anti_design/preview.png',
+  maximalism:     'images/styles/maximalism/preview.png',
+  memphis:        'images/styles/memphis/preview.png',
+  glitch:         'images/styles/glitch/preview.png',
+  kinetic_typo:   'images/styles/kinetic_typo/preview.png',
+  surreal_3d:     'images/styles/surreal_3d/preview.png',
   // Retro & Era
-  bauhaus:        'images/lark_bauhaus.jpg',
-  synthwave:      'images/vaporwave.jpg',
-  y2k:            'images/retro90.jpg',
-  cassette_fut:   'images/album2.jpg',
+  bauhaus:        'images/styles/bauhaus/preview.png',
+  synthwave:      'images/styles/synthwave/preview.png',
+  y2k:            'images/styles/y2k/preview.png',
+  cassette_fut:   'images/styles/cassette_fut/preview.png',
   // Organic & Humanistic
-  organic_modern: 'images/organic.jpg',
-  biophilic:      'images/festival3.jpg',
-  wabi_sabi:      'images/editorial4.jpg',
-  ethereal:       'images/psychedelic2.jpg',
-  cinematic_editorial: 'images/darkacademia.jpg',
+  organic_modern: 'images/styles/organic_modern/preview.png',
+  biophilic:      'images/styles/biophilic/preview.jpg',
+  wabi_sabi:      'images/styles/wabi_sabi/preview.png',
+  ethereal:       'images/styles/ethereal/preview.png',
+  cinematic_editorial: 'images/styles/cinematic_editorial/preview.png',
 };
 
 // Gradient fallback colors per vibe
 const vibePalette = {
   // Minimal & Modern
-  swiss_style:    ['#ffffff','#ff0000','#000000'],
+  swiss_style:         ['#ffffff','#ff0000','#000000'],
+  swiss_geometric:     ['#f5f0eb','#e8170a','#0a0a0a'],
+  swiss_typo_bw:       ['#f5f5f0','#0a0a0a','#888888'],
+  swiss_dots_color:    ['#ffe600','#0047bb','#0a0a0a'],
   editorial_min:  ['#f5f0eb','#c8b89a','#2a2520'],
   tech_min:       ['#f8f8f8','#e0e0e0','#1a1a1a'],
   warm_min:       ['#f5efe6','#d4b896','#8b6a4f'],
@@ -5507,6 +4868,23 @@ function getVIPrompt(styleId, styleData, brandName) {
   return styleData.vi.replace(/\[BRAND\]/g, brand);
 }
 
+// Extract every hex color from the PALETTE section of a vi prompt, in order,
+// deduped case-insensitively. Falls back to vibePalette / a neutral triple.
+function parsePaletteHex(styleId, styleData) {
+  const vi = (styleData && styleData.vi) || '';
+  const m = vi.match(/\nPALETTE\n([\s\S]*?)(?:\n[A-Z][A-Z& ]+\n|$)/);
+  const region = m ? m[1] : vi;
+  const found = region.match(/#[0-9a-fA-F]{6}/g) || [];
+  const seen = new Set();
+  const out = [];
+  found.forEach(h => {
+    const k = h.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); out.push(h); }
+  });
+  if (out.length) return out;
+  return vibePalette[styleId] || ['#111111','#333333','#555555'];
+}
+
 // ─── Custom palette state ─────────────────────────────────
 let customColors = []; // current user-picked colors for open modal
 let defaultColors = []; // original palette to support reset
@@ -5524,19 +4902,34 @@ function buildWaterfall(cat, query) {
     return true;
   });
 
-  // CSS columns masonry — normal document flow, no absolute positioning
+  // CSS Grid span masonry — zero bottom gaps, no absolute positioning
+  const ROW_PX = 1; // grid-auto-rows: 1px
+  const GAP = 12;
+
+  function getCols(w) {
+    return w < 600 ? 2 : w < 900 ? 3 : w < 1400 ? 4 : 5;
+  }
+
+  function applySpan(card) {
+    const h = card.getBoundingClientRect().height;
+    card.style.gridRowEnd = `span ${Math.ceil((h + GAP) / (ROW_PX + 0))}`;
+  }
+
+  function reflow() {
+    const mw = (document.getElementById('gp-main') || {}).clientWidth || 900;
+    const c = getCols(mw);
+    container.style.setProperty('--masonry-cols', c);
+    container.querySelectorAll('.vibe-card').forEach(applySpan);
+  }
+
   const mainW = (document.getElementById('gp-main') || {}).clientWidth || 900;
-  const cols = mainW < 600 ? 2 : mainW < 900 ? 3 : mainW < 1400 ? 4 : 5;
-  container.style.columnCount = cols;
-  container.style.columnGap = '12px';
+  container.style.setProperty('--masonry-cols', getCols(mainW));
 
   filtered.forEach(([id, s], i) => {
     const pal = vibePalette[id] || ['#111','#333','#555'];
     const imgPath = styleImageMap[id];
     const card = document.createElement('div');
     card.className = 'vibe-card';
-    card.style.breakInside = 'avoid';
-    card.style.marginBottom = '12px';
     card.style.opacity = '0';
     card.style.transform = 'translateY(16px)';
     card.style.transition = `opacity 0.45s ease ${i * 30}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${i * 30}ms`;
@@ -5556,6 +4949,16 @@ function buildWaterfall(cat, query) {
       </div>`;
     container.appendChild(card);
 
+    // Span calculation after image loads (or immediately if cached)
+    const img = card.querySelector('.vc-img');
+    const setSpan = () => { applySpan(card); };
+    if (img && !img.complete) {
+      img.addEventListener('load', setSpan, { once: true });
+      img.addEventListener('error', setSpan, { once: true });
+    } else {
+      requestAnimationFrame(setSpan);
+    }
+
     // Staggered entrance
     requestAnimationFrame(() => requestAnimationFrame(() => {
       card.style.opacity = '1';
@@ -5563,13 +4966,10 @@ function buildWaterfall(cat, query) {
     }));
   });
 
-  window.removeEventListener('resize', buildWaterfall._resize);
-  buildWaterfall._resize = () => {
-    const mw = (document.getElementById('gp-main') || {}).clientWidth || 900;
-    const c = mw < 600 ? 2 : mw < 900 ? 3 : mw < 1400 ? 4 : 5;
-    container.style.columnCount = c;
-  };
-  window.addEventListener('resize', buildWaterfall._resize);
+  // ResizeObserver for responsive reflow
+  if (buildWaterfall._ro) buildWaterfall._ro.disconnect();
+  buildWaterfall._ro = new ResizeObserver(reflow);
+  buildWaterfall._ro.observe(container);
 }
 
 let activeCat = 'all';
@@ -5672,15 +5072,16 @@ function openVibeModal(id) {
 
   const imgEl = document.getElementById('vm-img');
   const fallEl = document.getElementById('vm-fallback');
-  const pal = vibePalette[id] || ['#111','#333','#555'];
-  fallEl.style.background = `linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]})`;
+  const gradPal = vibePalette[id] || ['#111','#333','#555'];
+  fallEl.style.background = `linear-gradient(135deg,${gradPal[0]},${gradPal[1]},${gradPal[2]})`;
   imgEl.classList.add('hidden');
 
   const probe = new Image();
   probe.onload = () => { imgEl.src = styleImageMap[id]; imgEl.classList.remove('hidden'); };
   probe.src = styleImageMap[id];
 
-  // Init palette
+  // Init palette from the real colors extracted from the vi PALETTE section
+  const pal = parsePaletteHex(id, s);
   defaultColors = [...pal];
   customColors = [...pal];
   renderPaletteSwatches();
@@ -5697,7 +5098,6 @@ function openVibeModal(id) {
 function renderPaletteSwatches() {
   const container = document.getElementById('vm-palette-swatches');
   container.innerHTML = '';
-  const names = ['Primary', 'Secondary', 'Accent'];
   customColors.forEach((hex, i) => {
     const wrap = document.createElement('div');
     wrap.className = 'vm-swatch-wrap';
@@ -5705,7 +5105,7 @@ function renderPaletteSwatches() {
     const swatch = document.createElement('div');
     swatch.className = 'vm-swatch';
     swatch.style.background = hex;
-    swatch.title = `${names[i]}: ${hex}`;
+    swatch.title = hex;
 
     const picker = document.createElement('input');
     picker.type = 'color';
@@ -5713,10 +5113,8 @@ function renderPaletteSwatches() {
     picker.addEventListener('input', function() {
       customColors[i] = this.value;
       swatch.style.background = this.value;
+      swatch.title = this.value;
       hexLabel.textContent = this.value.toUpperCase();
-      // Update fallback gradient
-      const fallEl = document.getElementById('vm-fallback');
-      fallEl.style.background = `linear-gradient(135deg,${customColors[0]},${customColors[1]},${customColors[2]})`;
       renderVibePre();
     });
     swatch.appendChild(picker);
@@ -5734,8 +5132,6 @@ function renderPaletteSwatches() {
 function resetPalette() {
   customColors = [...defaultColors];
   renderPaletteSwatches();
-  const fallEl = document.getElementById('vm-fallback');
-  fallEl.style.background = `linear-gradient(135deg,${customColors[0]},${customColors[1]},${customColors[2]})`;
   renderVibePre();
 }
 
@@ -5842,7 +5238,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateUnlockUI();
   initGallery();
   galleryBuilt = true;
-  document.body.classList.add('in-gallery');
+  // body.in-gallery overflow:hidden removed — allow normal page scroll
 
   // Populate curtain preview cards (8 random style images)
   const curtainContainer = document.getElementById('hero-curtain-cards');
