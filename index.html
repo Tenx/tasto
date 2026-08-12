@@ -2200,9 +2200,9 @@
     }
     .gp-waterfall-inner {
       display: grid;
-      grid-template-columns: repeat(var(--masonry-cols, 4), 1fr);
+      grid-template-columns: repeat(var(--masonry-cols, 3), 1fr);
       grid-auto-rows: 1px;
-      gap: 0 12px;
+      gap: 0;
       width: 100%;
       align-items: start;
     }
@@ -2210,17 +2210,15 @@
     /* Vibe cards */
     .vibe-card {
       width: 100%;
-      margin-bottom: 12px;
       cursor: auto;
+      position: relative;
       background: var(--surface);
-      border: 1px solid var(--border);
       overflow: hidden;
-      transition: border-color 0.2s, transform 0.25s cubic-bezier(0.23,1,0.32,1), box-shadow 0.2s;
+      transition: box-shadow 0.2s;
     }
     .vibe-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-2px);
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      z-index: 2;
     }
     .vc-img-wrap {
       position: relative;
@@ -2232,10 +2230,7 @@
       display: block;
       width: 100%;
       height: auto;
-      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
-    }
-    .vibe-card:hover .vc-img {
-      transform: scale(1.04);
+      transition: transform 0.5s cubic-bezier(0.23,1,0.32,1);
     }
     .vc-fallback {
       display: none;
@@ -2244,18 +2239,57 @@
       position: absolute;
       inset: 0;
     }
-    .vc-hover {
+    /* twenty75-style caption overlay: veil fades in, text rises + fades, staggered */
+    .vc-caption {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px;
       opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 0.18s ease, transform 0.18s ease;
+      background: linear-gradient(180deg, rgba(6,8,12,0) 0%, rgba(6,8,12,0.35) 45%, rgba(6,8,12,0.82) 100%);
+      transition: opacity 0.3s ease-in-out;
       pointer-events: none;
     }
-    .vibe-card:hover .vc-hover {
+    .vibe-card:hover .vc-caption {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* each .anim starts nudged down + hidden, rises into place on hover */
+    .vc-caption .anim {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+    .vibe-card:hover .vc-caption .anim {
       opacity: 1;
       transform: translateY(0);
-      pointer-events: auto;
+    }
+    /* staggered reveal: title first, category next, button last */
+    .vibe-card:hover .vc-cap-title { transition-delay: 0.05s; }
+    .vibe-card:hover .vc-cap-cat   { transition-delay: 0.12s; }
+    .vibe-card:hover .vc-caption .vc-copy-btn.anim { transition-delay: 0.19s, 0.19s, 0s, 0s, 0s; }
+    .vc-cap-top {
+      margin-bottom: 12px;
+    }
+    .vc-cap-title {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 5px;
+    }
+    .vc-cap-cat {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
     }
     .vc-copy-btn {
       display: block;
@@ -2269,8 +2303,12 @@
       background: var(--accent);
       color: #000;
       border: none;
-      cursor: auto;
-      transition: background 0.15s, color 0.15s, letter-spacing 0.15s;
+      cursor: pointer;
+    }
+    /* keep the rise-in transition (from .anim) and add bg/letter-spacing feedback */
+    .vc-caption .vc-copy-btn.anim {
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out,
+                  background 0.15s, color 0.15s, letter-spacing 0.15s;
     }
     .vc-copy-btn:hover {
       background: #fff;
@@ -2281,26 +2319,6 @@
       background: #00ff88;
       color: #000;
       letter-spacing: 0.08em;
-    }
-    .vc-foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-    }
-    .vc-title {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-    .vc-cat {
-      font-family: 'Space Mono', monospace;
-      font-size: 8px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
     }
 
     /* ─── VIBE MODAL ────────────────────────────────────── */
@@ -2780,7 +2798,7 @@
 <div class="gallery-portal" id="gallery-portal">
   <div class="gp-sidebar" id="gp-sidebar">
     <nav class="gp-nav">
-      <button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">29</span></button>
+      <button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count" id="gp-nav-count">29</span></button>
 
       <div class="gp-nav-group">Minimal & Modern</div>
       <button class="gp-nav-btn" data-cat="minimal_modern">Swiss Style</button>
@@ -2788,6 +2806,7 @@
       <button class="gp-nav-btn" data-cat="tech_min">Tech Minimal</button>
       <button class="gp-nav-btn" data-cat="warm_min">Warm Minimal</button>
       <button class="gp-nav-btn" data-cat="luxury_min">Luxury Minimal</button>
+      <button class="gp-nav-btn" data-cat="velvet_luxe">Velvet Luxe</button>
       <button class="gp-nav-btn" data-cat="monochrome">Monochrome</button>
 
       <div class="gp-nav-group">Material & Space</div>
@@ -2832,7 +2851,7 @@
 
   <div class="gp-main" id="gp-main">
     <div class="gp-topbar">
-      <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span>29</span></div>
+      <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span id="gp-topbar-count">29</span></div>
       <input class="gp-search" id="gp-search" type="text" placeholder="Search styles..." autocomplete="off">
     </div>
     <div class="gp-waterfall" id="gp-waterfall">
@@ -3773,6 +3792,45 @@ Translate this identity onto any surface. On physical goods (t-shirts, tote bags
 
 DO: use extreme white space, high-contrast serif type, gold as one rare detail, slow deliberate motion.
 DON'T: enlarge the logo, add multiple colors, crowd the layout, or use bouncy motion.
+
+Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
+  },
+
+  velvet_luxe: {
+    title: 'VELVET LUXE',
+    meta: { origin: 'Heritage maisons / Boutique hospitality', tags: ['Luxury', 'Serif', 'Emerald'], desc: 'Deep emerald velvet and gilded serif. The visual language of old-world hospitality and heritage houses — jewel-tone depth, gold used like a signet, elegance you can feel before you read.' },
+    vi: `Brand: [BRAND] — Visual identity in the Velvet Luxe aesthetic.
+
+AESTHETIC
+Old-world opulence made quiet. Deep emerald velvet as ground, gold as a signet — the language of heritage maisons, private members' clubs, and boutique hospitality. Richness through depth and restraint, never through clutter; the surface should feel tactile and expensive before a single word is read.
+
+PALETTE
+A deep emerald velvet ground carrying warm gilded detail, all soft light and jewel-tone depth — gold appears only as emblem and lettering, never as fill:
+- Emerald velvet — #183030 (primary ground)
+- Deep forest / shadow — #001818 (velvet folds, darkest depth)
+- Mid teal-green — #184848 (raking light on the velvet)
+- Antique gold — #d0b070 (logo, wordmark, hairline detail)
+- Warm gold shadow — #c0a070 (gilded lowlight)
+- Ivory glow — #f0f0f0 (rare satin highlight)
+Color reads as material — velvet depth plus a single warm metal. Gold is precious and sparing; the greens do the volume, the gold does the signature.
+
+TYPOGRAPHY
+A refined high-contrast serif for the wordmark and display (Trajan / Cormorant / Didot spirit) with wide, confident letter-spacing set in gold. Body is a quiet light serif or humanist sans at generous line-height. Everything is centered or elegantly axial — the wordmark sits like an engraved plate, often paired with a small emblem above it.
+
+FORM & LAYOUT
+Centered, symmetrical, ceremonial. A compact emblem (here, twin gold waves) crowns a spaced serif wordmark. Deep velvet fills the frame with soft directional light and gentle folds; generous negative space keeps it hushed. Edges are clean, detail is fine and gilded. Logo: gold emblem + tracked serif wordmark, embossed or foil-stamped in feel, identical from signet to signage.
+
+MOTION
+Stillness and slow reveal. Gold catches light with a slow shimmer; the wordmark fades up gently. No bounce, no speed — movement is candlelight, not neon.
+
+MOOD
+Opulent, serene, heritage, tactile, confident — a velvet-lined jewel box, the hush of a grand lobby.
+
+APPLICATION
+Translate this identity onto any surface. On physical goods (t-shirts, tote bags, caps, mugs, stickers, tape measures, packaging), render the emblem and wordmark as gold foil or embossed metallic on deep emerald stock, velvet or matte-soft-touch finishes, gold kept to fine detail. On digital products (websites, apps, landing pages, social posts), fill with emerald depth and soft light, center the gilded serif wordmark, keep motion slow and luminous. The gold emblem and wordmark stay identical across every medium.
+
+DO: keep the emerald velvet ground, reserve gold for emblem and lettering, center the composition, let material depth carry the luxury.
+DON'T: flood the layout with gold, use flat bright greens, add hard neon light, crowd the wordmark, or use bouncy motion.
 
 Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
@@ -4746,6 +4804,7 @@ const vibeCategories = {
   tech_min:       'tech_min',
   warm_min:       'warm_min',
   luxury_min:     'luxury_min',
+  velvet_luxe:    'velvet_luxe',
   monochrome:     'monochrome',
   // Material & Spatial
   glassmorphism:  'glassmorphism',
@@ -4780,44 +4839,45 @@ const vibeCategories = {
 
 const styleImageMap = {
   // Minimal & Modern
-  swiss_style:         'images/styles/swiss_style/preview.png',
-  swiss_geometric:     'images/styles/swiss_geometric/preview.png',
-  swiss_typo_bw:       'images/styles/swiss_typo_bw/preview.png',
-  swiss_dots_color:    'images/styles/swiss_dots_color/preview.png',
-  editorial_min:  'images/styles/editorial_min/preview.png',
-  tech_min:       'images/styles/tech_min/preview.png',
-  warm_min:       'images/styles/warm_min/preview.png',
-  luxury_min:     'images/styles/luxury_min/preview.png',
-  monochrome:     'images/styles/monochrome/preview.png',
+  swiss_style:         'images/recreated/tasto_swiss_style.png',
+  swiss_geometric:     'images/recreated/tasto_swiss_geometric.png',
+  swiss_typo_bw:       'images/recreated/tasto_swiss_typo_bw.png',
+  swiss_dots_color:    'images/recreated/tasto_swiss_dots_color.png',
+  editorial_min:  'images/recreated/tasto_editorial_min.png',
+  tech_min:       'images/recreated/tasto_tech_min.png',
+  warm_min:       'images/recreated/tasto_warm_min.png',
+  luxury_min:     'images/recreated/tasto_luxury_min.png',
+  velvet_luxe:    'images/recreated/tasto_velvet_luxe.png',
+  monochrome:     'images/recreated/tasto_monochrome.png',
   // Material & Space
-  glassmorphism:  'images/styles/glassmorphism/preview.png',
-  paper_cutout:   'images/styles/paper_cutout/preview.png',
+  glassmorphism:  'images/recreated/tasto_glassmorphism.png',
+  paper_cutout:   'images/recreated/tasto_paper_cutout.png',
   // Futuristic & Sci-Fi
-  cyberpunk:      'images/styles/cyberpunk/preview.png',
-  dark_tech:      'images/styles/dark_tech/preview.png',
-  scifi_hud:      'images/styles/scifi_hud/preview.png',
+  cyberpunk:      'images/recreated/tasto_cyberpunk.png',
+  dark_tech:      'images/recreated/tasto_dark_tech.png',
+  scifi_hud:      'images/recreated/tasto_scifi_hud.png',
   // Cinematic & Narrative
-  cinematic:      'images/styles/cinematic/preview.png',
-  film_noir:      'images/styles/film_noir/preview.png',
+  cinematic:      'images/recreated/tasto_cinematic.png',
+  film_noir:      'images/recreated/tasto_film_noir.png',
   // Graphic & Experimental
-  neo_brutalism:  'images/styles/neo_brutalism/preview.png',
-  anti_design:    'images/styles/anti_design/preview.png',
-  maximalism:     'images/styles/maximalism/preview.png',
-  memphis:        'images/styles/memphis/preview.png',
-  glitch:         'images/styles/glitch/preview.png',
-  kinetic_typo:   'images/styles/kinetic_typo/preview.png',
-  surreal_3d:     'images/styles/surreal_3d/preview.png',
+  neo_brutalism:  'images/recreated/tasto_neo_brutalism.png',
+  anti_design:    'images/recreated/tasto_anti_design.png',
+  maximalism:     'images/recreated/tasto_maximalism.png',
+  memphis:        'images/recreated/tasto_memphis.png',
+  glitch:         'images/recreated/tasto_glitch.png',
+  kinetic_typo:   'images/recreated/tasto_kinetic_typo.png',
+  surreal_3d:     'images/recreated/tasto_surreal_3d.png',
   // Retro & Era
-  bauhaus:        'images/styles/bauhaus/preview.png',
-  synthwave:      'images/styles/synthwave/preview.png',
-  y2k:            'images/styles/y2k/preview.png',
-  cassette_fut:   'images/styles/cassette_fut/preview.png',
+  bauhaus:        'images/recreated/tasto_bauhaus.png',
+  synthwave:      'images/recreated/tasto_synthwave.png',
+  y2k:            'images/recreated/tasto_y2k.png',
+  cassette_fut:   'images/recreated/tasto_cassette_fut.png',
   // Organic & Humanistic
-  organic_modern: 'images/styles/organic_modern/preview.png',
-  biophilic:      'images/styles/biophilic/preview.jpg',
-  wabi_sabi:      'images/styles/wabi_sabi/preview.png',
-  ethereal:       'images/styles/ethereal/preview.png',
-  cinematic_editorial: 'images/styles/cinematic_editorial/preview.png',
+  organic_modern: 'images/recreated/tasto_organic_modern.png',
+  biophilic:      'images/recreated/tasto_biophilic.png',
+  wabi_sabi:      'images/recreated/tasto_wabi_sabi.png',
+  ethereal:       'images/recreated/tasto_ethereal.png',
+  cinematic_editorial: 'images/recreated/tasto_cinematic_editorial.png',
 };
 
 // Gradient fallback colors per vibe
@@ -4831,6 +4891,7 @@ const vibePalette = {
   tech_min:       ['#f8f8f8','#e0e0e0','#1a1a1a'],
   warm_min:       ['#f5efe6','#d4b896','#8b6a4f'],
   luxury_min:     ['#fafaf8','#c0a882','#1a1a1a'],
+  velvet_luxe:    ['#183030','#d0b070','#001818'],
   monochrome:     ['#000000','#555555','#f0f0f0'],
   // Material & Spatial
   glassmorphism:  ['#1a1a3e','#4488ff','#ffffff'],
@@ -4891,6 +4952,15 @@ let defaultColors = []; // original palette to support reset
 
 // ─── Gallery portal ───────────────────────────────────────
 
+// Keep the "All Styles" counts in sync with the real number of styles
+(function syncStyleCount() {
+  const n = Object.keys(styles).length;
+  const nav = document.getElementById('gp-nav-count');
+  const top = document.getElementById('gp-topbar-count');
+  if (nav) nav.textContent = n;
+  if (top) top.textContent = n;
+})();
+
 function buildWaterfall(cat, query) {
   const container = document.getElementById('gp-waterfall-inner');
   container.innerHTML = '';
@@ -4904,10 +4974,10 @@ function buildWaterfall(cat, query) {
 
   // CSS Grid span masonry — zero bottom gaps, no absolute positioning
   const ROW_PX = 1; // grid-auto-rows: 1px
-  const GAP = 12;
+  const GAP = 0;
 
   function getCols(w) {
-    return w < 600 ? 2 : w < 900 ? 3 : w < 1400 ? 4 : 5;
+    return w < 600 ? 1 : w < 900 ? 2 : 3;
   }
 
   function applySpan(card) {
@@ -4939,13 +5009,13 @@ function buildWaterfall(cat, query) {
         <img class="vc-img" src="${imgPath}" alt="${s.title}"
              onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';">
         <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]});height:200px;"></div>
-        <div class="vc-hover">
-          <button class="vc-copy-btn" onclick="quickCopy(event,'${id}')">Copy Prompt</button>
+        <div class="vc-caption">
+          <div class="vc-cap-top">
+            <span class="vc-cap-title anim">${s.title}</span>
+            <span class="vc-cap-cat anim">${vibeCategories[id] || ''}</span>
+          </div>
+          <button class="vc-copy-btn anim" onclick="quickCopy(event,'${id}')">Copy Prompt</button>
         </div>
-      </div>
-      <div class="vc-foot">
-        <span class="vc-title">${s.title}</span>
-        <span class="vc-cat">${vibeCategories[id] || ''}</span>
       </div>`;
     container.appendChild(card);
 
@@ -5290,10 +5360,13 @@ function copyVibePrompt() {
   const brand = document.getElementById('vm-brand-input').value.trim();
   let text = getVIPrompt(currentVibe, s, brand);
   text = applyColorsToPalette(text);
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('vm-copy-btn');
-    const orig = btn.textContent;
+  const btn = document.getElementById('vm-copy-btn');
+  const orig = btn.textContent;
+  copyText(text).then(() => {
     btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  }).catch(() => {
+    btn.textContent = '⚠ Press Ctrl+C';
     setTimeout(() => btn.textContent = orig, 2000);
   });
 }
@@ -5311,15 +5384,49 @@ function quickCopy(e, id) {
   const s = styles[id];
   if (!s) return;
   const text = getVIPrompt(id, s, '');
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = e.currentTarget;
+  const btn = e.currentTarget;
+  const flash = () => {
     btn.textContent = '✓ Copied!';
     btn.classList.add('copied');
     setTimeout(() => {
       btn.textContent = 'Copy Prompt';
       btn.classList.remove('copied');
     }, 1600);
+  };
+  copyText(text).then(flash).catch(() => {
+    btn.textContent = '⚠ Press Ctrl+C';
+    setTimeout(() => { btn.textContent = 'Copy Prompt'; }, 1600);
   });
+}
+
+// Robust clipboard: try async API but never hang; fall back to execCommand
+function copyText(text) {
+  const legacy = () => new Promise((resolve, reject) => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('execCommand failed'));
+    } catch (err) {
+      reject(err);
+    }
+  });
+
+  if (navigator.clipboard && window.isSecureContext) {
+    // Race the async write against a timeout so a hung promise can't block the UI
+    return Promise.race([
+      navigator.clipboard.writeText(text),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('clipboard timeout')), 400)),
+    ]).catch(legacy);
+  }
+  return legacy();
 }
 
 // ─── Escape key ──────────────────────────────────────────
