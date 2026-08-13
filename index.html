@@ -3,7 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TASTO — Visual Style System</title>
+  <title>TASTO — Copy-Paste AI Brand Identity Prompts by Visual Style</title>
+  <meta name="description" content="Pick a visual vibe, copy one portable brand-identity prompt, and paste it into any AI tool — ChatGPT, Midjourney, or your code generator — to ship on-brand visuals for physical goods and digital products. 30+ curated styles: Swiss, Cyberpunk, Bauhaus, Glassmorphism and more.">
+  <meta name="theme-color" content="#0a0a0e">
+  <link rel="canonical" href="https://www.tasto.world/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0e'/%3E%3Ctext x='50' y='72' font-family='Arial,sans-serif' font-size='64' font-weight='700' fill='%23e8ff47' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TASTO">
+  <meta property="og:title" content="TASTO — Copy-Paste AI Brand Identity Prompts by Visual Style">
+  <meta property="og:description" content="Pick your vibe, copy one portable prompt, paste it into any AI tool to generate on-brand visuals for physical goods and digital products. 30+ curated styles.">
+  <meta property="og:url" content="https://www.tasto.world/">
+  <meta property="og:image" content="https://www.tasto.world/images/recreated/tasto_swiss_style.png">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TASTO — Copy-Paste AI Brand Identity Prompts by Visual Style">
+  <meta name="twitter:description" content="Pick your vibe, copy one portable prompt, paste it into any AI tool. 30+ curated visual styles.">
+  <meta name="twitter:image" content="https://www.tasto.world/images/recreated/tasto_swiss_style.png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,400;0,9..40,500;1,9..40,200&family=Almarai:wght@300;400;700;800&family=Instrument+Serif:ital@1&display=swap');
 
@@ -604,7 +620,7 @@
       border: none;
       padding: 14px 28px;
       font-weight: 700;
-      cursor: auto;
+      cursor: pointer;
       transition: opacity 0.2s;
     }
     .hero-btn-primary:hover { opacity: 0.85; }
@@ -617,7 +633,7 @@
       color: var(--text-dim);
       border: 1px solid var(--border-hover);
       padding: 14px 28px;
-      cursor: auto;
+      cursor: pointer;
       transition: border-color 0.2s, color 0.2s;
     }
     .hero-btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
@@ -636,6 +652,68 @@
       height: 320px;
       justify-content: center;
     }
+    /* AIGC workflow video — no frame, blends into hero background */
+    .hero-right:has(.hero-video-panel) {
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      overflow: visible;
+    }
+    .hero-video-panel {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: transparent;
+    }
+    /* feather the video edges into the hero's #0d1017 so the bright
+       rectangle blends away — vignette + edge fade toward background */
+    .hero-right:has(.hero-video-panel)::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      pointer-events: none;
+      z-index: 2;
+      box-shadow: inset 0 0 90px 40px #0d1017;
+      background:
+        linear-gradient(to right,  #0d1017 0%, rgba(13,16,23,0) 20%, rgba(13,16,23,0) 80%, #0d1017 100%),
+        linear-gradient(to bottom, #0d1017 0%, rgba(13,16,23,0) 24%, rgba(13,16,23,0) 78%, #0d1017 100%);
+    }
+    /* three-step captions overlaid on the video bottom — synced to currentTime */
+    .hero-steps-overlay {
+      position: absolute;
+      left: 0; right: 0; bottom: 14px;
+      z-index: 3;                 /* above the feather mask (z2) */
+      display: flex;
+      justify-content: center;
+      gap: clamp(16px, 3vw, 40px);
+      pointer-events: none;       /* display only, never blocks clicks */
+      padding: 0 20px;
+    }
+    .hstep {
+      display: flex; align-items: baseline; gap: 7px;
+      opacity: 0.35;
+      transition: opacity 0.45s ease, color 0.45s ease;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+      white-space: nowrap;
+    }
+    .hstep-n {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.15em;
+      color: var(--text-muted);
+    }
+    .hstep-t {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(12px, 1.4vw, 16px);
+      letter-spacing: 0.08em;
+      color: rgba(232,230,226,0.7);
+    }
+    .hstep.active { opacity: 1; }
+    .hstep.active .hstep-n,
+    .hstep.active .hstep-t { color: var(--accent); }
     .hero-right-header {
       display: flex;
       align-items: center;
@@ -2087,10 +2165,13 @@
 
     /* Second-level nav item */
     .gp-nav-btn {
-      display: block;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
       min-width: 180px;
       width: 100%;
-      padding: 4px 16px;
+      padding: 7px 16px;
       background: transparent;
       border: none;
       border-left: 2px solid transparent;
@@ -2098,7 +2179,7 @@
       font-family: 'DM Sans', sans-serif;
       font-size: 16.25px;
       font-weight: 300;
-      cursor: auto;
+      cursor: pointer;
       transition: color 0.15s;
       text-align: left;
       line-height: 1.7;
@@ -2120,7 +2201,19 @@
     }
     .gp-nav-btn[data-cat="all"].active { color: var(--accent); }
     .gp-nav-icon { display: none; }
-    .gp-nav-count { display: none; }
+    .gp-nav-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .gp-nav-btn.active .gp-nav-count { color: var(--accent); }
+    .gp-nav-btn:focus-visible,
+    .vc-copy-btn:focus-visible,
+    .vibe-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
     .gp-sidebar-tagline {
       font-family: 'Space Mono', monospace;
       font-size: 9px;
@@ -2496,6 +2589,11 @@
       color: var(--text-muted);
       flex-shrink: 0;
     }
+    .vm-palette-hint {
+      color: var(--accent);
+      opacity: 0.72;
+      letter-spacing: 0.1em;
+    }
     .vm-palette-swatches {
       display: flex;
       gap: 8px;
@@ -2652,6 +2750,11 @@
         height: auto;
         padding: 28px 24px;
       }
+      /* video panel keeps a 2.4:1 frame on mobile instead of collapsing */
+      .hero-right:has(.hero-video-panel) {
+        aspect-ratio: 2.4 / 1;
+        padding: 0;
+      }
       .hero-step-row-desc {
         max-height: none;
         opacity: 1;
@@ -2711,9 +2814,6 @@
 </head>
 <body>
 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursor-ring"></div>
-
 <canvas id="bg-canvas" style="display:none"></canvas>
 
 <div class="layout">
@@ -2732,47 +2832,33 @@
           <span class="line-vibe">YOUR VIBE.</span><br>
           <span class="line-ship">SHIP IT.</span>
         </h1>
+        <p class="hero-desc-new">One portable brand-identity prompt per style. Copy it, paste it into any AI tool — ChatGPT, Midjourney, or your code generator — and ship on-brand visuals for physical goods and digital products alike.</p>
+        <div class="hero-btns">
+          <button class="hero-btn-primary" onclick="enterGallery()">Browse Styles →</button>
+          <button class="hero-btn-ghost" onclick="openUnlockModal()">Go Unlimited</button>
+        </div>
       </div>
 
-      <!-- RIGHT: step showcase panel -->
+      <!-- RIGHT: AIGC workflow video -->
       <div class="hero-right">
-        <div class="hero-right-header">
-          <div class="hero-right-dot"></div>
-          <div class="hero-right-dot"></div>
-          <div class="hero-right-dot"></div>
-          <div class="hero-right-title">HOW IT WORKS</div>
+        <video
+          class="hero-video-panel"
+          id="hero-workflow-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="images/hero/workflow-poster.jpg"
+          aria-label="tasto workflow: pick your vibe, grab the prompt, ship your brand">
+          <source src="images/hero/workflow.webm" type="video/webm">
+          <source src="images/hero/workflow.mp4" type="video/mp4">
+        </video>
+        <div class="hero-steps-overlay" id="hero-steps-overlay" aria-hidden="true">
+          <div class="hstep" data-step="0"><span class="hstep-n">01</span><span class="hstep-t">PICK YOUR VIBE</span></div>
+          <div class="hstep" data-step="1"><span class="hstep-n">02</span><span class="hstep-t">GRAB THE PROMPT</span></div>
+          <div class="hstep" data-step="2"><span class="hstep-n">03</span><span class="hstep-t">SHIP YOUR BRAND</span></div>
         </div>
-
-        <div class="hero-step-row active" data-step="0">
-          <div class="hero-step-row-bar"></div>
-          <div class="hero-step-row-num">01</div>
-          <div class="hero-step-row-body">
-            <div class="hero-step-row-label">// SELECT</div>
-            <div class="hero-step-row-title">PICK YOUR VIBE</div>
-            <div class="hero-step-row-desc">Browse 29 curated aesthetic systems — from Bauhaus to Cyberpunk to Organic Modern. Find the one that feels right.</div>
-          </div>
-        </div>
-
-        <div class="hero-step-row" data-step="1">
-          <div class="hero-step-row-bar"></div>
-          <div class="hero-step-row-num">02</div>
-          <div class="hero-step-row-body">
-            <div class="hero-step-row-label">// COPY</div>
-            <div class="hero-step-row-title">GRAB THE PROMPT</div>
-            <div class="hero-step-row-desc">Each style ships with a complete VI prompt. Copy it, drop it into ChatGPT or Midjourney — done.</div>
-          </div>
-        </div>
-
-        <div class="hero-step-row" data-step="2">
-          <div class="hero-step-row-bar"></div>
-          <div class="hero-step-row-num">03</div>
-          <div class="hero-step-row-body">
-            <div class="hero-step-row-label">// LAUNCH</div>
-            <div class="hero-step-row-title">SHIP YOUR BRAND</div>
-            <div class="hero-step-row-desc">Logo, poster, packaging, UI, merch — one style, deployed across every touchpoint. Minutes, not months.</div>
-          </div>
-        </div>
-
       </div><!-- /hero-right -->
 
     </div><!-- /hero-inner -->
@@ -2783,66 +2869,12 @@
 <!-- Floating unlock button — hidden (using header button instead) -->
 <button class="float-unlock-btn" id="float-unlock-btn" onclick="openUnlockModal()" style="display:none">Go Unlimited</button>
 
-<!-- ═══ DREAM TRANSITION ══════════════════════════════════ -->
-<div class="dream-transition" id="dream-transition">
-  <canvas class="dream-canvas" id="dream-canvas"></canvas>
-  <div class="dream-words">
-    <span class="dw" style="--i:0">PICK</span>
-    <span class="dw" style="--i:1">YOUR</span>
-    <span class="dw" style="--i:2">VIBE</span>
-  </div>
-</div>
-
 <!-- ═══ GALLERY PORTAL ════════════════════════════════════ -->
 <div class="gallery-wrapper" id="gallery-wrapper">
 <div class="gallery-portal" id="gallery-portal">
   <div class="gp-sidebar" id="gp-sidebar">
-    <nav class="gp-nav">
-      <button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count" id="gp-nav-count">29</span></button>
-
-      <div class="gp-nav-group">Minimal & Modern</div>
-      <button class="gp-nav-btn" data-cat="minimal_modern">Swiss Style</button>
-      <button class="gp-nav-btn" data-cat="editorial_min">Editorial Minimal</button>
-      <button class="gp-nav-btn" data-cat="tech_min">Tech Minimal</button>
-      <button class="gp-nav-btn" data-cat="warm_min">Warm Minimal</button>
-      <button class="gp-nav-btn" data-cat="luxury_min">Luxury Minimal</button>
-      <button class="gp-nav-btn" data-cat="velvet_luxe">Velvet Luxe</button>
-      <button class="gp-nav-btn" data-cat="monochrome">Monochrome</button>
-
-      <div class="gp-nav-group">Material & Space</div>
-      <button class="gp-nav-btn" data-cat="glassmorphism">Glassmorphism</button>
-      <button class="gp-nav-btn" data-cat="paper_cutout">Paper / Cutout</button>
-
-      <div class="gp-nav-group">Futuristic & Sci-Fi</div>
-      <button class="gp-nav-btn" data-cat="cyberpunk">Cyberpunk</button>
-      <button class="gp-nav-btn" data-cat="scifi_hud">Sci-Fi HUD</button>
-      <button class="gp-nav-btn" data-cat="dark_tech">Dark Technology</button>
-
-      <div class="gp-nav-group">Cinematic & Narrative</div>
-      <button class="gp-nav-btn" data-cat="cinematic">Cinematic Dark</button>
-      <button class="gp-nav-btn" data-cat="film_noir">Film Noir</button>
-      <button class="gp-nav-btn" data-cat="cinematic_editorial">Cinematic Editorial</button>
-
-      <div class="gp-nav-group">Graphic & Experimental</div>
-      <button class="gp-nav-btn" data-cat="neo_brutalism">Neo-Brutalism</button>
-      <button class="gp-nav-btn" data-cat="anti_design">Anti-Design</button>
-      <button class="gp-nav-btn" data-cat="maximalism">Maximalism</button>
-      <button class="gp-nav-btn" data-cat="memphis">Memphis</button>
-      <button class="gp-nav-btn" data-cat="glitch">Glitch Art</button>
-      <button class="gp-nav-btn" data-cat="kinetic_typo">Kinetic Typography</button>
-      <button class="gp-nav-btn" data-cat="surreal_3d">Surreal 3D</button>
-
-      <div class="gp-nav-group">Retro & Era</div>
-      <button class="gp-nav-btn" data-cat="bauhaus">Bauhaus</button>
-      <button class="gp-nav-btn" data-cat="synthwave">Synthwave</button>
-      <button class="gp-nav-btn" data-cat="y2k">Y2K Revival</button>
-      <button class="gp-nav-btn" data-cat="cassette_fut">Cassette Futurism</button>
-
-      <div class="gp-nav-group">Organic & Humanistic</div>
-      <button class="gp-nav-btn" data-cat="organic_modern">Organic Modern</button>
-      <button class="gp-nav-btn" data-cat="biophilic">Biophilic</button>
-      <button class="gp-nav-btn" data-cat="wabi_sabi">Wabi-Sabi</button>
-      <button class="gp-nav-btn" data-cat="ethereal">Ethereal</button>
+    <nav class="gp-nav" id="gp-nav">
+      <!-- filter buttons built by JS from CATEGORY_LABELS -->
     </nav>
     <div class="gp-sidebar-foot">
       <button class="nav-unlock-btn" onclick="openUnlockModal()" style="width:100%;text-align:center;font-size:11px;padding:8px 12px;">Go Unlimited</button>
@@ -2851,8 +2883,8 @@
 
   <div class="gp-main" id="gp-main">
     <div class="gp-topbar">
-      <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span id="gp-topbar-count">29</span></div>
-      <input class="gp-search" id="gp-search" type="text" placeholder="Search styles..." autocomplete="off">
+      <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span id="gp-topbar-count"></span></div>
+      <input class="gp-search" id="gp-search" type="text" placeholder="Search styles..." autocomplete="off" aria-label="Search styles">
     </div>
     <div class="gp-waterfall" id="gp-waterfall">
       <div class="gp-waterfall-inner" id="gp-waterfall-inner">
@@ -2885,7 +2917,7 @@
         <input type="text" id="vm-brand-input" class="vm-brand-input" placeholder="e.g. LUNA, NovaSkin, Stellan..." maxlength="40">
       </div>
       <div class="vm-palette-row" id="vm-palette-row">
-        <span class="vm-palette-label">Brand Palette</span>
+        <span class="vm-palette-label">Brand Palette <span class="vm-palette-hint">— tap a swatch to recolor</span></span>
         <div class="vm-palette-swatches" id="vm-palette-swatches"></div>
         <button class="vm-palette-reset" id="vm-palette-reset" onclick="resetPalette()">Reset</button>
       </div>
@@ -2912,7 +2944,7 @@
     <h2 class="unlock-title">GO UNLIMITED</h2>
     <p class="unlock-sub">Copy any prompt, customize palettes, and access all future styles. Pay once, use forever.</p>
     <ul class="unlock-features">
-      <li>All 29+ VI style prompts — fully unlocked</li>
+      <li>All <span id="unlock-style-count">30</span>+ VI style prompts — fully unlocked</li>
       <li>Brand palette color customization</li>
       <li>Lifetime updates — new styles added regularly</li>
       <li>Personal &amp; client work</li>
@@ -2925,394 +2957,6 @@
   </div>
 </div>
 
-  <section id="gallery" style="display:none">
-    <div class="style-grid">
-
-      <!-- Y2K -->
-      <div class="style-card" onclick="openModal('y2k')">
-        <div class="card-preview preview-y2k">
-          <img class="preview-img" src="images/y2k.jpg" alt="y2k style preview" onerror="this.classList.add('hidden')">
-          <div class="inner">
-            <h3>HELLO WORLD</h3>
-            <p>YOUR SITE — EST. 2001</p>
-            <span class="chip">LOADING 100%</span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Y2K Revival</div>
-            <div class="card-tags">
-              <span class="tag">Retro</span>
-              <span class="tag">Maximalist</span>
-              <span class="tag">Colorful</span>
-            </div>
-          </div>
-        <button class="copy-btn" onclick="copyPrompt(event,'y2k')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Brutalist -->
-      <div class="style-card" onclick="openModal('brutalist')">
-        <div class="card-preview preview-brutalist">
-          <img class="preview-img" src="images/brutalist.jpg" alt="brutalist style preview" onerror="this.classList.add('hidden')">
-          <div class="inner">
-            <h3>BOLD<br>UGLY<br>TRUE</h3>
-            <p>BRUTALISM — NO COMPROMISES</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Raw Brutalism</div>
-            <div class="card-tags">
-              <span class="tag">Experimental</span>
-              <span class="tag">Typography</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'brutalist')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Glassmorphism -->
-      <div class="style-card" onclick="openModal('glassmorphism')">
-        <div class="card-preview preview-glassmorphism">
-          <img class="preview-img" src="images/glassmorphism.jpg" alt="glassmorphism style preview" onerror="this.classList.add('hidden')">
-          <div class="inner">
-            <h3>Crystal Clear</h3>
-            <p>Glass · Blur · Depth</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Glassmorphism</div>
-            <div class="card-tags">
-              <span class="tag">Dark</span>
-              <span class="tag">Soft</span>
-              <span class="tag">Modern</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'glassmorphism')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Neubrutalism -->
-      <div class="style-card" onclick="openModal('neubrutalism')">
-        <div class="card-preview preview-neubrutalism">
-          <img class="preview-img" src="images/neubrutalism.jpg" alt="neubrutalism style preview" onerror="this.classList.add('hidden')">
-          <span class="tag">NEW</span>
-          <div class="card-inner">
-            <h3>NEU BRUTAL</h3>
-            <p>SHADOWS · BORDERS · YELLOW</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Neubrutalism</div>
-            <div class="card-tags">
-              <span class="tag">Bold</span>
-              <span class="tag">Fun</span>
-              <span class="tag">High-contrast</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'neubrutalism')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Cyberpunk -->
-      <div class="style-card" onclick="openModal('cyberpunk')">
-        <div class="card-preview preview-cyberpunk">
-          <img class="preview-img" src="images/cyberpunk.jpg" alt="cyberpunk style preview" onerror="this.classList.add('hidden')">
-          <div class="scan-line"></div>
-          <div class="glitch"></div>
-          <div class="inner">
-            <h3>SYS_ACCESS</h3>
-            <p>GRID · SCAN · TERMINAL</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Cyberpunk Grid</div>
-            <div class="card-tags">
-              <span class="tag">Dark</span>
-              <span class="tag">Tech</span>
-              <span class="tag">Animated</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'cyberpunk')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Editorial -->
-      <div class="style-card" onclick="openModal('editorial')">
-        <div class="card-preview preview-editorial">
-          <img class="preview-img" src="images/editorial.jpg" alt="editorial style preview" onerror="this.classList.add('hidden')">
-          <div class="block"></div>
-          <div class="content">
-            <h3><span class="white">DESIGN</span>FOCUS</h3>
-            <p>Magazine · Clean · Contrast</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Editorial</div>
-            <div class="card-tags">
-              <span class="tag">Minimal</span>
-              <span class="tag">Type-heavy</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'editorial')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Minimal -->
-      <div class="style-card" onclick="openModal('minimal')">
-        <div class="card-preview preview-minimal">
-          <img class="preview-img" src="images/minimal.jpg" alt="minimal style preview" onerror="this.classList.add('hidden')">
-          <div class="inner">
-            <div class="line"></div>
-            <h3>Less is More</h3>
-            <p>White space · Clarity · Calm</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Zen Minimal</div>
-            <div class="card-tags">
-              <span class="tag">Light</span>
-              <span class="tag">Clean</span>
-              <span class="tag">Luxury</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'minimal')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Neon Noir -->
-      <div class="style-card" onclick="openModal('neon')">
-        <div class="card-preview preview-neon">
-          <img class="preview-img" src="images/neon.jpg" alt="neon style preview" onerror="this.classList.add('hidden')">
-          <div class="inner">
-            <h3>NEON NOIR</h3>
-            <p>Darkness · Glow · Contrast</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Neon Noir</div>
-            <div class="card-tags">
-              <span class="tag">Dark</span>
-              <span class="tag">Glow</span>
-              <span class="tag">Dramatic</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'neon')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Retro 90s -->
-      <div class="style-card" onclick="openModal('retro90')">
-        <div class="card-preview preview-retro90">
-          <img class="preview-img" src="images/retro90.jpg" alt="retro90 style preview" onerror="this.classList.add('hidden')">
-          <div class="win95-bar">
-            <span>My Website.exe</span>
-            <div class="win95-btns"><span>_</span><span>□</span><span>✕</span></div>
-          </div>
-          <div class="win95-body">
-            <div class="win95-dialog">
-              <h3>Welcome to My Homepage!</h3>
-              <span class="ok-btn">OK</span>
-            </div>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Retro 90s</div>
-            <div class="card-tags">
-              <span class="tag">Retro</span>
-              <span class="tag">Windows 95</span>
-              <span class="tag">Skeuomorphic</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'retro90')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Soft Pastel -->
-      <div class="style-card" onclick="openModal('pastel')">
-        <div class="card-preview preview-pastel">
-          <img class="preview-img" src="images/pastel.jpg" alt="pastel style preview" onerror="this.classList.add('hidden')">
-          <div class="pinner">
-            <h3>Sweet &amp; Soft</h3>
-            <p>Calm · Warm · Gentle</p>
-            <div class="dots">
-              <span class="dot"></span><span class="dot"></span>
-              <span class="dot"></span><span class="dot"></span>
-            </div>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Soft Pastel</div>
-            <div class="card-tags">
-              <span class="tag">Light</span>
-              <span class="tag">Feminine</span>
-              <span class="tag">Calm</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'pastel')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Dark Academia -->
-      <div class="style-card" onclick="openModal('darkacademia')">
-        <div class="card-preview preview-darkacademia">
-          <img class="preview-img" src="images/darkacademia.jpg" alt="darkacademia style preview" onerror="this.classList.add('hidden')">
-          <div class="pinner">
-            <h3>ars longa, vita brevis</h3>
-            <div class="rule"></div>
-            <p>Knowledge · Mystery · Ink</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Dark Academia</div>
-            <div class="card-tags">
-              <span class="tag">Dark</span>
-              <span class="tag">Literary</span>
-              <span class="tag">Vintage</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'darkacademia')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Memphis Design -->
-      <div class="style-card" onclick="openModal('memphis')">
-        <div class="card-preview preview-memphis">
-          <img class="preview-img" src="images/memphis.jpg" alt="memphis style preview" onerror="this.classList.add('hidden')">
-          <div class="shape1"></div>
-          <div class="shape2"></div>
-          <div class="shape3"></div>
-          <div class="pinner">
-            <h3>MEMPHIS</h3>
-            <p>Geo · Bold · Pop</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Memphis Design</div>
-            <div class="card-tags">
-              <span class="tag">Retro</span>
-              <span class="tag">Geometric</span>
-              <span class="tag">Playful</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'memphis')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Swiss / Bauhaus -->
-      <div class="style-card" onclick="openModal('swiss')">
-        <div class="card-preview preview-swiss">
-          <img class="preview-img" src="images/swiss.jpg" alt="swiss style preview" onerror="this.classList.add('hidden')">
-          <div class="red-bar"></div>
-          <div class="content">
-            <h3>Form<strong>Function</strong></h3>
-            <p>Grid · Order · Precision</p>
-          </div>
-          <div class="grid-mark"></div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Swiss / Bauhaus</div>
-            <div class="card-tags">
-              <span class="tag">Minimal</span>
-              <span class="tag">Grid</span>
-              <span class="tag">Typographic</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'swiss')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Vaporwave -->
-      <div class="style-card" onclick="openModal('vaporwave')">
-        <div class="card-preview preview-vaporwave">
-          <img class="preview-img" src="images/vaporwave.jpg" alt="vaporwave style preview" onerror="this.classList.add('hidden')">
-          <div class="grid-floor"></div>
-          <div class="sun">
-            <div class="sun-lines">
-              <div class="sun-line"></div><div class="sun-line"></div>
-              <div class="sun-line"></div><div class="sun-line"></div>
-            </div>
-          </div>
-          <div class="pinner">
-            <h3>ÆSTHETICS</h3>
-            <p>Retro · Future · Dream</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Vaporwave</div>
-            <div class="card-tags">
-              <span class="tag">Retro</span>
-              <span class="tag">Dreamy</span>
-              <span class="tag">80s Cyber</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'vaporwave')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Organic / Biomorphic -->
-      <div class="style-card" onclick="openModal('organic')">
-        <div class="card-preview preview-organic">
-          <img class="preview-img" src="images/organic.jpg" alt="organic style preview" onerror="this.classList.add('hidden')">
-          <div class="blob1"></div>
-          <div class="blob2"></div>
-          <div class="pinner">
-            <h3>Nature Flow</h3>
-            <p>Soft · Curved · Alive</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Organic / Biomorphic</div>
-            <div class="card-tags">
-              <span class="tag">Light</span>
-              <span class="tag">Natural</span>
-              <span class="tag">Flowing</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'organic')">Copy Prompt</button>
-        </div>
-      </div>
-
-      <!-- Terminal -->
-      <div class="style-card" onclick="openModal('terminal')">
-        <div class="card-preview preview-terminal">
-          <img class="preview-img" src="images/terminal.jpg" alt="terminal style preview" onerror="this.classList.add('hidden')">
-          <div class="term-content">
-            <div class="term-line"><span class="prompt">~/site $ </span><span class="cmd">init project</span></div>
-            <div class="term-line"><span class="out">▶ Loading vibes...</span></div>
-            <div class="term-line"><span class="out">✓ Done in 0.3s</span></div>
-            <div class="term-line"><span class="prompt">~/site $ </span><span class="cursor-blink"></span></div>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="card-name">Terminal / Monochrome</div>
-            <div class="card-tags">
-              <span class="tag">Dark</span>
-              <span class="tag">Minimal</span>
-              <span class="tag">Hacker</span>
-            </div>
-          </div>
-          <button class="copy-btn" onclick="copyPrompt(event,'terminal')">Copy Prompt</button>
-        </div>
-      </div>
-
-    </div>
-  </section>
 
 <script>
 // ─── Cursor — disabled (using default OS cursor) ──────────
@@ -3331,6 +2975,30 @@
   rows.forEach((row, i) => row.addEventListener('click', () => { goStep(i); clearInterval(timer); timer = setInterval(() => goStep((cur+1) % rows.length), 3500); }));
   let timer = setInterval(() => goStep((cur+1) % rows.length), 3500);
 })();
+
+// ─── Hero video → step-caption sync ───────────────────────
+(function () {
+  var v = document.getElementById('hero-workflow-video');
+  var overlay = document.getElementById('hero-steps-overlay');
+  if (!v || !overlay) return;
+  var steps = overlay.querySelectorAll('.hstep');
+  var cuts = [2.4, 3.5];                 // cards scatter <2.4→0, coalesce <3.5→1, materials else→2
+  var cur = -1;
+  function setActive(i) {
+    if (i === cur) return;
+    cur = i;
+    steps.forEach(function (s, idx) { s.classList.toggle('active', idx === i); });
+  }
+  function tick() {
+    var t = v.currentTime || 0;
+    var i = t < cuts[0] ? 0 : (t < cuts[1] ? 1 : 2);
+    setActive(i);
+  }
+  v.addEventListener('timeupdate', tick);   // ~4Hz, sufficient
+  v.addEventListener('loadedmetadata', tick);
+  setActive(0);                              // light 01 on first frame
+})();
+
 
 
 // ─── Parallax Background ──────────────────────────────────
@@ -4794,47 +4462,60 @@ Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a l
 
 // ─── Gallery + Modal ─────────────────────────────────────
 // ─── Vibe data: category assignment ─────────────────────
+// Each style → its category group key. Used for sidebar filtering AND the
+// human-readable caption label (via CATEGORY_LABELS below).
 const vibeCategories = {
   // Minimal & Modern
   swiss_style:         'minimal_modern',
   swiss_geometric:     'minimal_modern',
   swiss_typo_bw:       'minimal_modern',
   swiss_dots_color:    'minimal_modern',
-  editorial_min:  'editorial_min',
-  tech_min:       'tech_min',
-  warm_min:       'warm_min',
-  luxury_min:     'luxury_min',
-  velvet_luxe:    'velvet_luxe',
-  monochrome:     'monochrome',
-  // Material & Spatial
-  glassmorphism:  'glassmorphism',
-  paper_cutout:   'paper_cutout',
+  editorial_min:  'minimal_modern',
+  tech_min:       'minimal_modern',
+  warm_min:       'minimal_modern',
+  luxury_min:     'minimal_modern',
+  velvet_luxe:    'minimal_modern',
+  monochrome:     'minimal_modern',
+  // Material & Space
+  glassmorphism:  'material_space',
+  paper_cutout:   'material_space',
   // Futuristic & Sci-Fi
-  cyberpunk:      'cyberpunk',
-  dark_tech:      'dark_tech',
-  scifi_hud:      'scifi_hud',
+  cyberpunk:      'futuristic',
+  dark_tech:      'futuristic',
+  scifi_hud:      'futuristic',
   // Cinematic & Narrative
   cinematic:      'cinematic',
-  film_noir:      'film_noir',
+  film_noir:      'cinematic',
+  cinematic_editorial: 'cinematic',
   // Graphic & Experimental
-  neo_brutalism:  'neo_brutalism',
-  anti_design:    'anti_design',
-  maximalism:     'maximalism',
-  memphis:        'memphis',
-  glitch:         'glitch',
-  kinetic_typo:   'kinetic_typo',
-  surreal_3d:     'surreal_3d',
+  neo_brutalism:  'graphic',
+  anti_design:    'graphic',
+  maximalism:     'graphic',
+  memphis:        'graphic',
+  glitch:         'graphic',
+  kinetic_typo:   'graphic',
+  surreal_3d:     'graphic',
   // Retro & Era
-  bauhaus:        'bauhaus',
-  synthwave:      'synthwave',
-  y2k:            'y2k',
-  cassette_fut:   'cassette_fut',
+  bauhaus:        'retro',
+  synthwave:      'retro',
+  y2k:            'retro',
+  cassette_fut:   'retro',
   // Organic & Humanistic
-  organic_modern: 'organic_modern',
-  biophilic:      'biophilic',
-  wabi_sabi:      'wabi_sabi',
-  ethereal:       'ethereal',
-  cinematic_editorial: 'cinematic_editorial',
+  organic_modern: 'organic',
+  biophilic:      'organic',
+  wabi_sabi:      'organic',
+  ethereal:       'organic',
+};
+
+// Category key → display label (order defines sidebar + section order).
+const CATEGORY_LABELS = {
+  minimal_modern: 'Minimal & Modern',
+  material_space: 'Material & Space',
+  futuristic:     'Futuristic & Sci-Fi',
+  cinematic:      'Cinematic & Narrative',
+  graphic:        'Graphic & Experimental',
+  retro:          'Retro & Era',
+  organic:        'Organic & Humanistic',
 };
 
 const styleImageMap = {
@@ -4953,14 +4634,6 @@ let defaultColors = []; // original palette to support reset
 // ─── Gallery portal ───────────────────────────────────────
 
 // Keep the "All Styles" counts in sync with the real number of styles
-(function syncStyleCount() {
-  const n = Object.keys(styles).length;
-  const nav = document.getElementById('gp-nav-count');
-  const top = document.getElementById('gp-topbar-count');
-  if (nav) nav.textContent = n;
-  if (top) top.textContent = n;
-})();
-
 function buildWaterfall(cat, query) {
   const container = document.getElementById('gp-waterfall-inner');
   container.innerHTML = '';
@@ -5003,16 +4676,24 @@ function buildWaterfall(cat, query) {
     card.style.opacity = '0';
     card.style.transform = 'translateY(16px)';
     card.style.transition = `opacity 0.45s ease ${i * 30}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${i * 30}ms`;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', `${s.title} — view brand identity prompt`);
     card.onclick = () => openVibeModal(id);
+    card.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openVibeModal(id); }
+    });
+    const catLabel = CATEGORY_LABELS[vibeCategories[id]] || '';
     card.innerHTML = `
       <div class="vc-img-wrap">
-        <img class="vc-img" src="${imgPath}" alt="${s.title}"
+        <img class="vc-img" src="${imgPath}" alt="${s.title} — ${catLabel} visual style preview"
+             loading="lazy" decoding="async"
              onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';">
         <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]});height:200px;"></div>
         <div class="vc-caption">
           <div class="vc-cap-top">
             <span class="vc-cap-title anim">${s.title}</span>
-            <span class="vc-cap-cat anim">${vibeCategories[id] || ''}</span>
+            <span class="vc-cap-cat anim">${catLabel}</span>
           </div>
           <button class="vc-copy-btn anim" onclick="quickCopy(event,'${id}')">Copy Prompt</button>
         </div>
@@ -5044,19 +4725,36 @@ function buildWaterfall(cat, query) {
 
 let activeCat = 'all';
 
+function catCount(cat) {
+  return cat === 'all'
+    ? Object.keys(styles).length
+    : Object.keys(styles).filter(id => vibeCategories[id] === cat).length;
+}
+
 function initGallery() {
+  // Build sidebar filter buttons from CATEGORY_LABELS
+  const nav = document.getElementById('gp-nav');
+  const total = Object.keys(styles).length;
+  let navHTML = `<button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">${total}</span></button>`;
+  for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
+    const n = catCount(cat);
+    if (!n) continue;
+    navHTML += `<button class="gp-nav-btn" data-cat="${cat}">${label}<span class="gp-nav-count">${n}</span></button>`;
+  }
+  nav.innerHTML = navHTML;
+
+  document.getElementById('gp-topbar-count').textContent = total;
+  const unlockCount = document.getElementById('unlock-style-count');
+  if (unlockCount) unlockCount.textContent = total;
+
   buildWaterfall('all', '');
   document.querySelectorAll('.gp-nav-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.gp-nav-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       activeCat = this.dataset.cat;
-      // Get label: text content minus the icon span
-      const iconEl = this.querySelector('.gp-nav-icon');
-      const label = this.textContent.replace(iconEl ? iconEl.textContent : '', '').trim();
-      const count = activeCat === 'all'
-        ? Object.keys(styles).length + '+'
-        : Object.keys(styles).filter(id => vibeCategories[id] === activeCat).length || '—';
+      const label = activeCat === 'all' ? 'All Styles' : (CATEGORY_LABELS[activeCat] || 'Styles');
+      const count = catCount(activeCat);
       document.getElementById('gp-topbar-title').innerHTML = `${label} <span>${count}</span>`;
       buildWaterfall(activeCat, document.getElementById('gp-search').value);
     });
@@ -5079,50 +4777,6 @@ function exitGallery() {
 }
 
 // ─── Dream canvas animation ──────────────────────────────
-function runDreamAnim(onDone) {
-  const dc = document.getElementById('dream-canvas');
-  dc.width = window.innerWidth;
-  dc.height = window.innerHeight;
-  const ctx2 = dc.getContext('2d');
-  let t = 0;
-  const cx = dc.width / 2, cy = dc.height / 2;
-  const maxR = Math.hypot(cx, cy) * 1.1;
-
-  function frame() {
-    t += 0.025;
-    ctx2.clearRect(0, 0, dc.width, dc.height);
-
-    // Expanding radial dream wipe
-    const r = maxR * Math.pow(t, 1.4);
-    const grad = ctx2.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0, `rgba(8,10,14,${Math.min(t * 1.5, 1)})`);
-    grad.addColorStop(0.6, `rgba(20,40,80,${Math.min(t, 0.9)})`);
-    grad.addColorStop(0.85, `rgba(232,255,71,${0.12 * Math.sin(t * 4)})`);
-    grad.addColorStop(1, 'rgba(8,10,14,0)');
-    ctx2.fillStyle = grad;
-    ctx2.fillRect(0, 0, dc.width, dc.height);
-
-    // Particle rings
-    for (let ring = 0; ring < 5; ring++) {
-      const rr = r * (0.4 + ring * 0.15);
-      const alpha = Math.max(0, 0.4 - t * 0.3 - ring * 0.06);
-      ctx2.beginPath();
-      ctx2.arc(cx, cy, rr, 0, Math.PI * 2);
-      ctx2.strokeStyle = `rgba(232,255,71,${alpha})`;
-      ctx2.lineWidth = 1;
-      ctx2.stroke();
-    }
-
-    if (t < 1) {
-      requestAnimationFrame(frame);
-    } else {
-      ctx2.clearRect(0, 0, dc.width, dc.height);
-      onDone();
-    }
-  }
-  requestAnimationFrame(frame);
-}
-
 // ─── Vibe modal ──────────────────────────────────────────
 let currentVibe = null;
 
@@ -5141,6 +4795,7 @@ function openVibeModal(id) {
   tagsEl.innerHTML = (meta.tags || []).map(t => `<span class="vm-meta-tag">${t}</span>`).join('');
 
   const imgEl = document.getElementById('vm-img');
+  imgEl.alt = `${s.title} — ${CATEGORY_LABELS[vibeCategories[id]] || 'visual'} style preview`;
   const fallEl = document.getElementById('vm-fallback');
   const gradPal = vibePalette[id] || ['#111','#333','#555'];
   fallEl.style.background = `linear-gradient(135deg,${gradPal[0]},${gradPal[1]},${gradPal[2]})`;
