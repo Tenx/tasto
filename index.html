@@ -382,7 +382,7 @@
       display: grid;
       grid-template-columns: 2fr 3fr;
       gap: 80px;
-      align-items: flex-start;
+      align-items: center;
       width: 100%;
       max-width: 1400px;
       margin: 0 auto;
@@ -579,8 +579,6 @@
       display: flex;
       flex-direction: column;
       gap: 28px;
-      position: sticky;
-      top: 80px;
     }
     .hero-tagline {
       font-family: 'Bebas Neue', sans-serif;
@@ -2244,6 +2242,7 @@
     .gp-main {
       margin-left: 200px;
       min-width: 0;
+      min-height: calc(100vh - 64px);
       display: flex;
       flex-direction: column;
     }
@@ -2256,7 +2255,7 @@
       background: rgba(8,10,14,0.95);
       backdrop-filter: blur(12px);
       position: sticky;
-      top: 0;
+      top: 64px;
       z-index: 10;
       flex-shrink: 0;
     }
@@ -4757,6 +4756,11 @@ function initGallery() {
       const count = catCount(activeCat);
       document.getElementById('gp-topbar-title').innerHTML = `${label} <span>${count}</span>`;
       buildWaterfall(activeCat, document.getElementById('gp-search').value);
+      // Keep the sidebar latched + the gallery pinned to the top of the viewport
+      // so a short filtered result set can't scroll the page back into the hero.
+      document.getElementById('gp-sidebar').classList.add('visible');
+      const portalTop = document.getElementById('gallery-portal').getBoundingClientRect().top + window.scrollY;
+      if (window.scrollY < portalTop) window.scrollTo(0, portalTop);
     });
   });
 
@@ -4987,14 +4991,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Show sidebar when hero scrolls out of view
+  // Reveal the sidebar once the gallery is scrolled into view, then keep it
+  // latched visible while browsing (filtering can shrink the page and jump the
+  // scroll position — the sidebar must NOT disappear mid-interaction).
   const hero = document.querySelector('.hero');
   const sidebar = document.getElementById('gp-sidebar');
   const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
-      sidebar.classList.remove('visible');
-    } else {
+    if (!entries[0].isIntersecting) {
       sidebar.classList.add('visible');
+      observer.disconnect();
     }
   }, { threshold: 0.05 });
   observer.observe(hero);
