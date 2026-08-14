@@ -4756,9 +4756,8 @@ function initGallery() {
       const count = catCount(activeCat);
       document.getElementById('gp-topbar-title').innerHTML = `${label} <span>${count}</span>`;
       buildWaterfall(activeCat, document.getElementById('gp-search').value);
-      // Keep the sidebar latched + the gallery pinned to the top of the viewport
-      // so a short filtered result set can't scroll the page back into the hero.
-      document.getElementById('gp-sidebar').classList.add('visible');
+      // Pin the gallery to the top of the viewport so a short filtered result set
+      // can't scroll the page back into the hero (which would hide the sidebar).
       const portalTop = document.getElementById('gallery-portal').getBoundingClientRect().top + window.scrollY;
       if (window.scrollY < portalTop) window.scrollTo(0, portalTop);
     });
@@ -4991,16 +4990,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Reveal the sidebar once the gallery is scrolled into view, then keep it
-  // latched visible while browsing (filtering can shrink the page and jump the
-  // scroll position — the sidebar must NOT disappear mid-interaction).
+  // Sidebar follows the hero: visible when the gallery is in view, hidden when
+  // you scroll back up into the hero. The filter-click handler (below) keeps the
+  // gallery pinned to the top so a short result set can't scroll the page back
+  // into the hero and hide the sidebar mid-interaction.
   const hero = document.querySelector('.hero');
   const sidebar = document.getElementById('gp-sidebar');
   const observer = new IntersectionObserver((entries) => {
-    if (!entries[0].isIntersecting) {
-      sidebar.classList.add('visible');
-      observer.disconnect();
-    }
+    sidebar.classList.toggle('visible', !entries[0].isIntersecting);
   }, { threshold: 0.05 });
   observer.observe(hero);
 
