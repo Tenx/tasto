@@ -2286,6 +2286,37 @@
     .gp-search::placeholder { color: var(--text-muted); }
     .gp-search:focus { border-color: var(--border-hover); }
 
+    /* Mobile-only category chips (hidden on desktop; sidebar handles filtering there) */
+    .gp-chips {
+      display: none;
+    }
+    .gp-chip {
+      flex: 0 0 auto;
+      padding: 7px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .gp-chip .gp-chip-count {
+      color: var(--text-muted);
+      margin-left: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+    }
+    .gp-chip.active {
+      color: #0a0c10;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .gp-chip.active .gp-chip-count { color: rgba(10,12,16,0.6); }
+
     /* Waterfall / masonry — CSS Grid span masonry */
     .gp-waterfall {
       padding: 20px 20px 60px;
@@ -2595,7 +2626,7 @@
     }
     .vm-palette-swatches {
       display: flex;
-      gap: 8px;
+      gap: 14px;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -2632,7 +2663,7 @@
       margin-top: 3px;
       text-align: center;
       text-transform: uppercase;
-      width: 28px;
+      white-space: nowrap;
     }
     .vm-swatch-wrap {
       display: flex;
@@ -2762,7 +2793,7 @@
       .hero-step-row-title { font-size: 22px; }
       .hero-step-row-num { font-size: 36px; width: 40px; }
 
-      /* Sidebar — hidden on mobile, show toggle */
+      /* Sidebar — hidden on mobile; chips row below the topbar handles filtering */
       .gp-sidebar { display: none; }
       .gp-main { margin-left: 0; }
 
@@ -2770,6 +2801,23 @@
       .gp-topbar { padding: 14px 16px; }
       .gp-topbar-title { font-size: 18px; }
       .gp-search { width: 140px; font-size: 11px; }
+
+      /* Category chips — horizontal scroll row, sticky under the topbar */
+      .gp-chips {
+        display: flex;
+        gap: 8px;
+        padding: 12px 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        border-bottom: 1px solid var(--border);
+        background: rgba(8,10,14,0.95);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 113px;
+        z-index: 9;
+      }
+      .gp-chips::-webkit-scrollbar { display: none; }
 
       /* Gallery grid — 1 column on phone, 2 on tablet */
       .style-grid {
@@ -2884,6 +2932,9 @@
     <div class="gp-topbar">
       <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span id="gp-topbar-count"></span></div>
       <input class="gp-search" id="gp-search" type="text" placeholder="Search styles..." autocomplete="off" aria-label="Search styles">
+    </div>
+    <div class="gp-chips" id="gp-chips" role="tablist" aria-label="Filter styles by category">
+      <!-- mobile-only category chips, filled by JS -->
     </div>
     <div class="gp-waterfall" id="gp-waterfall">
       <div class="gp-waterfall-inner" id="gp-waterfall-inner">
@@ -4731,9 +4782,10 @@ function catCount(cat) {
 }
 
 function initGallery() {
-  // Build sidebar filter buttons from CATEGORY_LABELS
-  const nav = document.getElementById('gp-nav');
   const total = Object.keys(styles).length;
+
+  // Build sidebar filter buttons (desktop) from CATEGORY_LABELS
+  const nav = document.getElementById('gp-nav');
   let navHTML = `<button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">${total}</span></button>`;
   for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
     const n = catCount(cat);
@@ -4742,25 +4794,41 @@ function initGallery() {
   }
   nav.innerHTML = navHTML;
 
+  // Build category chips (mobile) from the same data
+  const chips = document.getElementById('gp-chips');
+  if (chips) {
+    let chipHTML = `<button class="gp-chip active" data-cat="all">All<span class="gp-chip-count">${total}</span></button>`;
+    for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
+      const n = catCount(cat);
+      if (!n) continue;
+      chipHTML += `<button class="gp-chip" data-cat="${cat}">${label}<span class="gp-chip-count">${n}</span></button>`;
+    }
+    chips.innerHTML = chipHTML;
+  }
+
   document.getElementById('gp-topbar-count').textContent = total;
   const unlockCount = document.getElementById('unlock-style-count');
   if (unlockCount) unlockCount.textContent = total;
 
   buildWaterfall('all', '');
-  document.querySelectorAll('.gp-nav-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.gp-nav-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      activeCat = this.dataset.cat;
-      const label = activeCat === 'all' ? 'All Styles' : (CATEGORY_LABELS[activeCat] || 'Styles');
-      const count = catCount(activeCat);
-      document.getElementById('gp-topbar-title').innerHTML = `${label} <span>${count}</span>`;
-      buildWaterfall(activeCat, document.getElementById('gp-search').value);
-      // Pin the gallery to the top of the viewport so a short filtered result set
-      // can't scroll the page back into the hero (which would hide the sidebar).
-      const portalTop = document.getElementById('gallery-portal').getBoundingClientRect().top + window.scrollY;
-      if (window.scrollY < portalTop) window.scrollTo(0, portalTop);
+
+  // Shared handler — keeps sidebar buttons AND mobile chips in sync
+  function selectCategory(cat) {
+    activeCat = cat;
+    document.querySelectorAll('.gp-nav-btn, .gp-chip').forEach(el => {
+      el.classList.toggle('active', el.dataset.cat === cat);
     });
+    const label = cat === 'all' ? 'All Styles' : (CATEGORY_LABELS[cat] || 'Styles');
+    document.getElementById('gp-topbar-title').innerHTML = `${label} <span>${catCount(cat)}</span>`;
+    buildWaterfall(cat, document.getElementById('gp-search').value);
+    // Pin the gallery to the top of the viewport so a short filtered result set
+    // can't scroll the page back into the hero (which would hide the sidebar).
+    const portalTop = document.getElementById('gallery-portal').getBoundingClientRect().top + window.scrollY;
+    if (window.scrollY < portalTop) window.scrollTo(0, portalTop);
+  }
+
+  document.querySelectorAll('.gp-nav-btn, .gp-chip').forEach(el => {
+    el.addEventListener('click', function() { selectCategory(this.dataset.cat); });
   });
 
   document.getElementById('gp-search').addEventListener('input', function() {
