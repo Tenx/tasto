@@ -2742,7 +2742,7 @@
         </h1>
         <p class="hero-desc-new">Browse curated aesthetics by style. Pick your vibe → Copy the prompt → Launch your brand.</p>
         <div class="hero-btns">
-          <button class="hero-btn-primary" onclick="document.getElementById('gallery-portal').scrollIntoView({behavior:'smooth'})">Explore 29+ Styles ↗</button>
+          <button class="hero-btn-primary" onclick="document.getElementById('gallery-portal').scrollIntoView({behavior:'smooth'})">Explore 30+ Styles ↗</button>
           <button class="hero-btn-ghost" onclick="document.getElementById('gallery-portal').scrollIntoView({behavior:'smooth'})">See How It Works ↓</button>
         </div>
       </div>
@@ -2911,7 +2911,7 @@
     <div class="gp-sidebar-tagline">Pick your aesthetic.<br>Copy the prompt.<br>Launch your brand.</div>
     <div class="gp-sidebar-label">// Aesthetic Categories</div>
     <nav class="gp-nav">
-      <button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">29</span></button>
+      <button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">30</span></button>
 
       <div class="gp-nav-group">Minimal & Modern</div>
       <button class="gp-nav-btn" data-cat="minimal_modern">Swiss Style</button>
@@ -2927,6 +2927,7 @@
 
       <div class="gp-nav-group">Futuristic & Sci-Fi</div>
       <button class="gp-nav-btn" data-cat="cyberpunk">Cyberpunk</button>
+      <button class="gp-nav-btn" data-cat="neon_skyport">Neon Skyport</button>
       <button class="gp-nav-btn" data-cat="scifi_hud">Sci-Fi HUD</button>
       <button class="gp-nav-btn" data-cat="dark_tech">Dark Technology</button>
 
@@ -2963,7 +2964,7 @@
 
   <div class="gp-main" id="gp-main">
     <div class="gp-topbar">
-      <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span>29</span></div>
+      <div class="gp-topbar-title" id="gp-topbar-title">All Styles <span>30</span></div>
       <input class="gp-search" id="gp-search" type="text" placeholder="Search styles..." autocomplete="off">
     </div>
     <div class="gp-waterfall" id="gp-waterfall">
@@ -3024,7 +3025,7 @@
     <h2 class="unlock-title">GO UNLIMITED</h2>
     <p class="unlock-sub">Copy any prompt, customize palettes, and access all future styles. Pay once, use forever.</p>
     <ul class="unlock-features">
-      <li>All 29+ VI style prompts — fully unlocked</li>
+      <li>All 30+ VI style prompts — fully unlocked</li>
       <li>Brand palette color customization</li>
       <li>Lifetime updates — new styles added regularly</li>
       <li>Personal &amp; client work</li>
@@ -4197,6 +4198,73 @@ Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: analog
 
 ## 7. Implementation Notes
 Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: Blade Runner neon, Ghost in the Shell HUD, the beautiful decay of hypercapitalist futurity.`,
+  },
+
+  neon_skyport: {
+    title: 'NEON SKYPORT',
+    meta: { origin: 'Anime science fiction / optimistic megacity futures', tags: ['Anime', 'Sky City', 'Neon'], desc: 'A bright, high-altitude future of floating transit hubs, saturated blue skies, graphic neon signage, and human-scale moments inside monumental technology.' },
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Neon Skyport aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-sky:     #4f8cff;
+  --color-sun:     #ff91ad;
+  --color-cyan:    #20f1ef;
+  --color-yellow:  #ffd323;
+  --color-red:     #e53a3f;
+  --color-ink:     #11182b;
+  --color-cloud:   #fff6ef;
+  Rule: Start with luminous sky blue and cloud white. Use cyan, yellow, and red as precise transit-signage accents; reserve deep ink for structural contrast.
+
+## 2. Typography System
+  Display: "Space Grotesk" or "Eurostile" — 700 weight, uppercase, wide tracking
+  Body: "Inter" — 400 weight, open counters, compact line-height
+  Data labels: "Space Mono" — 500 weight, uppercase, 0.12em tracking
+  Rule: Type behaves like wayfinding: short, legible, modular, and aligned to engineered surfaces.
+
+## 3. Logo Concept for [BRAND]
+  A forward-leaning wordmark paired with an orbital arc or navigation chevron.
+  Build the mark from two simple geometric pieces so it works as a vehicle badge, app icon, and illuminated station sign.
+  Primary lockup: cloud white on ink; signal variant: cyan with a restrained outer glow.
+
+## 4. Art Direction & Layout Principles
+  Compose in cinematic 3:2 frames with a grounded foreground observer and an immense airborne city beyond.
+  Mix clean anime linework with painterly clouds, reflective metal, and crisp industrial details.
+  Use diagonal rails, flight trails, and circular megastructures to pull the eye toward the horizon.
+  Keep the future optimistic and lived-in: personal vehicles, pets, worn platforms, decals, and small wayfinding labels.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.skyport-panel {
+  background: rgba(17, 24, 43, 0.9);
+  border: 1px solid rgba(32, 241, 239, 0.55);
+  border-radius: 2px;
+  box-shadow: inset 0 0 24px rgba(32, 241, 239, 0.08);
+  color: #fff6ef;
+}
+.route-button {
+  background: #11182b;
+  color: #20f1ef;
+  border: 1px solid #20f1ef;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+.route-button:hover {
+  background: #20f1ef;
+  color: #11182b;
+  box-shadow: 0 0 24px rgba(32, 241, 239, 0.45);
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Aircraft drift slowly across the horizon on long linear paths.
+  Navigation accents pulse once on entry, then remain stable.
+  Hover interactions use a 120ms light sweep and a subtle cyan edge glow; avoid aggressive glitch effects.
+  Parallax is layered by altitude: foreground platform fastest, sky city medium, sun and clouds nearly fixed.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: optimistic anime futurism at golden hour — a spectacular floating metropolis made intimate by one quiet traveler at the edge of the sky.`,
   },
 
   dark_tech: {
@@ -5377,6 +5445,7 @@ const vibeCategories = {
   paper_cutout:   'paper_cutout',
   // Futuristic & Sci-Fi
   cyberpunk:      'cyberpunk',
+  neon_skyport:   'neon_skyport',
   dark_tech:      'dark_tech',
   scifi_hud:      'scifi_hud',
   // Cinematic & Narrative
@@ -5416,6 +5485,7 @@ const styleImageMap = {
   paper_cutout:   'images/lark_paper_cutout.jpg',
   // Futuristic & Sci-Fi
   cyberpunk:      'images/lark_cyberpunk.jpg',
+  neon_skyport:   'images/neon_skyport.png',
   dark_tech:      'images/lark_dark_tech.png',
   scifi_hud:      'images/lark_scifi_hud.jpg',
   // Cinematic & Narrative
@@ -5456,6 +5526,7 @@ const vibePalette = {
   paper_cutout:   ['#f5e6c8','#d44444','#1a4a8a'],
   // Futuristic & Sci-Fi
   cyberpunk:      ['#0d0d1a','#00FFFF','#FF00AA'],
+  neon_skyport:   ['#4f8cff','#ff91ad','#20f1ef'],
   dark_tech:      ['#000000','#00ff00','#003300'],
   scifi_hud:      ['#060612','#39ff14','#ff00ff'],
   // Cinematic & Narrative
