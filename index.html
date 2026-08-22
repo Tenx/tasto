@@ -3879,6 +3879,73 @@ DON'T: use light backgrounds, flatten the glow, overuse glitch until it's noise,
 Now apply this identity to: [describe the product — e.g. a t-shirt, a mug, a landing page, an app screen, product packaging].`,
   },
 
+  neon_skyport: {
+    title: 'NEON SKYPORT',
+    meta: { origin: 'Anime science fiction / optimistic megacity futures', tags: ['Anime', 'Sky City', 'Neon'], desc: 'A bright, high-altitude future of floating transit hubs, saturated blue skies, graphic neon signage, and human-scale moments inside monumental technology.' },
+    vi: `You are building a complete Visual Identity (VI) system for the brand "[BRAND]" using the Neon Skyport aesthetic. Generate the following deliverables as production-ready code and specifications:
+
+## 1. Brand Color System
+  --color-sky:     #4f8cff;
+  --color-sun:     #ff91ad;
+  --color-cyan:    #20f1ef;
+  --color-yellow:  #ffd323;
+  --color-red:     #e53a3f;
+  --color-ink:     #11182b;
+  --color-cloud:   #fff6ef;
+  Rule: Start with luminous sky blue and cloud white. Use cyan, yellow, and red as precise transit-signage accents; reserve deep ink for structural contrast.
+
+## 2. Typography System
+  Display: "Space Grotesk" or "Eurostile" — 700 weight, uppercase, wide tracking
+  Body: "Inter" — 400 weight, open counters, compact line-height
+  Data labels: "Space Mono" — 500 weight, uppercase, 0.12em tracking
+  Rule: Type behaves like wayfinding: short, legible, modular, and aligned to engineered surfaces.
+
+## 3. Logo Concept for [BRAND]
+  A forward-leaning wordmark paired with an orbital arc or navigation chevron.
+  Build the mark from two simple geometric pieces so it works as a vehicle badge, app icon, and illuminated station sign.
+  Primary lockup: cloud white on ink; signal variant: cyan with a restrained outer glow.
+
+## 4. Art Direction & Layout Principles
+  Compose in cinematic 3:2 frames with a grounded foreground observer and an immense airborne city beyond.
+  Mix clean anime linework with painterly clouds, reflective metal, and crisp industrial details.
+  Use diagonal rails, flight trails, and circular megastructures to pull the eye toward the horizon.
+  Keep the future optimistic and lived-in: personal vehicles, pets, worn platforms, decals, and small wayfinding labels.
+
+## 5. UI Component Library (CSS)
+\`\`\`css
+.skyport-panel {
+  background: rgba(17, 24, 43, 0.9);
+  border: 1px solid rgba(32, 241, 239, 0.55);
+  border-radius: 2px;
+  box-shadow: inset 0 0 24px rgba(32, 241, 239, 0.08);
+  color: #fff6ef;
+}
+.route-button {
+  background: #11182b;
+  color: #20f1ef;
+  border: 1px solid #20f1ef;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+.route-button:hover {
+  background: #20f1ef;
+  color: #11182b;
+  box-shadow: 0 0 24px rgba(32, 241, 239, 0.45);
+}
+\`\`\`
+
+## 6. Motion & Animation
+  Aircraft drift slowly across the horizon on long linear paths.
+  Navigation accents pulse once on entry, then remain stable.
+  Hover interactions use a 120ms light sweep and a subtle cyan edge glow; avoid aggressive glitch effects.
+  Parallax is layered by altitude: foreground platform fastest, sky city medium, sun and clouds nearly fixed.
+
+## 7. Implementation Notes
+Apply this complete VI system to build [BRAND]'s product/site. Aesthetic: optimistic anime futurism at golden hour — a spectacular floating metropolis made intimate by one quiet traveler at the edge of the sky.`,
+  },
+
   dark_tech: {
     title: 'DARK TECHNOLOGY',
     meta: { origin: 'Dev tools / Gaming / Web3 brands', tags: ['Dark', 'Geek', 'Precision'], desc: "The extreme version of Vercel and Linear's dark mode. Pure black, a single neon accent, monospace type — code is aesthetics, precision is style." },
@@ -4698,6 +4765,7 @@ const vibeCategories = {
   paper_cutout:   'material',
   // Futuristic
   cyberpunk:      'futuristic',
+  neon_skyport:   'futuristic',
   dark_tech:      'futuristic',
   scifi_hud:      'futuristic',
   // Cinematic & Narrative
@@ -4773,6 +4841,7 @@ const styleImageMap = {
   paper_cutout:   'images/recreated/tasto_paper_cutout.png',
   // Futuristic & Sci-Fi
   cyberpunk:      'images/recreated/tasto_cyberpunk.png',
+  neon_skyport:   'images/neon_skyport.png',
   dark_tech:      'images/recreated/tasto_dark_tech.png',
   scifi_hud:      'images/recreated/tasto_scifi_hud.png',
   // Cinematic & Narrative
@@ -4821,6 +4890,7 @@ const vibePalette = {
   paper_cutout:   ['#f5e6c8','#d44444','#1a4a8a'],
   // Futuristic & Sci-Fi
   cyberpunk:      ['#0d0d1a','#00FFFF','#FF00AA'],
+  neon_skyport:   ['#4f8cff','#ff91ad','#20f1ef'],
   dark_tech:      ['#000000','#00ff00','#003300'],
   scifi_hud:      ['#060612','#39ff14','#ff00ff'],
   // Cinematic & Narrative
