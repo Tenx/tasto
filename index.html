@@ -2206,6 +2206,15 @@
       font-weight: 400;
     }
     .gp-nav-btn.active .gp-nav-count { color: var(--accent); }
+    .gp-nav-zh {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--text-muted);
+      margin-left: 5px;
+      letter-spacing: 0.02em;
+    }
+    .gp-nav-btn.active .gp-nav-zh { color: var(--accent); opacity: 0.75; }
     .gp-nav-btn:focus-visible,
     .vc-copy-btn:focus-visible,
     .vibe-card:focus-visible {
@@ -4680,14 +4689,14 @@ const vibeCategories = {
   luxury_min:     'minimal_modern',
   velvet_luxe:    'minimal_modern',
   monochrome:     'minimal_modern',
-  // Material & Space
-  glassmorphism:  'material_space',
-  aurora_gradient:'material_space',
-  claymorphism:   'material_space',
-  frosted_depth:  'material_space',
-  neumorphism:    'material_space',
-  paper_cutout:   'material_space',
-  // Futuristic & Sci-Fi
+  // Material
+  glassmorphism:  'material',
+  aurora_gradient:'material',
+  claymorphism:   'material',
+  frosted_depth:  'material',
+  neumorphism:    'material',
+  paper_cutout:   'material',
+  // Futuristic
   cyberpunk:      'futuristic',
   dark_tech:      'futuristic',
   scifi_hud:      'futuristic',
@@ -4716,14 +4725,31 @@ const vibeCategories = {
 };
 
 // Category key → display label (order defines sidebar + section order).
+// Order follows the 8-tier directory: Minimal → Graphic → Material →
+// Futuristic → Game Worlds → Cinematic → Retro → Organic.
+// Empty categories (no styles yet, e.g. game_worlds) are skipped at render.
 const CATEGORY_LABELS = {
   minimal_modern: 'Minimal & Modern',
-  material_space: 'Material & Space',
-  futuristic:     'Futuristic & Sci-Fi',
-  cinematic:      'Cinematic & Narrative',
   graphic:        'Graphic & Experimental',
+  material:       'Material',
+  futuristic:     'Futuristic',
+  game_worlds:    'Game Worlds',
+  cinematic:      'Cinematic & Narrative',
   retro:          'Retro & Era',
   organic:        'Organic & Humanistic',
+};
+
+// Category key → Chinese subtitle (shown only in the sidebar nav / mobile chips,
+// never in alt text or card captions — those use the clean English label above).
+const CATEGORY_ZH = {
+  minimal_modern: '现代极简',
+  graphic:        '图形与实验',
+  material:       '材质风格',
+  futuristic:     '未来科技',
+  game_worlds:    '游戏世界',
+  cinematic:      '影视叙事',
+  retro:          '复古与时代',
+  organic:        '自然与人文',
 };
 
 const styleImageMap = {
@@ -4956,7 +4982,8 @@ function initGallery() {
   for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
     const n = catCount(cat);
     if (!n) continue;
-    navHTML += `<button class="gp-nav-btn" data-cat="${cat}">${label}<span class="gp-nav-count">${n}</span></button>`;
+    const zh = CATEGORY_ZH[cat] ? ` <span class="gp-nav-zh">${CATEGORY_ZH[cat]}</span>` : '';
+    navHTML += `<button class="gp-nav-btn" data-cat="${cat}"><span class="gp-nav-label">${label}${zh}</span><span class="gp-nav-count">${n}</span></button>`;
   }
   nav.innerHTML = navHTML;
 
