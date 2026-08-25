@@ -2114,7 +2114,7 @@
     .gp-sidebar {
       position: fixed;
       left: 0; top: 64px;
-      width: 200px;
+      width: 292px;
       height: calc(100vh - 64px);
       border-right: 1px solid var(--border);
       background: var(--bg2);
@@ -2143,59 +2143,115 @@
     .gp-nav {
       flex: 1;
       display: block;
-      width: 200px;
+      width: 292px;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 8px 0 16px;
+      padding: 8px 0 22px;
     }
     .gp-nav::-webkit-scrollbar { width: 0; }
 
-    /* Top-level group heading */
-    .gp-nav-group {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 17.5px;
-      font-weight: 500;
-      color: var(--accent);
-      padding: 18px 16px 4px;
-      cursor: default;
+    .gp-nav-section {
+      padding: 0 0 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.045);
     }
-    .gp-nav-group:first-child { padding-top: 12px; }
+    .gp-nav-section:last-child { border-bottom: 0; }
 
-    /* Second-level nav item */
-    .gp-nav-btn {
+    /* Top-level group heading */
+    .gp-nav-group-btn {
       display: flex;
       align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-      min-width: 180px;
+      gap: 7px;
       width: 100%;
-      padding: 7px 16px;
+      border: 0;
+      border-left: 2px solid transparent;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      padding: 16px 16px 7px;
+      cursor: pointer;
+      text-align: left;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .gp-nav-section:first-of-type .gp-nav-group-btn { padding-top: 14px; }
+    .gp-nav-group-btn:hover,
+    .gp-nav-group-btn.active,
+    .gp-nav-group-btn.active-parent {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .gp-nav-group-btn.is-disabled {
+      color: rgba(232,230,226,0.42);
+      opacity: 1;
+      cursor: default;
+    }
+    .gp-nav-number {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      min-width: 20px;
+    }
+    .gp-nav-group-btn.active .gp-nav-number,
+    .gp-nav-group-btn.active-parent .gp-nav-number { color: var(--accent); }
+    .gp-nav-group-label { flex: 1; }
+
+    /* Second-level nav item */
+    .gp-nav-sub-btn {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      width: 100%;
+      padding: 3px 16px 3px 45px;
       background: transparent;
       border: none;
       border-left: 2px solid transparent;
       color: var(--text-dim);
       font-family: 'DM Sans', sans-serif;
-      font-size: 16.25px;
+      font-size: 13px;
       font-weight: 300;
       cursor: pointer;
-      transition: color 0.15s;
+      transition: color 0.15s, border-color 0.15s;
       text-align: left;
-      line-height: 1.7;
+      line-height: 1.45;
       box-sizing: border-box;
     }
-    .gp-nav-btn:hover { color: var(--text); }
-    .gp-nav-btn.active {
+    .gp-nav-sub-btn:hover { color: var(--text); }
+    .gp-nav-sub-btn.active {
       color: var(--accent);
       border-left-color: var(--accent);
     }
+    .gp-nav-sub-btn.is-disabled {
+      color: rgba(232,230,226,0.30);
+      opacity: 1;
+      cursor: default;
+    }
+    .gp-nav-sub-en { white-space: nowrap; }
+    .gp-nav-sub-zh {
+      color: var(--text-muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .gp-nav-sub-btn.active .gp-nav-sub-zh { color: var(--accent); opacity: 0.72; }
+
     /* All Styles — pinned at top */
     .gp-nav-btn[data-cat="all"] {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      width: 100%;
+      background: transparent;
+      border: 0;
+      border-left: 2px solid transparent;
+      font-family: 'DM Sans', sans-serif;
       font-size: 17.5px;
       font-weight: 500;
       color: var(--text-dim);
       padding: 10px 16px 14px;
       border-bottom: 1px solid var(--border);
       margin-bottom: 4px;
+      cursor: pointer;
+      text-align: left;
     }
     .gp-nav-btn[data-cat="all"].active { color: var(--accent); }
     .gp-nav-icon { display: none; }
@@ -2216,6 +2272,8 @@
     }
     .gp-nav-btn.active .gp-nav-zh { color: var(--accent); opacity: 0.75; }
     .gp-nav-btn:focus-visible,
+    .gp-nav-group-btn:focus-visible,
+    .gp-nav-sub-btn:focus-visible,
     .vc-copy-btn:focus-visible,
     .vibe-card:focus-visible {
       outline: 2px solid var(--accent);
@@ -2249,9 +2307,9 @@
 
     /* Main area — normal document flow, shifts right of sidebar */
     .gp-main {
-      margin-left: 200px;
+      margin-left: 292px;
       min-width: 0;
-      min-height: calc(100vh - 64px);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
@@ -2299,6 +2357,9 @@
     .gp-chips {
       display: none;
     }
+    .gp-subchips {
+      display: none;
+    }
     .gp-chip {
       flex: 0 0 auto;
       padding: 7px 14px;
@@ -2325,6 +2386,7 @@
       border-color: var(--accent);
     }
     .gp-chip.active .gp-chip-count { color: rgba(10,12,16,0.6); }
+    .gp-chip.is-disabled { opacity: 0.58; cursor: default; }
 
     /* Waterfall / masonry — CSS Grid span masonry */
     .gp-waterfall {
@@ -2858,6 +2920,40 @@
       }
       .gp-chips::-webkit-scrollbar { display: none; }
 
+      .gp-subchips.visible {
+        display: flex;
+        gap: 7px;
+        padding: 9px 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        border-bottom: 1px solid var(--border);
+        background: rgba(12,15,20,0.97);
+        position: sticky;
+        top: 162px;
+        z-index: 8;
+      }
+      .gp-subchips::-webkit-scrollbar { display: none; }
+      .gp-subchip {
+        flex: 0 0 auto;
+        padding: 6px 11px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--text-dim);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .gp-subchip.active {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .gp-subchip.is-disabled {
+        opacity: 0.58;
+        cursor: default;
+      }
+
       /* Gallery grid — 1 column on phone, 2 on tablet */
       .style-grid {
         grid-template-columns: repeat(2, 1fr) !important;
@@ -2974,6 +3070,9 @@
     </div>
     <div class="gp-chips" id="gp-chips" role="tablist" aria-label="Filter styles by category">
       <!-- mobile-only category chips, filled by JS -->
+    </div>
+    <div class="gp-subchips" id="gp-subchips" role="tablist" aria-label="Filter styles by subcategory">
+      <!-- mobile-only second-level style chips, filled by JS -->
     </div>
     <div class="gp-waterfall" id="gp-waterfall">
       <div class="gp-waterfall-inner" id="gp-waterfall-inner">
@@ -4850,6 +4949,93 @@ const CATEGORY_ZH = {
   organic:        '自然与人文',
 };
 
+// Two-level navigation taxonomy. Items without a matching style card remain
+// visible as disabled roadmap entries so the menu mirrors the full directory.
+const MENU_TAXONOMY = [
+  {
+    key: 'minimal_modern', number: '01', label: 'Minimal & Modern', zh: '现代极简',
+    items: [
+      ['Tech Minimal', '科技极简', 'tech_min'],
+      ['Luxury Minimal', '奢华极简', 'luxury_min'],
+      ['Editorial Minimal', '编辑式极简', 'editorial_min'],
+      ['Swiss Style', '瑞士国际主义风格', 'swiss_style'],
+      ['Monochrome', '单色主义', 'monochrome'],
+      ['Bento Grid', '网格卡片', 'bento_grid'],
+    ],
+  },
+  {
+    key: 'graphic', number: '02', label: 'Graphic & Experimental', zh: '图形与实验',
+    items: [
+      ['Neo-Brutalism', '新粗野主义', 'neo_brutalism'],
+      ['Anti-Design', '反设计', 'anti_design'],
+      ['Memphis', '孟菲斯风格', 'memphis'],
+      ['Dopamine Design', '多巴胺设计', 'dopamine_design'],
+      ['Pixel', '像素风格', 'pixel'],
+      ['Glitch Art', '故障艺术', 'glitch'],
+      ['Kinetic Typography', '动态字体', 'kinetic_typo'],
+      ['Surreal 3D', '超现实三维', 'surreal_3d'],
+    ],
+  },
+  {
+    key: 'material', number: '03', label: 'Material', zh: '材质风格',
+    items: [
+      ['Liquid Glass', '液态玻璃', 'glassmorphism'],
+      ['Neumorphism', '柔性拟态', 'neumorphism'],
+      ['Claymorphism', '黏土拟态', 'claymorphism'],
+      ['Paper / Cutout', '纸张拼贴', 'paper_cutout'],
+    ],
+  },
+  {
+    key: 'futuristic', number: '04', label: 'Futuristic', zh: '未来科技',
+    items: [
+      ['Dark Technology', '暗黑科技', 'dark_tech'],
+      ['Industrial Futurism', '工业未来主义', 'industrial_futurism'],
+      ['Biotech UI', '生物科技', 'biotech_ui'],
+      ['Cyberpunk', '赛博朋克', 'cyberpunk'],
+      ['Solarpunk', '太阳朋克', 'solarpunk'],
+    ],
+  },
+  {
+    key: 'game_worlds', number: '05', label: 'Game Worlds', zh: '游戏世界',
+    items: [
+      ['Fantasy RPG', '奇幻 RPG', 'fantasy_rpg'],
+      ['Tactical / Military', '战术军事', 'tactical_military'],
+      ['Post Apocalyptic', '废土生存', 'post_apocalyptic'],
+      ['Racing', '赛车', 'racing'],
+    ],
+  },
+  {
+    key: 'cinematic', number: '06', label: 'Cinematic & Narrative', zh: '影视叙事',
+    items: [
+      ['Cinematic Dark', '电影感暗色', 'cinematic'],
+      ['Film Noir', '黑色电影', 'film_noir'],
+      ['Title Sequence', '片头字幕', 'title_sequence'],
+      ['Documentary', '纪录片', 'documentary'],
+    ],
+  },
+  {
+    key: 'retro', number: '07', label: 'Retro & Era', zh: '复古与时代',
+    items: [
+      ['Bauhaus', '包豪斯风格', 'bauhaus'],
+      ['Retro Futurism', '复古未来主义', 'cassette_fut'],
+      ['Synthwave', '合成波', 'synthwave'],
+      ['Y2K', '千禧年风格', 'y2k'],
+      ['Web 1.0 / 90s Web', '早期互联网', 'web_1_90s'],
+    ],
+  },
+  {
+    key: 'organic', number: '08', label: 'Organic & Humanistic', zh: '自然与人文',
+    items: [
+      ['Organic Modern', '有机现代主义', 'organic_modern'],
+      ['Biophilic', '亲生命设计', 'biophilic'],
+      ['Hand-drawn', '手绘插画', 'hand_drawn'],
+      ['Wellness', '疗愈健康', 'wellness'],
+      ['Wabi-Sabi', '侘寂', 'wabi_sabi'],
+      ['Eco-Futurism', '生态未来主义', 'eco_futurism'],
+    ],
+  },
+];
+
 const styleImageMap = {
   // Minimal & Modern
   swiss_style:         'images/recreated/tasto_swiss_style.png',
@@ -4872,7 +5058,7 @@ const styleImageMap = {
   // Futuristic & Sci-Fi
   cyberpunk:      'images/recreated/tasto_cyberpunk.png',
   neon_skyport:   'images/neon_skyport.png',
-  dark_tech:      'images/recreated/tasto_dark_tech.png',
+  dark_tech:      'images/recreated/tasto_liquid_glass_orb.png',
   scifi_hud:      'images/recreated/tasto_scifi_hud.png',
   // Cinematic & Narrative
   cinematic:      'images/recreated/tasto_cinematic.png',
@@ -4980,9 +5166,11 @@ function buildWaterfall(cat, query) {
   const container = document.getElementById('gp-waterfall-inner');
   container.innerHTML = '';
   const q = (query || '').toLowerCase();
+  const styleOnly = cat && cat.startsWith('style:') ? cat.slice(6) : '';
 
   const filtered = Object.entries(styles).filter(([id, s]) => {
-    if (cat && cat !== 'all' && vibeCategories[id] !== cat) return false;
+    if (styleOnly && id !== styleOnly) return false;
+    if (!styleOnly && cat && cat !== 'all' && vibeCategories[id] !== cat) return false;
     if (q && !s.title.toLowerCase().includes(q) && !id.includes(q)) return false;
     return true;
   });
@@ -5074,35 +5262,59 @@ function buildWaterfall(cat, query) {
 let activeCat = 'all';
 
 function catCount(cat) {
-  return cat === 'all'
-    ? Object.keys(styles).length
-    : Object.keys(styles).filter(id => vibeCategories[id] === cat).length;
+  if (cat === 'all') return Object.keys(styles).length;
+  if (cat && cat.startsWith('style:')) return styles[cat.slice(6)] ? 1 : 0;
+  return Object.keys(styles).filter(id => vibeCategories[id] === cat).length;
 }
 
 function initGallery() {
   const total = Object.keys(styles).length;
 
-  // Build sidebar filter buttons (desktop) from CATEGORY_LABELS
+  // Build the two-level desktop menu from the full taxonomy.
   const nav = document.getElementById('gp-nav');
   let navHTML = `<button class="gp-nav-btn active" data-cat="all">All Styles<span class="gp-nav-count">${total}</span></button>`;
-  for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
-    const n = catCount(cat);
-    if (!n) continue;
-    const zh = CATEGORY_ZH[cat] ? ` <span class="gp-nav-zh">${CATEGORY_ZH[cat]}</span>` : '';
-    navHTML += `<button class="gp-nav-btn" data-cat="${cat}"><span class="gp-nav-label">${label}${zh}</span><span class="gp-nav-count">${n}</span></button>`;
-  }
+  MENU_TAXONOMY.forEach(group => {
+    const count = catCount(group.key);
+    const groupDisabled = count ? '' : ' is-disabled';
+    const groupAttrs = count ? `data-cat="${group.key}"` : 'disabled aria-disabled="true"';
+    const items = group.items.map(([label, zh, styleId]) => {
+      const available = Boolean(styles[styleId]);
+      const cls = available ? '' : ' is-disabled';
+      const attrs = available ? `data-cat="style:${styleId}"` : 'disabled aria-disabled="true"';
+      return `<button class="gp-nav-sub-btn${cls}" ${attrs}><span class="gp-nav-sub-en">${label}</span><span class="gp-nav-sub-zh">${zh}</span></button>`;
+    }).join('');
+    navHTML += `<section class="gp-nav-section"><button class="gp-nav-group-btn${groupDisabled}" ${groupAttrs}><span class="gp-nav-number">${group.number}</span><span class="gp-nav-group-label">${group.label}<span class="gp-nav-zh">${group.zh}</span></span></button>${items}</section>`;
+  });
   nav.innerHTML = navHTML;
 
-  // Build category chips (mobile) from the same data
+  // Mobile level one: all eight category chips.
   const chips = document.getElementById('gp-chips');
   if (chips) {
     let chipHTML = `<button class="gp-chip active" data-cat="all">All<span class="gp-chip-count">${total}</span></button>`;
-    for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
-      const n = catCount(cat);
-      if (!n) continue;
-      chipHTML += `<button class="gp-chip" data-cat="${cat}">${label}<span class="gp-chip-count">${n}</span></button>`;
-    }
+    MENU_TAXONOMY.forEach(group => {
+      const count = catCount(group.key);
+      const cls = count ? '' : ' is-disabled';
+      const attrs = count ? `data-cat="${group.key}"` : 'disabled aria-disabled="true"';
+      chipHTML += `<button class="gp-chip${cls}" ${attrs}>${group.number} ${group.label}<span class="gp-chip-count">${count}</span></button>`;
+    });
     chips.innerHTML = chipHTML;
+  }
+
+  const subchips = document.getElementById('gp-subchips');
+
+  function renderMobileSubchips(groupKey) {
+    const group = MENU_TAXONOMY.find(item => item.key === groupKey);
+    if (!subchips || !group) {
+      if (subchips) { subchips.innerHTML = ''; subchips.classList.remove('visible'); }
+      return;
+    }
+    subchips.innerHTML = group.items.map(([label, zh, styleId]) => {
+      const available = Boolean(styles[styleId]);
+      const cls = available ? '' : ' is-disabled';
+      const attrs = available ? `data-cat="style:${styleId}"` : 'disabled aria-disabled="true"';
+      return `<button class="gp-subchip${cls}" ${attrs}>${label} ${zh}</button>`;
+    }).join('');
+    subchips.classList.add('visible');
   }
 
   document.getElementById('gp-topbar-count').textContent = total;
@@ -5111,13 +5323,25 @@ function initGallery() {
 
   buildWaterfall('all', '');
 
-  // Shared handler — keeps sidebar buttons AND mobile chips in sync
+  // Shared handler — keeps both menu levels and mobile chips in sync.
   function selectCategory(cat) {
     activeCat = cat;
-    document.querySelectorAll('.gp-nav-btn, .gp-chip').forEach(el => {
+    const selectedStyle = cat && cat.startsWith('style:') ? cat.slice(6) : '';
+    const selectedGroup = selectedStyle ? vibeCategories[selectedStyle] : cat;
+    renderMobileSubchips(selectedGroup);
+
+    document.querySelectorAll('.gp-nav-btn, .gp-nav-group-btn, .gp-nav-sub-btn, .gp-chip, .gp-subchip').forEach(el => {
       el.classList.toggle('active', el.dataset.cat === cat);
     });
-    const label = cat === 'all' ? 'All Styles' : (CATEGORY_LABELS[cat] || 'Styles');
+    document.querySelectorAll('.gp-nav-group-btn').forEach(el => {
+      el.classList.toggle('active-parent', Boolean(selectedStyle) && el.dataset.cat === selectedGroup);
+    });
+
+    const label = cat === 'all'
+      ? 'All Styles'
+      : selectedStyle
+        ? (styles[selectedStyle] ? styles[selectedStyle].title : 'Styles')
+        : (CATEGORY_LABELS[cat] || 'Styles');
     document.getElementById('gp-topbar-title').innerHTML = `${label} <span>${catCount(cat)}</span>`;
     buildWaterfall(cat, document.getElementById('gp-search').value);
     // Pin the gallery to the top of the viewport so a short filtered result set
@@ -5126,8 +5350,12 @@ function initGallery() {
     if (window.scrollY < portalTop) window.scrollTo(0, portalTop);
   }
 
-  document.querySelectorAll('.gp-nav-btn, .gp-chip').forEach(el => {
-    el.addEventListener('click', function() { selectCategory(this.dataset.cat); });
+  [nav, chips, subchips].filter(Boolean).forEach(container => {
+    container.addEventListener('click', function(event) {
+      const control = event.target.closest('[data-cat]');
+      if (!control || control.disabled) return;
+      selectCategory(control.dataset.cat);
+    });
   });
 
   document.getElementById('gp-search').addEventListener('input', function() {
