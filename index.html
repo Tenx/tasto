@@ -2371,10 +2371,40 @@
       position: absolute;
       inset: 0;
     }
+    /* freemium: a single refined PRO chip on premium cards (top-right).
+       Outline + glass, not a solid color block. FREE cards carry no mark. */
+    .vc-tier {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px 4px 7px;
+      border-radius: 999px;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      line-height: 1;
+      color: rgba(255,255,255,0.92);
+      background: rgba(18,20,26,0.32);
+      border: 1px solid rgba(255,255,255,0.28);
+      backdrop-filter: blur(6px) saturate(1.1);
+      -webkit-backdrop-filter: blur(6px) saturate(1.1);
+      pointer-events: none;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .vc-tier svg { opacity: 0.85; margin-top: -0.5px; }
+    .vibe-card:hover .vc-tier {
+      background: rgba(18,20,26,0.5);
+      border-color: rgba(255,255,255,0.42);
+    }
     /* twenty75-style caption overlay: veil fades in, text rises + fades, staggered */
     .vc-caption {
       position: absolute;
       inset: 0;
+      z-index: 4;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -3001,7 +3031,7 @@
     <button class="unlock-modal-close" onclick="closeUnlockModal()">✕</button>
     <div class="unlock-eyebrow">// Lifetime Access</div>
     <h2 class="unlock-title">GO UNLIMITED</h2>
-    <p class="unlock-sub">Copy any prompt, customize palettes, and access all future styles. Pay once, use forever.</p>
+    <p class="unlock-sub">Unlock all premium styles — copy any prompt, customize palettes, and access all future styles. Pay once, use forever.</p>
     <ul class="unlock-features">
       <li>All <span id="unlock-style-count">30</span>+ VI style prompts — fully unlocked</li>
       <li>Brand palette color customization</li>
@@ -4996,12 +5026,18 @@ function buildWaterfall(cat, query) {
       if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openVibeModal(id); }
     });
     const catLabel = CATEGORY_LABELS[vibeCategories[id]] || '';
+    // Freemium: locked premium cards get a single refined outline chip, top-right.
+    // FREE cards (and everything once unlocked) carry no mark. No veil, no desaturation.
+    const tierBadge = isStyleLocked(id)
+      ? '<span class="vc-tier"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true"><path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm3 8H9V6a3 3 0 0 1 6 0z"/></svg>PRO</span>'
+      : '';
     card.innerHTML = `
       <div class="vc-img-wrap">
         <img class="vc-img" src="${imgPath}" alt="${s.title} — ${catLabel} visual style preview"
              loading="lazy" decoding="async"
              onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';">
         <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]});height:200px;"></div>
+        ${tierBadge}
         <div class="vc-caption">
           <div class="vc-cap-top">
             <span class="vc-cap-title anim">${s.title}</span>
@@ -5239,8 +5275,18 @@ function renderVibePre() {
 const CREEM_PRODUCT_URL = 'https://creem.io/product/prod_67xRhoIK1u5D7jON4I5VKV';
 const LICENSE_KEY = 'tasto_license';
 
+// Freemium: 2 free styles per category (14 total); the rest are premium.
+const FREE_STYLES = new Set([
+  'swiss_style','editorial_min','glassmorphism','aurora_gradient',
+  'cyberpunk','dark_tech','cinematic','film_noir',
+  'neo_brutalism','memphis','bauhaus','synthwave',
+  'organic_modern','biophilic'
+]);
+function isPremium(id){ return !FREE_STYLES.has(id); }
+function isStyleLocked(id){ return isPremium(id) && !isUnlocked(); }
+
 function isUnlocked() {
-  return true; // TODO: re-enable paywall when payment is ready
+  return localStorage.getItem(LICENSE_KEY) === 'true';
 }
 
 function setUnlocked() {
@@ -5262,12 +5308,13 @@ function updateUnlockUI() {
     navBtn.classList.toggle('unlocked', unlocked);
     navBtn.onclick = unlocked ? null : openUnlockModal;
   }
-  // Prompt gate
+  // Prompt gate — per-style: only premium styles gate when locked
   const wrap = document.getElementById('vm-prompt-wrap');
   const gate = document.getElementById('vm-prompt-gate');
   if (wrap && gate) {
-    wrap.classList.toggle('vm-prompt-locked', !unlocked);
-    gate.style.display = unlocked ? 'none' : 'flex';
+    const locked = currentVibe ? isStyleLocked(currentVibe) : false;
+    wrap.classList.toggle('vm-prompt-locked', locked);
+    gate.style.display = locked ? 'flex' : 'none';
   }
 }
 
@@ -5342,7 +5389,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function copyVibePrompt() {
-  if (!isUnlocked()) { openUnlockModal(); return; }
+  if (isStyleLocked(currentVibe)) { openUnlockModal(); return; }
   const s = styles[currentVibe];
   if (!s) return;
   const brand = document.getElementById('vm-brand-input').value.trim();
@@ -5368,7 +5415,7 @@ function closeVibeModal(e) {
 
 function quickCopy(e, id) {
   e.stopPropagation();
-  if (!isUnlocked()) { openUnlockModal(); return; }
+  if (isStyleLocked(id)) { openUnlockModal(); return; }
   const s = styles[id];
   if (!s) return;
   const text = getVIPrompt(id, s, '');
