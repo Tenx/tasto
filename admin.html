@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>TASTO 图片管理</title>
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="返回 TASTO 首页">TASTO</a>
+    <div class="topbar-meta">
+      <span class="environment">IMAGE ADMIN</span>
+      <button id="logout-button" class="text-button" type="button" hidden>退出登录</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="login-panel" class="login-panel" hidden>
+      <form id="login-form" class="login-card">
+        <p class="eyebrow">PRIVATE ACCESS</p>
+        <h1>图片管理后台</h1>
+        <p class="muted">输入管理员密码后管理 TASTO 前端图片。</p>
+        <label for="password">管理员密码</label>
+        <input id="password" name="password" type="password" minlength="12" autocomplete="current-password" required>
+        <button class="primary-button" type="submit">登录</button>
+        <p id="login-message" class="form-message" role="status"></p>
+      </form>
+    </section>
+
+    <section id="admin-panel" class="admin-shell" hidden>
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">TASTO CATALOG</p>
+          <h1>图片与菜单目录</h1>
+          <p class="muted">保存为“前端显示”后，最多约 30 秒同步到网站。</p>
+        </div>
+        <div class="stats" aria-live="polite">
+          <span id="total-count">0 张图片</span>
+          <span id="published-count">0 张已发布</span>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <aside class="editor-panel">
+          <form id="image-form">
+            <div class="editor-heading">
+              <h2 id="form-title">上传新图片</h2>
+              <button id="cancel-edit" class="text-button" type="button" hidden>取消编辑</button>
+            </div>
+            <input id="record-id" name="id" type="hidden">
+
+            <label for="status">显示状态</label>
+            <select id="status" name="status" required>
+              <option value="published">前端显示</option>
+              <option value="draft">草稿，不显示</option>
+              <option value="archived">已归档</option>
+            </select>
+
+            <label for="menu-path">TASTO 菜单目录</label>
+            <select id="menu-path" name="menu_path" required>
+              <option value="">请选择菜单目录</option>
+            </select>
+
+            <label for="title">图片标题</label>
+            <input id="title" name="title" type="text" maxlength="120" required placeholder="例如 SWISS STYLE">
+
+            <label for="alt-text">图片说明 <span>可不填</span></label>
+            <input id="alt-text" name="alt_text" type="text" maxlength="300" placeholder="用于无障碍阅读和搜索引擎">
+
+            <label for="sort">排序数字 <span>越小越靠前</span></label>
+            <input id="sort" name="sort" type="number" step="1" placeholder="例如 10">
+
+            <label for="image">图片文件 <span id="image-help">JPG、PNG、WebP、AVIF、GIF，最大 4 MB</span></label>
+            <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" required>
+            <img id="file-preview" class="file-preview" alt="待上传图片预览" hidden>
+
+            <button id="save-button" class="primary-button" type="submit">上传并保存</button>
+            <p id="form-message" class="form-message" role="status"></p>
+          </form>
+        </aside>
+
+        <section class="catalog-panel">
+          <div class="catalog-toolbar">
+            <h2>当前图片</h2>
+            <input id="search" type="search" placeholder="搜索标题或目录" aria-label="搜索图片">
+          </div>
+          <div id="image-list" class="image-list" aria-live="polite"></div>
+          <div id="empty-state" class="empty-state" hidden>还没有图片，请先上传一张。</div>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

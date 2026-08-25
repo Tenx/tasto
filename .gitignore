@@ -1,4 +1,7 @@
 .vercel
+.env.local
+.env.*.local
+node_modules/
 
 # OS junk
 .DS_Store

@@ -4929,6 +4929,11 @@ const MENU_TAXONOMY = [
       ['Luxury Minimal', '奢华极简', 'luxury_min'],
       ['Editorial Minimal', '编辑式极简', 'editorial_min'],
       ['Swiss Style', '瑞士国际主义风格', 'swiss_style'],
+      ['Swiss Geometric', '瑞士几何风格', 'swiss_geometric'],
+      ['Swiss Typographic', '瑞士黑白字体', 'swiss_typo_bw'],
+      ['Swiss Dots & Color', '瑞士圆点色彩', 'swiss_dots_color'],
+      ['Warm Minimal', '温暖极简', 'warm_min'],
+      ['Velvet Luxe', '丝绒奢华', 'velvet_luxe'],
       ['Monochrome', '单色主义', 'monochrome'],
       ['Bento Grid', '网格卡片', 'bento_grid'],
     ],
@@ -4944,12 +4949,15 @@ const MENU_TAXONOMY = [
       ['Glitch Art', '故障艺术', 'glitch'],
       ['Kinetic Typography', '动态字体', 'kinetic_typo'],
       ['Surreal 3D', '超现实三维', 'surreal_3d'],
+      ['Maximalism', '极繁主义', 'maximalism'],
     ],
   },
   {
     key: 'material', number: '03', label: 'Material', zh: '材质风格',
     items: [
       ['Liquid Glass', '液态玻璃', 'glassmorphism'],
+      ['Aurora Gradient', '极光渐变', 'aurora_gradient'],
+      ['Frosted Depth', '磨砂空间', 'frosted_depth'],
       ['Neumorphism', '柔性拟态', 'neumorphism'],
       ['Claymorphism', '黏土拟态', 'claymorphism'],
       ['Paper / Cutout', '纸张拼贴', 'paper_cutout'],
@@ -4959,6 +4967,8 @@ const MENU_TAXONOMY = [
     key: 'futuristic', number: '04', label: 'Futuristic', zh: '未来科技',
     items: [
       ['Dark Technology', '暗黑科技', 'dark_tech'],
+      ['Neon Skyport', '霓虹空港', 'neon_skyport'],
+      ['Sci-Fi HUD', '科幻界面', 'scifi_hud'],
       ['Industrial Futurism', '工业未来主义', 'industrial_futurism'],
       ['Biotech UI', '生物科技', 'biotech_ui'],
       ['Cyberpunk', '赛博朋克', 'cyberpunk'],
@@ -4979,6 +4989,7 @@ const MENU_TAXONOMY = [
     items: [
       ['Cinematic Dark', '电影感暗色', 'cinematic'],
       ['Film Noir', '黑色电影', 'film_noir'],
+      ['Cinematic Editorial', '电影感编辑设计', 'cinematic_editorial'],
       ['Title Sequence', '片头字幕', 'title_sequence'],
       ['Documentary', '纪录片', 'documentary'],
     ],
@@ -5001,6 +5012,7 @@ const MENU_TAXONOMY = [
       ['Hand-drawn', '手绘插画', 'hand_drawn'],
       ['Wellness', '疗愈健康', 'wellness'],
       ['Wabi-Sabi', '侘寂', 'wabi_sabi'],
+      ['Ethereal', '空灵风格', 'ethereal'],
       ['Eco-Futurism', '生态未来主义', 'eco_futurism'],
     ],
   },
@@ -5053,6 +5065,90 @@ const styleImageMap = {
   ethereal:       'images/recreated/tasto_ethereal.png',
   cinematic_editorial: 'images/recreated/tasto_cinematic_editorial.png',
 };
+
+// Directus-backed media catalog. The public frontend talks only to the
+// read-only media gateway; the Directus admin and its credentials stay private.
+const TASTO_IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const TASTO_CATALOG_URL = window.TASTO_CATALOG_URL ||
+  (TASTO_IS_LOCAL
+    ? `${window.TASTO_MEDIA_API || 'http://localhost:8060'}/catalog`
+    : '/api/catalog');
+let managedImages = null; // null means the API was unavailable; [] is a valid empty catalog.
+
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function managedImageUrl(imageUrl, width = 1200) {
+  const url = new URL(imageUrl, window.location.origin);
+  // Vercel Blob URLs are already delivered by Vercel's media network. The
+  // local Docker gateway still accepts explicit image transform parameters.
+  if (url.hostname.endsWith('.blob.vercel-storage.com')) return url.toString();
+  url.searchParams.set('width', String(width));
+  url.searchParams.set('quality', '82');
+  url.searchParams.set('format', 'auto');
+  return url.toString();
+}
+
+async function loadManagedImages() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetch(TASTO_CATALOG_URL, {
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!response.ok) throw new Error(`media API returned ${response.status}`);
+    const payload = await response.json();
+    managedImages = Array.isArray(payload.data) ? payload.data : [];
+  } catch (error) {
+    managedImages = null;
+    console.warn('TASTO media API unavailable; using bundled image fallback.', error);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function galleryEntries() {
+  if (Array.isArray(managedImages)) {
+    return managedImages
+      .map(record => {
+        const [category, styleId] = String(record.menu_path || '').split('/');
+        const style = styles[styleId];
+        if (!style || !CATEGORY_LABELS[category] || !record.image_url) return null;
+        return {
+          recordId: record.id,
+          id: styleId,
+          category,
+          s: style,
+          title: record.title || style.title,
+          altText: record.alt_text || `${style.title} — ${CATEGORY_LABELS[category]} visual style preview`,
+          imgPath: managedImageUrl(record.image_url),
+        };
+      })
+      .filter(Boolean);
+  }
+
+  return Object.entries(styles).map(([id, s]) => ({
+    recordId: `fallback:${id}`,
+    id,
+    category: vibeCategories[id],
+    s,
+    title: s.title,
+    altText: `${s.title} — ${CATEGORY_LABELS[vibeCategories[id]] || 'visual'} style preview`,
+    imgPath: styleImageMap[id],
+  }));
+}
+
+function styleCategory(styleId) {
+  const managed = galleryEntries().find(entry => entry.id === styleId);
+  return managed ? managed.category : vibeCategories[styleId];
+}
 
 // Gradient fallback colors per vibe
 const vibePalette = {
@@ -5138,10 +5234,10 @@ function buildWaterfall(cat, query) {
   const q = (query || '').toLowerCase();
   const styleOnly = cat && cat.startsWith('style:') ? cat.slice(6) : '';
 
-  const filtered = Object.entries(styles).filter(([id, s]) => {
+  const filtered = galleryEntries().filter(({ id, s, category, title }) => {
     if (styleOnly && id !== styleOnly) return false;
-    if (!styleOnly && cat && cat !== 'all' && vibeCategories[id] !== cat) return false;
-    if (q && !s.title.toLowerCase().includes(q) && !id.includes(q)) return false;
+    if (!styleOnly && cat && cat !== 'all' && category !== cat) return false;
+    if (q && !String(title || s.title).toLowerCase().includes(q) && !id.includes(q)) return false;
     return true;
   });
 
@@ -5168,9 +5264,12 @@ function buildWaterfall(cat, query) {
   const mainW = (document.getElementById('gp-main') || {}).clientWidth || 900;
   container.style.setProperty('--masonry-cols', getCols(mainW));
 
-  filtered.forEach(([id, s], i) => {
+  filtered.forEach((entry, i) => {
+    const { id, s, category, imgPath, title, altText } = entry;
+    const safeTitle = escapeHTML(title);
+    const safeAltText = escapeHTML(altText);
+    const safeImgPath = escapeHTML(imgPath);
     const pal = vibePalette[id] || ['#111','#333','#555'];
-    const imgPath = styleImageMap[id];
     const card = document.createElement('div');
     card.className = 'vibe-card';
     card.style.opacity = '0';
@@ -5178,21 +5277,24 @@ function buildWaterfall(cat, query) {
     card.style.transition = `opacity 0.45s ease ${i * 30}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${i * 30}ms`;
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
-    card.setAttribute('aria-label', `${s.title} — view brand identity prompt`);
-    card.onclick = () => openVibeModal(id);
+    card.setAttribute('aria-label', `${title} — view brand identity prompt`);
+    card.onclick = () => openVibeModal(id, imgPath, category, altText);
     card.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openVibeModal(id); }
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        openVibeModal(id, imgPath, category, altText);
+      }
     });
-    const catLabel = CATEGORY_LABELS[vibeCategories[id]] || '';
+    const catLabel = CATEGORY_LABELS[category] || '';
     card.innerHTML = `
       <div class="vc-img-wrap">
-        <img class="vc-img" src="${imgPath}" alt="${s.title} — ${catLabel} visual style preview"
+        <img class="vc-img" src="${safeImgPath}" alt="${safeAltText}"
              loading="lazy" decoding="async"
              onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';">
         <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]});height:200px;"></div>
         <div class="vc-caption">
           <div class="vc-cap-top">
-            <span class="vc-cap-title anim">${s.title}</span>
+            <span class="vc-cap-title anim">${safeTitle}</span>
             <span class="vc-cap-cat anim">${catLabel}</span>
           </div>
           <button class="vc-copy-btn anim" onclick="quickCopy(event,'${id}')">Copy Prompt</button>
@@ -5226,13 +5328,18 @@ function buildWaterfall(cat, query) {
 let activeCat = 'all';
 
 function catCount(cat) {
-  if (cat === 'all') return Object.keys(styles).length;
-  if (cat && cat.startsWith('style:')) return styles[cat.slice(6)] ? 1 : 0;
-  return Object.keys(styles).filter(id => vibeCategories[id] === cat).length;
+  const entries = galleryEntries();
+  if (cat === 'all') return entries.length;
+  if (cat && cat.startsWith('style:')) {
+    return entries.filter(entry => entry.id === cat.slice(6)).length;
+  }
+  return entries.filter(entry => entry.category === cat).length;
 }
 
 function initGallery() {
-  const total = Object.keys(styles).length;
+  const entries = galleryEntries();
+  const total = entries.length;
+  const availableStyles = new Set(entries.map(entry => entry.id));
 
   // Build the two-level desktop menu from the full taxonomy.
   const nav = document.getElementById('gp-nav');
@@ -5242,7 +5349,7 @@ function initGallery() {
     const groupDisabled = count ? '' : ' is-disabled';
     const groupAttrs = count ? `data-cat="${group.key}"` : 'disabled aria-disabled="true"';
     const items = group.items.map(([label, zh, styleId]) => {
-      const available = Boolean(styles[styleId]);
+      const available = availableStyles.has(styleId);
       const cls = available ? '' : ' is-disabled';
       const attrs = available ? `data-cat="style:${styleId}"` : 'disabled aria-disabled="true"';
       return `<button class="gp-nav-sub-btn${cls}" ${attrs}><span class="gp-nav-sub-en">${label}</span><span class="gp-nav-sub-zh">${zh}</span></button>`;
@@ -5273,7 +5380,7 @@ function initGallery() {
       return;
     }
     subchips.innerHTML = group.items.map(([label, zh, styleId]) => {
-      const available = Boolean(styles[styleId]);
+      const available = availableStyles.has(styleId);
       const cls = available ? '' : ' is-disabled';
       const attrs = available ? `data-cat="style:${styleId}"` : 'disabled aria-disabled="true"';
       return `<button class="gp-subchip${cls}" ${attrs}>${label} ${zh}</button>`;
@@ -5291,7 +5398,7 @@ function initGallery() {
   function selectCategory(cat) {
     activeCat = cat;
     const selectedStyle = cat && cat.startsWith('style:') ? cat.slice(6) : '';
-    const selectedGroup = selectedStyle ? vibeCategories[selectedStyle] : cat;
+    const selectedGroup = selectedStyle ? styleCategory(selectedStyle) : cat;
     renderMobileSubchips(selectedGroup);
 
     document.querySelectorAll('.gp-nav-btn, .gp-nav-group-btn, .gp-nav-sub-btn, .gp-chip, .gp-subchip').forEach(el => {
@@ -5342,7 +5449,7 @@ function exitGallery() {
 // ─── Vibe modal ──────────────────────────────────────────
 let currentVibe = null;
 
-function openVibeModal(id) {
+function openVibeModal(id, previewImage, previewCategory, previewAlt) {
   const s = styles[id];
   if (!s) return;
   currentVibe = id;
@@ -5357,15 +5464,17 @@ function openVibeModal(id) {
   tagsEl.innerHTML = (meta.tags || []).map(t => `<span class="vm-meta-tag">${t}</span>`).join('');
 
   const imgEl = document.getElementById('vm-img');
-  imgEl.alt = `${s.title} — ${CATEGORY_LABELS[vibeCategories[id]] || 'visual'} style preview`;
+  const category = previewCategory || styleCategory(id);
+  imgEl.alt = previewAlt || `${s.title} — ${CATEGORY_LABELS[category] || 'visual'} style preview`;
   const fallEl = document.getElementById('vm-fallback');
   const gradPal = vibePalette[id] || ['#111','#333','#555'];
   fallEl.style.background = `linear-gradient(135deg,${gradPal[0]},${gradPal[1]},${gradPal[2]})`;
   imgEl.classList.add('hidden');
 
   const probe = new Image();
-  probe.onload = () => { imgEl.src = styleImageMap[id]; imgEl.classList.remove('hidden'); };
-  probe.src = styleImageMap[id];
+  const imageSource = previewImage || galleryEntries().find(entry => entry.id === id)?.imgPath || styleImageMap[id];
+  probe.onload = () => { imgEl.src = imageSource; imgEl.classList.remove('hidden'); };
+  probe.src = imageSource;
 
   // Init palette from the real colors extracted from the vi PALETTE section
   const pal = parsePaletteHex(id, s);
@@ -5514,7 +5623,7 @@ function goToCheckout() {
 }
 
 // Init on load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Auto-unlock if redirected back from Creem with ?unlocked=1
   const params = new URLSearchParams(window.location.search);
   if (params.get('unlocked') === '1') {
@@ -5523,6 +5632,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.history.replaceState({}, '', window.location.pathname);
   }
   updateUnlockUI();
+  await loadManagedImages();
   initGallery();
   galleryBuilt = true;
   // body.in-gallery overflow:hidden removed — allow normal page scroll
@@ -5530,13 +5640,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Populate curtain preview cards (8 random style images)
   const curtainContainer = document.getElementById('hero-curtain-cards');
   if (curtainContainer) {
-    const previewIds = Object.keys(styleImageMap).slice(0, 8);
-    previewIds.forEach(id => {
+    const previewEntries = galleryEntries().slice(0, 8);
+    previewEntries.forEach(entry => {
+      const id = entry.id;
       const pal = vibePalette[id] || ['#111','#333','#555'];
       const div = document.createElement('div');
       div.className = 'hero-curtain-card';
       const img = document.createElement('img');
-      img.src = styleImageMap[id];
+      img.src = entry.imgPath;
       img.alt = '';
       const fb = document.createElement('div');
       fb.className = 'hero-curtain-card-fb';

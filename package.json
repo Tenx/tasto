@@ -1,0 +1,18 @@
+{
+  "name": "tasto",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "check": "node --check admin.js && node --check api/catalog.mjs && node --check api/admin-images.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.1.0",
+    "@vercel/blob": "2.8.0"
+  }
+}
