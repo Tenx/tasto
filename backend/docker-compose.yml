@@ -1,0 +1,79 @@
+name: tasto-media
+
+services:
+  database:
+    image: mirror.gcr.io/library/postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-directus}
+      POSTGRES_USER: ${POSTGRES_USER:-directus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in backend/.env}
+      GATEWAY_DB_PASSWORD: ${GATEWAY_DB_PASSWORD:?Set GATEWAY_DB_PASSWORD in backend/.env}
+    volumes:
+      - directus_database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=$${POSTGRES_USER} --dbname=$${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  directus:
+    image: ghcr.io/directus/directus:12.2.0
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "${DIRECTUS_PORT:-8055}:8055"
+    environment:
+      SECRET: ${DIRECTUS_SECRET:?Set DIRECTUS_SECRET in backend/.env}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8055}
+
+      DB_CLIENT: pg
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-directus}
+      DB_USER: ${POSTGRES_USER:-directus}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in backend/.env}
+
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL in backend/.env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in backend/.env}
+
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      CORS_METHODS: GET,POST,PATCH,DELETE,OPTIONS
+      CORS_ALLOWED_HEADERS: Content-Type,Authorization
+      CORS_CREDENTIALS: "true"
+
+      STORAGE_LOCATIONS: local
+      STORAGE_LOCAL_DRIVER: local
+      STORAGE_LOCAL_ROOT: /directus/uploads
+
+      WEBSOCKETS_ENABLED: "true"
+      TELEMETRY: "false"
+    volumes:
+      - directus_uploads:/directus/uploads
+
+  media-api:
+    build:
+      context: ./gateway
+    restart: unless-stopped
+    depends_on:
+      - directus
+    ports:
+      - "${MEDIA_API_PORT:-8060}:8060"
+    environment:
+      PORT: 8060
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-directus}
+      DB_USER: tasto_gateway
+      DB_PASSWORD: ${GATEWAY_DB_PASSWORD:?Set GATEWAY_DB_PASSWORD in backend/.env}
+      ALLOWED_ORIGINS: ${MEDIA_ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,https://tasto.world,https://www.tasto.world}
+    volumes:
+      - directus_uploads:/uploads:ro
+
+volumes:
+  directus_database:
+  directus_uploads:
