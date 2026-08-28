@@ -2442,25 +2442,22 @@
       z-index: 3;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 8px 4px 7px;
-      border-radius: 999px;
-      font-size: 9.5px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
+      justify-content: center;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
       line-height: 1;
-      color: rgba(255,255,255,0.92);
-      background: rgba(18,20,26,0.32);
-      border: 1px solid rgba(255,255,255,0.28);
-      backdrop-filter: blur(6px) saturate(1.1);
-      -webkit-backdrop-filter: blur(6px) saturate(1.1);
+      color: #fff;
+      background: linear-gradient(135deg, #ddff3f 0%, #b6c832 100%);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.28);
       pointer-events: none;
-      transition: background 0.3s ease, border-color 0.3s ease;
+      transition: filter 0.3s ease, box-shadow 0.3s ease;
     }
-    .vc-tier svg { opacity: 0.85; margin-top: -0.5px; }
     .vibe-card:hover .vc-tier {
-      background: rgba(18,20,26,0.5);
-      border-color: rgba(255,255,255,0.42);
+      filter: brightness(1.06);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.38);
     }
     /* twenty75-style caption overlay: veil fades in, text rises + fades, staggered */
     .vc-caption {
@@ -5104,6 +5101,7 @@ const TASTO_CATALOG_URL = window.TASTO_CATALOG_URL ||
     ? `${window.TASTO_MEDIA_API || 'http://localhost:8060'}/catalog`
     : '/api/catalog');
 let managedImages = null; // null means the API was unavailable; [] is a valid empty catalog.
+let styleTier = null; // styleId -> 'pro' | 'free' from the DB; null means fall back to FREE_STYLES.
 
 function escapeHTML(value) {
   return String(value ?? '')
@@ -5136,12 +5134,26 @@ async function loadManagedImages() {
     if (!response.ok) throw new Error(`media API returned ${response.status}`);
     const payload = await response.json();
     managedImages = Array.isArray(payload.data) ? payload.data : [];
+    buildStyleTier();
   } catch (error) {
     managedImages = null;
+    styleTier = null;
     console.warn('TASTO media API unavailable; using bundled image fallback.', error);
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function buildStyleTier() {
+  if (!Array.isArray(managedImages)) { styleTier = null; return; }
+  const map = {};
+  for (const record of managedImages) {
+    const styleId = String(record.menu_path || '').split('/')[1];
+    if (!styleId) continue;
+    // Loose aggregation: any free row makes the whole style free.
+    if (map[styleId] !== 'free') map[styleId] = record.tier === 'free' ? 'free' : 'pro';
+  }
+  styleTier = map;
 }
 
 function galleryEntries() {
@@ -5319,7 +5331,7 @@ function buildWaterfall(cat, query) {
     // Freemium: locked premium cards get a single refined outline chip, top-right.
     // FREE cards (and everything once unlocked) carry no mark. No veil, no desaturation.
     const tierBadge = isStyleLocked(id)
-      ? '<span class="vc-tier"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true"><path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm3 8H9V6a3 3 0 0 1 6 0z"/></svg>PRO</span>'
+      ? '<span class="vc-tier">PRO</span>'
       : '';
     card.innerHTML = `
       <div class="vc-img-wrap">
@@ -5619,7 +5631,10 @@ const FREE_STYLES = new Set([
   'neo_brutalism','memphis','bauhaus','synthwave',
   'organic_modern','biophilic'
 ]);
-function isPremium(id){ return !FREE_STYLES.has(id); }
+function isPremium(id){
+  if (styleTier && id in styleTier) return styleTier[id] === 'pro';
+  return !FREE_STYLES.has(id);
+}
 function isStyleLocked(id){ return isPremium(id) && !isUnlocked(); }
 
 function isUnlocked() {

@@ -7,7 +7,7 @@ export default {
     try {
       await ensureSchema();
       const rows = await db()`
-        select id, sort, menu_path, title, alt_text, image_url
+        select id, sort, menu_path, title, alt_text, image_url, tier
         from tasto_images
         where status = 'published'
         order by sort nulls last, created_at, id

@@ -43,53 +43,30 @@
         </div>
       </div>
 
-      <div class="workspace">
-        <aside class="editor-panel">
-          <form id="image-form">
-            <div class="editor-heading">
-              <h2 id="form-title">上传新图片</h2>
-              <button id="cancel-edit" class="text-button" type="button" hidden>取消编辑</button>
-            </div>
-            <input id="record-id" name="id" type="hidden">
+      <!-- 视图 A: 目录网格（默认） -->
+      <div id="dir-view">
+        <div class="dir-toolbar">
+          <input id="dir-search" type="search" placeholder="搜索风格目录" aria-label="搜索目录">
+        </div>
+        <div id="dir-groups"></div>
+      </div>
 
-            <label for="status">显示状态</label>
-            <select id="status" name="status" required>
-              <option value="published">前端显示</option>
-              <option value="draft">草稿，不显示</option>
-              <option value="archived">已归档</option>
-            </select>
-
-            <label for="menu-path">TASTO 菜单目录</label>
-            <select id="menu-path" name="menu_path" required>
-              <option value="">请选择菜单目录</option>
-            </select>
-
-            <label for="title">图片标题</label>
-            <input id="title" name="title" type="text" maxlength="120" required placeholder="例如 SWISS STYLE">
-
-            <label for="alt-text">图片说明 <span>可不填</span></label>
-            <input id="alt-text" name="alt_text" type="text" maxlength="300" placeholder="用于无障碍阅读和搜索引擎">
-
-            <label for="sort">排序数字 <span>越小越靠前</span></label>
-            <input id="sort" name="sort" type="number" step="1" placeholder="例如 10">
-
-            <label for="image">图片文件 <span id="image-help">JPG、PNG、WebP、AVIF、GIF，最大 4 MB</span></label>
-            <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" required>
-            <img id="file-preview" class="file-preview" alt="待上传图片预览" hidden>
-
-            <button id="save-button" class="primary-button" type="submit">上传并保存</button>
-            <p id="form-message" class="form-message" role="status"></p>
-          </form>
-        </aside>
-
-        <section class="catalog-panel">
-          <div class="catalog-toolbar">
-            <h2>当前图片</h2>
-            <input id="search" type="search" placeholder="搜索标题或目录" aria-label="搜索图片">
-          </div>
-          <div id="image-list" class="image-list" aria-live="polite"></div>
-          <div id="empty-state" class="empty-state" hidden>还没有图片，请先上传一张。</div>
-        </section>
+      <!-- 视图 B: 单目录详情 + 批量上传（默认 hidden） -->
+      <div id="folder-view" hidden>
+        <button id="back-to-dirs" class="text-button" type="button">← 返回全部目录</button>
+        <div class="folder-head">
+          <h2 id="folder-title"></h2>
+          <p id="folder-sub" class="muted"></p>
+          <button id="tier-toggle" class="tier-toggle" type="button" hidden></button>
+        </div>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button">
+          <p>把图片拖到这里，或点击选择（可多选）</p>
+          <p class="muted">JPG / PNG / WebP / AVIF / GIF，单张 ≤ 4 MB</p>
+          <input id="folder-file" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" multiple hidden>
+        </div>
+        <ul id="upload-queue" class="upload-queue" aria-live="polite"></ul>
+        <div id="folder-images" class="image-list" aria-live="polite"></div>
+        <div id="folder-empty" class="empty-state" hidden>这个目录还没有图片，拖图上传吧。</div>
       </div>
     </section>
   </main>

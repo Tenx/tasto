@@ -64,7 +64,7 @@ function validateRecord(input, requireImage = false) {
 async function listImages() {
   const rows = await db()`
     select id, status, sort, menu_path, title, alt_text, image_url,
-           content_type, size_bytes, created_at, updated_at
+           content_type, size_bytes, tier, created_at, updated_at
     from tasto_images
     order by sort nulls last, created_at, id
   `;
@@ -82,9 +82,12 @@ async function saveWithImage(record) {
   const pathname = `tasto/${category}/${style}/${safeFilename(record.image.name)}`;
   let blob;
   try {
-    blob = await put(pathname, record.image, {
+    const bytes = Buffer.from(await record.image.arrayBuffer());
+    blob = await put(pathname, bytes, {
       access: 'public',
       addRandomSuffix: true,
+      contentType: record.image.type || 'application/octet-stream',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     let rows;
@@ -114,6 +117,19 @@ async function saveWithImage(record) {
     if (blob?.url) await del(blob.url).catch(console.error);
     throw error;
   }
+}
+
+async function setTier(body) {
+  const menuPath = text(body.menu_path, 180);
+  const tier = body.tier === 'free' ? 'free' : body.tier === 'pro' ? 'pro' : null;
+  if (!isValidMenuPath(menuPath)) return json({ error: '菜单目录无效。' }, 400);
+  if (!tier) return json({ error: 'tier 无效。' }, 400);
+  const rows = await db()`
+    update tasto_images set tier = ${tier}, updated_at = now()
+    where menu_path = ${menuPath}
+    returning id
+  `;
+  return json({ ok: true, tier, count: rows.length });
 }
 
 async function saveMetadata(record) {
@@ -155,7 +171,9 @@ export default {
       if (request.method === 'GET') return listImages();
       if (request.method === 'DELETE') return deleteImage(request);
       if (request.method === 'PATCH') {
-        const validation = validateRecord(await request.json());
+        const body = await request.json();
+        if (body.action === 'set_tier') return setTier(body);
+        const validation = validateRecord(body);
         return validation.error ? json({ error: validation.error }, 400) : saveMetadata(validation.record);
       }
       const form = await request.formData();

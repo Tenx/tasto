@@ -20,3 +20,4 @@ portfolio-deck.html
 37a1a18df9abf6fd47f0c902fb1f8ab5.jpg
 hero_video/
 images/hero/*.md
+.env*.local
