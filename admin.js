@@ -423,10 +423,15 @@ elements.loginForm.addEventListener('submit', async (event) => {
     elements.loginForm.reset();
     setMessage(elements.loginMessage, '');
     showAdmin();
-    await loadImages();
+    submit.disabled = false;
+    try {
+      await loadImages();
+    } catch (loadError) {
+      console.error('load images after login failed', loadError);
+    }
+    return;
   } catch (error) {
     setMessage(elements.loginMessage, error.message);
-  } finally {
     submit.disabled = false;
   }
 });

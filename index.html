@@ -5112,15 +5112,29 @@ function escapeHTML(value) {
     .replace(/'/g, '&#039;');
 }
 
-function managedImageUrl(imageUrl, width = 1200) {
+function managedImageUrl(imageUrl, width = 640) {
   const url = new URL(imageUrl, window.location.origin);
-  // Vercel Blob URLs are already delivered by Vercel's media network. The
-  // local Docker gateway still accepts explicit image transform parameters.
-  if (url.hostname.endsWith('.blob.vercel-storage.com')) return url.toString();
+  // Vercel Blob originals are large PNGs. Route them through Vercel's native
+  // Image Optimization API (/_vercel/image) to serve resized AVIF/WebP from
+  // the edge cache instead of the multi-MB source.
+  if (url.hostname.endsWith('.blob.vercel-storage.com')) {
+    return `/_vercel/image?url=${encodeURIComponent(url.toString())}&w=${width}&q=75`;
+  }
   url.searchParams.set('width', String(width));
   url.searchParams.set('quality', '82');
   url.searchParams.set('format', 'auto');
   return url.toString();
+}
+
+// Responsive srcset for gallery cards: card columns are ~500px, so serve 480w
+// at 1x and 1080w for retina / wide viewports. Only blob-backed images get a
+// srcset (the optimizer handles them); bundled fallbacks return ''.
+function managedSrcset(imageUrl) {
+  const url = new URL(imageUrl, window.location.origin);
+  if (!url.hostname.endsWith('.blob.vercel-storage.com')) return '';
+  return [480, 1080]
+    .map((w) => `${managedImageUrl(imageUrl, w)} ${w}w`)
+    .join(', ');
 }
 
 async function loadManagedImages() {
@@ -5171,6 +5185,7 @@ function galleryEntries() {
           title: record.title || style.title,
           altText: record.alt_text || `${style.title} — ${CATEGORY_LABELS[category]} visual style preview`,
           imgPath: managedImageUrl(record.image_url),
+          srcset: managedSrcset(record.image_url),
         };
       })
       .filter(Boolean);
@@ -5307,10 +5322,11 @@ function buildWaterfall(cat, query) {
   container.style.setProperty('--masonry-cols', getCols(mainW));
 
   filtered.forEach((entry, i) => {
-    const { id, s, category, imgPath, title, altText } = entry;
+    const { id, s, category, imgPath, srcset, title, altText } = entry;
     const safeTitle = escapeHTML(title);
     const safeAltText = escapeHTML(altText);
     const safeImgPath = escapeHTML(imgPath);
+    const srcsetAttr = srcset ? ` srcset="${escapeHTML(srcset)}" sizes="(max-width:600px) 100vw, (max-width:900px) 50vw, 33vw"` : '';
     const pal = vibePalette[id] || ['#111','#333','#555'];
     const card = document.createElement('div');
     card.className = 'vibe-card';
@@ -5335,7 +5351,7 @@ function buildWaterfall(cat, query) {
       : '';
     card.innerHTML = `
       <div class="vc-img-wrap">
-        <img class="vc-img" src="${safeImgPath}" alt="${safeAltText}"
+        <img class="vc-img" src="${safeImgPath}"${srcsetAttr} alt="${safeAltText}"
              loading="lazy" decoding="async"
              onerror="this.style.display='none';var fb=this.nextElementSibling;fb.style.display='block';">
         <div class="vc-fallback" style="background:linear-gradient(135deg,${pal[0]},${pal[1]},${pal[2]});height:200px;"></div>
@@ -5520,7 +5536,11 @@ function openVibeModal(id, previewImage, previewCategory, previewAlt) {
   imgEl.classList.add('hidden');
 
   const probe = new Image();
-  const imageSource = previewImage || galleryEntries().find(entry => entry.id === id)?.imgPath || styleImageMap[id];
+  const baseSource = previewImage || galleryEntries().find(entry => entry.id === id)?.imgPath || styleImageMap[id];
+  // Modal shows a large image — bump the optimizer width to 1200 for clarity.
+  const imageSource = typeof baseSource === 'string' && baseSource.includes('/_vercel/image?')
+    ? baseSource.replace(/([?&]w=)\d+/, '$11200')
+    : baseSource;
   probe.onload = () => { imgEl.src = imageSource; imgEl.classList.remove('hidden'); };
   probe.src = imageSource;
 

@@ -33,6 +33,7 @@ button, select { cursor: pointer; }
 .topbar-meta { display: flex; align-items: center; gap: 18px; }
 .environment, .eyebrow { font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; color: var(--acid); }
 
+[hidden] { display: none !important; }
 .login-panel { min-height: calc(100vh - 68px); display: grid; place-items: center; padding: 24px; }
 .login-card { width: min(100%, 420px); padding: 34px; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); }
 h1, h2, p { margin-top: 0; }

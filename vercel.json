@@ -1,6 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
+  "images": {
+    "sizes": [320, 480, 640, 750, 1080, 1200],
+    "qualities": [75],
+    "formats": ["image/avif", "image/webp"],
+    "minimumCacheTTL": 2592000,
+    "remotePatterns": [
+      { "protocol": "https", "hostname": "*.public.blob.vercel-storage.com" }
+    ]
+  },
   "rewrites": [
     {
       "source": "/admin",
