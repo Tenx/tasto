@@ -2227,12 +2227,6 @@
       cursor: default;
     }
     .gp-nav-sub-en { white-space: nowrap; }
-    .gp-nav-sub-zh {
-      color: var(--text-muted);
-      font-size: 11px;
-      white-space: nowrap;
-    }
-    .gp-nav-sub-btn.active .gp-nav-sub-zh { color: var(--accent); opacity: 0.72; }
 
     /* All Styles — pinned at top */
     .gp-nav-btn[data-cat="all"] {
@@ -2262,15 +2256,6 @@
       font-weight: 400;
     }
     .gp-nav-btn.active .gp-nav-count { color: var(--accent); }
-    .gp-nav-zh {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 300;
-      color: var(--text-muted);
-      margin-left: 5px;
-      letter-spacing: 0.02em;
-    }
-    .gp-nav-btn.active .gp-nav-zh { color: var(--accent); opacity: 0.75; }
     .gp-nav-btn:focus-visible,
     .gp-nav-group-btn:focus-visible,
     .gp-nav-sub-btn:focus-visible,
@@ -5432,9 +5417,9 @@ function initGallery() {
       const available = availableStyles.has(styleId);
       const cls = available ? '' : ' is-disabled';
       const attrs = available ? `data-cat="style:${styleId}"` : 'disabled aria-disabled="true"';
-      return `<button class="gp-nav-sub-btn${cls}" ${attrs}><span class="gp-nav-sub-en">${label}</span><span class="gp-nav-sub-zh">${zh}</span></button>`;
+      return `<button class="gp-nav-sub-btn${cls}" ${attrs}><span class="gp-nav-sub-en">${label}</span></button>`;
     }).join('');
-    navHTML += `<section class="gp-nav-section"><button class="gp-nav-group-btn${groupDisabled}" ${groupAttrs}><span class="gp-nav-number">${group.number}</span><span class="gp-nav-group-label">${group.label}<span class="gp-nav-zh">${group.zh}</span></span></button>${items}</section>`;
+    navHTML += `<section class="gp-nav-section"><button class="gp-nav-group-btn${groupDisabled}" ${groupAttrs}><span class="gp-nav-number">${group.number}</span><span class="gp-nav-group-label">${group.label}</span></button>${items}</section>`;
   });
   nav.innerHTML = navHTML;
 
@@ -5463,7 +5448,7 @@ function initGallery() {
       const available = availableStyles.has(styleId);
       const cls = available ? '' : ' is-disabled';
       const attrs = available ? `data-cat="style:${styleId}"` : 'disabled aria-disabled="true"';
-      return `<button class="gp-subchip${cls}" ${attrs}>${label} ${zh}</button>`;
+      return `<button class="gp-subchip${cls}" ${attrs}>${label}</button>`;
     }).join('');
     subchips.classList.add('visible');
   }
