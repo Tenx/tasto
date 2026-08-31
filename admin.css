@@ -78,8 +78,9 @@ input[type="file"] { padding: 8px; }
 .stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .stats span { padding: 8px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; }
 /* —— 视图 A: 目录网格 —— */
-.dir-toolbar { margin-bottom: 22px; }
+.dir-toolbar { margin-bottom: 22px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .dir-toolbar input { width: min(360px, 100%); }
+.dir-add { width: min(240px, 100%); }
 #dir-groups section { margin-bottom: 34px; }
 .dir-group-title { margin-bottom: 14px; font-size: 15px; letter-spacing: .02em; color: var(--muted); font-weight: 800; text-transform: uppercase; }
 .dir-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }

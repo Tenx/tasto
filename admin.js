@@ -8,6 +8,7 @@ const elements = {
   publishedCount: document.getElementById('published-count'),
   dirView: document.getElementById('dir-view'),
   dirSearch: document.getElementById('dir-search'),
+  dirAdd: document.getElementById('dir-add'),
   dirGroups: document.getElementById('dir-groups'),
   folderView: document.getElementById('folder-view'),
   backToDirs: document.getElementById('back-to-dirs'),
@@ -187,6 +188,8 @@ function renderDirGroups() {
   const groups = new Map();
   for (const choice of state.menuChoices) {
     const info = parseChoice(choice);
+    // 只显示有图片（≥1 张）的目录，空目录自动隐藏
+    if (!dirImages(info.value).length) continue;
     if (query && !info.styleName.toLowerCase().includes(query) && !info.catLabel.toLowerCase().includes(query)) {
       continue;
     }
@@ -207,6 +210,35 @@ function renderDirGroups() {
     nodes.push(section);
   }
   elements.dirGroups.replaceChildren(...nodes);
+}
+
+// 「+ 新风格目录」下拉：列出所有空目录（0 张），按分类分组，选中即进入上传
+function renderDirAdd() {
+  const select = elements.dirAdd;
+  if (!select) return;
+  const groups = new Map();
+  for (const choice of state.menuChoices) {
+    const info = parseChoice(choice);
+    if (dirImages(info.value).length) continue; // 只列空目录
+    if (!groups.has(info.category)) groups.set(info.category, { label: info.catLabel, items: [] });
+    groups.get(info.category).items.push(info);
+  }
+  const nodes = [document.createElement('option')];
+  nodes[0].value = '';
+  nodes[0].textContent = '+ 新风格目录…';
+  for (const { label, items } of groups.values()) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = label;
+    for (const info of items) {
+      const opt = document.createElement('option');
+      opt.value = info.value;
+      opt.textContent = info.styleName;
+      optgroup.append(opt);
+    }
+    nodes.push(optgroup);
+  }
+  select.replaceChildren(...nodes);
+  select.hidden = groups.size === 0;
 }
 
 function updateStats() {
@@ -407,6 +439,7 @@ async function loadImages() {
   } else {
     renderDirGroups();
   }
+  renderDirAdd();
 }
 
 elements.loginForm.addEventListener('submit', async (event) => {
@@ -443,6 +476,14 @@ elements.logoutButton.addEventListener('click', async () => {
 
 elements.dirSearch.addEventListener('input', renderDirGroups);
 elements.backToDirs.addEventListener('click', showDirView);
+
+if (elements.dirAdd) {
+  elements.dirAdd.addEventListener('change', () => {
+    const path = elements.dirAdd.value;
+    elements.dirAdd.value = '';
+    if (path) openFolder(path);
+  });
+}
 
 elements.tierToggle.addEventListener('click', async () => {
   if (!state.currentPath || state.uploading) return;
