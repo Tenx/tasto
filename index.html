@@ -307,6 +307,116 @@
       margin-bottom: 12px;
     }
     .unlock-buy-btn:hover { background: #fff; color: #000; }
+
+    /* ── header nav (wraps dev + unlock buttons) ── */
+    .header-nav { display: flex; align-items: center; gap: 12px; }
+    .header-dev-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .header-dev-btn:hover { color: var(--text); border-color: var(--text-muted); }
+
+    /* ── developer modal ── */
+    .dev-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+      backdrop-filter: blur(8px);
+    }
+    .dev-overlay.active { opacity: 1; pointer-events: all; }
+    .dev-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 40px 36px;
+      max-width: 560px;
+      width: 92%;
+      position: relative;
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+    .dev-modal::-webkit-scrollbar { width: 4px; }
+    .dev-modal::-webkit-scrollbar-thumb { background: var(--border); }
+    .dev-modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none;
+      color: var(--text-muted); font-size: 14px;
+      cursor: pointer; transition: color 0.2s;
+    }
+    .dev-modal-close:hover { color: var(--text); }
+    .dev-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.2em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .dev-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px; letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .dev-sub {
+      font-size: 13px; color: var(--text-dim);
+      line-height: 1.6; margin-bottom: 28px;
+    }
+    .dev-section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.18em;
+      color: var(--accent); text-transform: uppercase;
+      margin: 24px 0 10px;
+    }
+    .dev-section-label:first-of-type { margin-top: 0; }
+    .dev-tools { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+    .dev-tool {
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+    }
+    .dev-tool-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .dev-tool-desc { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+    .dev-code-block {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; line-height: 1.7;
+      color: var(--text-muted);
+      white-space: pre;
+      overflow-x: auto;
+      margin-bottom: 4px;
+    }
+    .dev-code-block .cm { color: #555; }
+    .dev-code-block .kw { color: var(--accent); }
+    .dev-step {
+      display: flex; gap: 12px; align-items: flex-start;
+      font-size: 12px; color: var(--text-dim); line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .dev-step-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; color: var(--accent);
+      padding-top: 2px; flex-shrink: 0; width: 16px;
+    }
+    .dev-cta {
+      margin-top: 28px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text-dim); line-height: 1.6;
+    }
+    .dev-cta a { color: var(--accent); text-decoration: none; }
+    .dev-cta a:hover { text-decoration: underline; }
     .unlock-divider {
       display: flex;
       align-items: center;
@@ -3065,7 +3175,10 @@
 <div class="layout">
   <header>
     <div class="logo">TAST<span>O</span></div>
-    <button class="nav-unlock-btn" id="nav-unlock-btn" onclick="openUnlockModal()">Go Unlimited</button>
+    <nav class="header-nav">
+      <button class="header-dev-btn" onclick="openDevModal()">For Developers</button>
+      <button class="nav-unlock-btn" id="nav-unlock-btn" onclick="openUnlockModal()">Go Unlimited</button>
+    </nav>
   </header>
 
   <div class="hero">
@@ -3221,6 +3334,56 @@
       <span class="unlock-price-note">one-time · no subscription</span>
     </div>
     <button class="unlock-buy-btn" onclick="goToCheckout()">Buy Lifetime Access →</button>
+  </div>
+</div>
+
+<!-- ── Developer / MCP modal ─────────────────────────────── -->
+<div class="dev-overlay" id="dev-overlay" onclick="closeDevModal(event)">
+  <div class="dev-modal" onclick="event.stopPropagation()">
+    <button class="dev-modal-close" onclick="closeDevModal()">✕</button>
+    <div class="dev-eyebrow">// MCP &amp; Skill Integration</div>
+    <h2 class="dev-title">FOR DEVELOPERS</h2>
+    <p class="dev-sub">Use TASTO's style engine directly in Claude Desktop, Cursor, or Claude Code via the <strong>tasto-vibe</strong> MCP server — give it one image, get a portable brand-identity prompt back.</p>
+
+    <div class="dev-section-label">// Two tools</div>
+    <div class="dev-tools">
+      <div class="dev-tool">
+        <div class="dev-tool-name">analyze_image_palette</div>
+        <div class="dev-tool-desc">Pure local algorithm — no API calls. Extract the dominant color palette from any image as exact 6-digit hex, with per-color share, luminance, and saturation. Returns tasto-compatible hex for the recolor UI.</div>
+      </div>
+      <div class="dev-tool">
+        <div class="dev-tool-name">generate_vi_prompt</div>
+        <div class="dev-tool-desc">Give it an image + brand name. The PALETTE section is pre-filled with locally-extracted hex; the host model (Claude / Cursor) classifies the style and writes the full 8-section brand-identity prompt. Zero extra API cost.</div>
+      </div>
+    </div>
+
+    <div class="dev-section-label">// Install</div>
+    <div class="dev-code-block"><span class="cm"># Clone the repo, then:</span>
+cd tasto/mcp
+npm install</div>
+
+    <div class="dev-section-label">// Connect</div>
+    <div class="dev-step"><span class="dev-step-num">1.</span><span><strong>Claude Code</strong> — one command:<br><code style="font-family:inherit;font-size:inherit">claude mcp add tasto-vibe -- node /path/to/tasto/mcp/server.mjs</code></span></div>
+    <div class="dev-step"><span class="dev-step-num">2.</span><span><strong>Claude Desktop</strong> — add to <code style="font-family:inherit">claude_desktop_config.json</code>:<br></span></div>
+    <div class="dev-code-block"><span class="kw">{</span>
+  "mcpServers": <span class="kw">{</span>
+    "tasto-vibe": <span class="kw">{</span>
+      "command": "node",
+      "args": ["/path/to/tasto/mcp/server.mjs"]
+    <span class="kw">}</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></div>
+    <div class="dev-step"><span class="dev-step-num">3.</span><span><strong>Cursor</strong> — same <code style="font-family:inherit">command/args</code> block under MCP settings.</span></div>
+
+    <div class="dev-section-label">// Usage example</div>
+    <div class="dev-code-block"><span class="cm"># In Claude / Cursor after connecting:</span>
+Use tasto-vibe to make a vi prompt
+from this image for brand ACME.</div>
+
+    <div class="dev-cta">
+      Source code and full docs: <a href="https://github.com/Tenx/tasto" target="_blank" rel="noopener">github.com/Tenx/tasto</a><br>
+      Questions or issues: <a href="mailto:hello@tasto.world">hello@tasto.world</a>
+    </div>
   </div>
 </div>
 
@@ -5784,6 +5947,16 @@ function closeUnlockModal(e) {
   }
 }
 
+function openDevModal() {
+  document.getElementById('dev-overlay').classList.add('active');
+}
+
+function closeDevModal(e) {
+  if (!e || e.target === document.getElementById('dev-overlay')) {
+    document.getElementById('dev-overlay').classList.remove('active');
+  }
+}
+
 function goToCheckout() {
   window.location.href = CREEM_PRODUCT_URL;
 }
@@ -5926,6 +6099,7 @@ function copyText(text) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeVibeModal({ target: document.getElementById('vibe-overlay') });
+    closeDevModal({ target: document.getElementById('dev-overlay') });
   }
 });
 

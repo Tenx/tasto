@@ -1,0 +1,21 @@
+{
+  "name": "tasto-vibe-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TASTO Vibe MCP — give it one image, get a portable brand-identity (vi) prompt in the tasto house format.",
+  "bin": {
+    "tasto-vibe-mcp": "./server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check lib/palette.mjs && node --check lib/template.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "sharp": "^0.33.5"
+  }
+}
